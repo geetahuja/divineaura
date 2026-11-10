@@ -6,7 +6,9 @@ import {
 } from "@medusajs/framework/http"
 import {
   AdminProductSpecsSchema,
+  CreateHeroBannerSchema,
   CreateSacredPlaceSchema,
+  UpdateHeroBannerSchema,
   ReorderSacredPlacesSchema,
   UpdateSacredPlaceSchema,
 } from "./validators"
@@ -56,6 +58,16 @@ export default defineMiddlewares({
       method: ["POST"],
       matcher: "/admin/products/:id/specs",
       middlewares: [validateAndTransformBody(AdminProductSpecsSchema)],
+    },
+    {
+      method: ["POST"],
+      matcher: "/admin/hero-banners",
+      middlewares: [validateAndTransformBody(CreateHeroBannerSchema)],
+    },
+    {
+      method: ["POST"],
+      matcher: "/admin/hero-banners/:id",
+      middlewares: [validateAndTransformBody(UpdateHeroBannerSchema)],
     },
     {
       method: ["POST"],

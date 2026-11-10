@@ -63,6 +63,33 @@ export const CreateSacredPlaceSchema = z.object(SacredPlaceFields)
 export const UpdateSacredPlaceSchema = z.object(SacredPlaceFields).partial()
 export const ReorderSacredPlacesSchema = z.object({ ids: z.array(z.string()).min(1) })
 
+// Hero banners. Links are site paths ("/collections/diwali"), never full URLs,
+// so the domain stays out of content (ARCHITECTURE.md §0).
+const sitePath = z.string().trim().regex(/^\/(?!\/)[^\s]*$/, "Use a site path starting with /, e.g. /collections/diwali")
+const dateTime = z.coerce.date().nullish()
+const HeroBannerFields = z.object({
+  title: z.string().trim().min(1).max(120),
+  heading: z.string().trim().min(1).max(120),
+  subheading: text,
+  button_text: z.string().trim().min(1).max(40),
+  button_link: sitePath,
+  image_desktop_url: z.string().url().nullish(),
+  image_mobile_url: z.string().url().nullish(),
+  image_alt: text,
+  starts_at: dateTime,
+  ends_at: dateTime,
+  priority: z.number().int().optional(),
+  active: z.boolean().optional(),
+})
+const endsAfterStart = (b: { starts_at?: Date | null; ends_at?: Date | null }) =>
+  !b.starts_at || !b.ends_at || b.ends_at > b.starts_at
+const endsAfterStartError = { message: "End date must be after the start date", path: ["ends_at"] }
+
+export const CreateHeroBannerSchema = HeroBannerFields.refine(endsAfterStart, endsAfterStartError)
+export const UpdateHeroBannerSchema = HeroBannerFields.partial().refine(endsAfterStart, endsAfterStartError)
+export type CreateHeroBannerBody = z.infer<typeof CreateHeroBannerSchema>
+export type UpdateHeroBannerBody = z.infer<typeof UpdateHeroBannerSchema>
+
 export type CreateSacredPlaceBody = z.infer<typeof CreateSacredPlaceSchema>
 export type UpdateSacredPlaceBody = z.infer<typeof UpdateSacredPlaceSchema>
 export type ReorderSacredPlacesBody = z.infer<typeof ReorderSacredPlacesSchema>

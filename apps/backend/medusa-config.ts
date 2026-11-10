@@ -38,5 +38,6 @@ module.exports = defineConfig({
     },
     { resolve: './src/modules/product-specs' },
     { resolve: './src/modules/sacred-places' },
+    { resolve: './src/modules/hero-banners' },
   ],
 })
