@@ -22,3 +22,8 @@ Thumbs.db
 # uploads and local data
 uploads/
 static/
+# tooling
+.turbo/
+*.tsbuildinfo
+*.pem
+coverage/
