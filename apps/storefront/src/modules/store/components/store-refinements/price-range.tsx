@@ -8,7 +8,7 @@ import { indexedCurrency, priceAttribute } from "@lib/search-client"
 
 function formatAmount(amount: number, currency: string) {
     try {
-      return new Intl.NumberFormat(undefined, {
+      return new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency: currency.toUpperCase(),
         maximumFractionDigits: 0,

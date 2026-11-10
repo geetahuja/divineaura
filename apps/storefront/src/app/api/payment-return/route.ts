@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
   // Without a country code the middleware resolves the customer's region and
   // prefixes it; either way every redirect below stays on this origin.
-  const prefix = countryCode ? `/${countryCode}` : ""
+  const prefix = ""
   const rejected = () =>
     NextResponse.redirect(`${origin}${prefix}/cart?error=payment_failed`)
 

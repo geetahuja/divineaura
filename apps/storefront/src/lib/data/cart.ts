@@ -382,7 +382,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
   }
 
   redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
+    `/checkout?step=delivery`
   )
 }
 
@@ -419,7 +419,7 @@ export async function placeOrder(cartId?: string) {
     revalidateTag(orderCacheTag, { expire: 0 })
 
     removeCartId()
-    redirect(`/${countryCode}/order/${cartRes?.order.id}/confirmed`)
+    redirect(`/order/${cartRes?.order.id}/confirmed`)
   }
 
   return cartRes.cart
@@ -450,7 +450,7 @@ export async function updateRegion(countryCode: string, currentPath: string) {
   const productsCacheTag = await getCacheTag("products")
   revalidateTag(productsCacheTag, { expire: 0 })
 
-  redirect(`/${countryCode}${currentPath}`)
+  redirect(currentPath)
 }
 
 export async function listCartOptions() {

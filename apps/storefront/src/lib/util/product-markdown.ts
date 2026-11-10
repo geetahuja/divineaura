@@ -15,7 +15,7 @@ export const renderProductMarkdown = ({
   origin: string
   countryCode: string
 }) => {
-  const base = `${origin}/${countryCode}`
+  const base = origin
   const productUrl = `${base}/products/${product.handle}`
   const currency = region.currency_code
   const policies = getRegionPolicies(region)

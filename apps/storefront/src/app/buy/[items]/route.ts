@@ -66,7 +66,7 @@ export async function GET(
   await activateCart(cartId)
 
   return NextResponse.redirect(
-    `${getRequestOrigin(request)}/${resolved.countryCode}/checkout`,
+    `${getRequestOrigin(request)}/checkout`,
     { status: 303, headers: NO_STORE }
   )
 }

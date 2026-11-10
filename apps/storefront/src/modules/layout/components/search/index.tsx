@@ -123,7 +123,7 @@ const Search = () => {
     <>
       {/* A real link so search works without JavaScript; with JS it opens the drawer instead. */}
       <Link
-        href={`/${countryCode}/search`}
+        href="/search"
         onClick={(event) => {
           event.preventDefault()
           open()

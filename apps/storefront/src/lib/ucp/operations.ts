@@ -109,7 +109,7 @@ export const searchCatalog = async (request: Request, input: Input): Promise<Ucp
     fields: UCP_PRODUCT_FIELDS,
   })
 
-  const base = `${getRequestOrigin(request)}/${resolved.countryCode}/products`
+  const base = `${getRequestOrigin(request)}/products`
   const nextOffset = offset + products.length
 
   return ucpResult(CATALOG_SEARCH, {
@@ -172,7 +172,7 @@ export const lookupCatalog = async (request: Request, input: Input): Promise<Ucp
     product.variants?.forEach((variant) => found.add(variant.id))
   }
 
-  const base = `${getRequestOrigin(request)}/${resolved.countryCode}/products`
+  const base = `${getRequestOrigin(request)}/products`
 
   return ucpResult(CATALOG_LOOKUP, {
     products: Array.from(products.values()).map((product) =>
@@ -370,7 +370,7 @@ const findOrder = async (cartId: string) => {
 const toUcpCheckoutBody = async (request: Request, cart: HttpTypes.StoreCart) => {
   const origin = getRequestOrigin(request)
   const countryCode = cartCountryCode(cart)
-  const base = `${origin}/${countryCode}`
+  const base = origin
   const address = cart.shipping_address
 
   const missing = [

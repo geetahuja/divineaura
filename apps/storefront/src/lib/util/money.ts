@@ -8,12 +8,13 @@ type ConvertToLocaleParams = {
   locale?: string
 }
 
+// ₹1,299 for whole rupees, ₹14.53 when there are paise (e.g. tax lines).
 export const convertToLocale = ({
   amount,
   currency_code,
-  minimumFractionDigits,
-  maximumFractionDigits,
-  locale = "en-US",
+  minimumFractionDigits = 0,
+  maximumFractionDigits = Number.isInteger(amount) ? 0 : 2,
+  locale = "en-IN",
 }: ConvertToLocaleParams) => {
   return currency_code && !isEmpty(currency_code)
     ? new Intl.NumberFormat(locale, {

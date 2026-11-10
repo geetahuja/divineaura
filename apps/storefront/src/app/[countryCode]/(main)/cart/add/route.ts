@@ -97,7 +97,7 @@ export async function POST(
   await activateCart(cartId)
 
   return NextResponse.redirect(
-    `${getRequestOrigin(request)}/${countryCode}/cart`,
+    `${getRequestOrigin(request)}/cart`,
     303
   )
 }

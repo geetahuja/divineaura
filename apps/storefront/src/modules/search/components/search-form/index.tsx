@@ -11,7 +11,7 @@ const SearchForm = ({ countryCode, defaultValue, className }: SearchFormProps) =
   <form
     role="search"
     method="get"
-    action={`/${countryCode}/search`}
+    action="/search"
     className={clx("flex gap-2", className)}
     {...{
       toolname: "search_products",

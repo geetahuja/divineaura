@@ -60,13 +60,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: item.updated_at ? new Date(item.updated_at) : undefined,
       }))
 
-  return listCountryCodes(regions).flatMap((countryCode) => {
-    const base = `${origin}/${countryCode}`
-    return [
-      ...STATIC_PATHS.map((path) => ({ url: `${base}${path}` })),
-      ...toEntries(base, "products", products),
-      ...toEntries(base, "categories", categories),
-      ...toEntries(base, "collections", collections),
-    ]
-  })
+  const base = origin
+  return [
+    ...STATIC_PATHS.map((path) => ({ url: `${base}${path}` })),
+    ...toEntries(base, "products", products),
+    ...toEntries(base, "categories", categories),
+    ...toEntries(base, "collections", collections),
+  ]
 }

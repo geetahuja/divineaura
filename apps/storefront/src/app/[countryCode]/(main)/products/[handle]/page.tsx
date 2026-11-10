@@ -125,7 +125,7 @@ export default async function ProductPage(props: Props) {
     product: pricedProduct,
     region,
     countryCode: params.countryCode,
-    productUrl: `${origin}/${params.countryCode}/products/${pricedProduct.handle}`,
+    productUrl: `${origin}/products/${pricedProduct.handle}`,
   })
 
   return (

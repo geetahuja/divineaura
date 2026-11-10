@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   ])
 
   const countries = listCountryCodes(regions)
-  const base = `${origin}/${getDefaultCountryCode(regions)}`
+  const base = origin
   const currencies = Array.from(
     new Set(regions.map((r) => r.currency_code?.toUpperCase()).filter(Boolean))
   )
@@ -35,7 +35,6 @@ export async function GET(request: Request) {
 
 > Online store. Ships to ${countries.length} countries. Prices in ${currencies.join(", ")}.
 
-URLs are prefixed with a two-letter country code that sets currency and pricing, for example \`${base}\`. Available country codes: ${countries.join(", ")}.
 
 ## Shop
 - [All products](${base}/store)
