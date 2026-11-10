@@ -3,7 +3,6 @@ import { listCollections } from "@lib/data/collections"
 import { listRegions } from "@lib/data/regions"
 import { UCP_MCP_PATH, UCP_REST_BASE_PATH } from "@lib/ucp/ucp"
 import {
-  getDefaultCountryCode,
   getRequestOrigin,
   listCountryCodes,
   STORE_NAME,
@@ -37,7 +36,7 @@ export async function GET(request: Request) {
 
 
 ## Shop
-- [All products](${base}/store)
+- [All products](${base}/shop)
 ${links.join("\n")}
 - Search: ${base}/search?q={query}
 

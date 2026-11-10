@@ -2,7 +2,7 @@
 
 import { MagnifyingGlass } from "@medusajs/icons"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { Search as SearchIcon } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { SearchClient } from "instantsearch.js"
 import {
@@ -115,9 +115,14 @@ const SearchPanel = ({ onNavigate }: { onNavigate: () => void }) => {
   )
 }
 
-const Search = () => {
+const Search = ({
+  className = "flex items-center p-2 text-primary hover:text-primary-hover",
+  children,
+}: {
+  className?: string
+  children?: React.ReactNode
+}) => {
   const { state: isOpen, open, close } = useToggleState()
-  const { countryCode } = useParams<{ countryCode: string }>()
 
   return (
     <>
@@ -128,11 +133,11 @@ const Search = () => {
           event.preventDefault()
           open()
         }}
-        aria-label="Search products"
-        className="flex items-center hover:text-ui-fg-base"
+        aria-label={children ? undefined : "Search products"}
+        className={className}
         data-testid="nav-search-button"
       >
-        <MagnifyingGlass />
+        {children ?? <SearchIcon className="h-5 w-5" aria-hidden />}
       </Link>
 
       <SearchDrawer isOpen={isOpen} close={close}>

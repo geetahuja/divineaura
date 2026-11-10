@@ -5,7 +5,6 @@ import { createCartWithItems, resolveRegion } from "@lib/util/server-cart"
 import { getRequestOrigin } from "@lib/util/site"
 import {
   cartContinueUrl,
-  cartCountryCode,
   parseLineItems,
   toUcpLineItems,
   toUcpProduct,
@@ -369,7 +368,6 @@ const findOrder = async (cartId: string) => {
 
 const toUcpCheckoutBody = async (request: Request, cart: HttpTypes.StoreCart) => {
   const origin = getRequestOrigin(request)
-  const countryCode = cartCountryCode(cart)
   const base = origin
   const address = cart.shipping_address
 

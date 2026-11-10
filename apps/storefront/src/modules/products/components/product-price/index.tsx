@@ -53,6 +53,7 @@ export default function ProductPrice({
           </span>
         </>
       )}
+      <span className="text-xs text-ui-fg-muted">Inclusive of all taxes</span>
     </div>
   )
 }

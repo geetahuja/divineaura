@@ -1,31 +1,26 @@
-import { Github } from "@medusajs/icons";
-import { Button, Heading } from "@modules/common/components/ui";
+import { Heading } from "@modules/common/components/ui"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+
+// Placeholder until the festival-driven HeroBanner (milestone 4).
 const Hero = () => {
   return (
-    <div className="h-[75vh] w-full border-b border-ui-border-base relative bg-ui-bg-subtle">
-      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center small:p-32 gap-6">
-        <span>
-          <Heading
-            level="h1"
-            className="text-3xl leading-10 text-ui-fg-base font-normal"
-          >
-            Ecommerce Starter Template
-          </Heading>
-          <Heading
-            level="h2"
-            className="text-3xl leading-10 text-ui-fg-subtle font-normal"
-          >
-            Powered by Medusa and Next.js
-          </Heading>
-        </span>
-        <a href="https://github.com/medusajs/dtc-starter" target="_blank">
-          <Button variant="secondary">
-            View on GitHub <Github />
-          </Button>
-        </a>
+    <div className="w-full border-b border-champagne bg-ivory-deep">
+      <div className="content-container flex flex-col items-center gap-5 py-16 small:py-28 text-center">
+        <Heading level="h1" className="text-4xl small:text-5xl leading-tight">
+          Devotion you can wear
+        </Heading>
+        <p className="max-w-md text-ink-soft">
+          Lockets, bracelets, malas and sacred threads, made in the traditions they come from.
+        </p>
+        <LocalizedClientLink
+          href="/shop"
+          className="rounded-full bg-primary px-7 py-3 font-semibold text-white hover:bg-primary-hover"
+        >
+          Shop now
+        </LocalizedClientLink>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Hero;
+export default Hero

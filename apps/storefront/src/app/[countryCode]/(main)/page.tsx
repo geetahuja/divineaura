@@ -5,34 +5,20 @@ import Hero from "@modules/home/components/hero"
 import { listCollections } from "@lib/data/collections"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { toJsonLd } from "@lib/util/product-structured-data"
-import { getSiteOrigin, listCountryCodes, STORE_NAME } from "@lib/util/site"
+import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import { buildRegionsReturnPolicies } from "@lib/util/store-policies"
 
 export const dynamic = "force-static"
 export const revalidate = 60
 
-export async function generateMetadata(props: {
-  params: Promise<{ countryCode: string }>
-}): Promise<Metadata> {
-  const { countryCode } = await props.params
-  const [origin, regions] = await Promise.all([getSiteOrigin(), listRegions()])
+export async function generateMetadata(): Promise<Metadata> {
+  const origin = await getSiteOrigin()
 
   return {
-    title: "Medusa Next.js Starter Template",
+    title: `${STORE_NAME} | Devotional lockets, bracelets & malas`,
     description:
-      "A performant frontend ecommerce starter template with Next.js 16 and Medusa.",
-    alternates: {
-      canonical: `${origin}/${countryCode}`,
-      languages: {
-        ...Object.fromEntries(
-          listCountryCodes(regions).map((code) => [
-            `en-${code.toUpperCase()}`,
-            `${origin}/${code}`,
-          ])
-        ),
-        "x-default": origin,
-      },
-    },
+      "Devotional lockets, spiritual and gemstone bracelets, malas and sacred threads. Prices inclusive of all taxes.",
+    alternates: { canonical: origin },
   }
 }
 

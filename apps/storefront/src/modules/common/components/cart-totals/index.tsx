@@ -3,15 +3,17 @@
 import { convertToLocale } from "@lib/util/money"
 import React from "react"
 
+// Prices are GST-inclusive, so every line shows tax-inclusive amounts
+// (item_total, shipping_total, discount_total) and GST is shown as "included".
 type CartTotalsProps = {
   totals: {
     total?: number | null
-    subtotal?: number | null
     tax_total?: number | null
     currency_code: string
-    item_subtotal?: number | null
-    shipping_subtotal?: number | null
-    discount_subtotal?: number | null
+    item_total?: number | null
+    shipping_total?: number | null
+    discount_total?: number | null
+    shipping_methods?: unknown[] | null
   }
 }
 
@@ -20,61 +22,56 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     currency_code,
     total,
     tax_total,
-    item_subtotal,
-    shipping_subtotal,
-    discount_subtotal,
+    item_total,
+    shipping_total,
+    discount_total,
+    shipping_methods,
   } = totals
+  const money = (amount?: number | null) => convertToLocale({ amount: amount ?? 0, currency_code })
 
   return (
     <div>
-      <div className="flex flex-col gap-y-2 txt-medium text-ui-fg-subtle ">
+      <div className="flex flex-col gap-y-2 txt-medium text-ui-fg-subtle">
         <div className="flex items-center justify-between">
-          <span>Subtotal (excl. shipping and taxes)</span>
-          <span data-testid="cart-subtotal" data-value={item_subtotal || 0}>
-            {convertToLocale({ amount: item_subtotal ?? 0, currency_code })}
+          <span>Subtotal</span>
+          <span data-testid="cart-subtotal" data-value={item_total || 0}>
+            {money(item_total)}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span>Shipping</span>
-          <span data-testid="cart-shipping" data-value={shipping_subtotal || 0}>
-            {convertToLocale({ amount: shipping_subtotal ?? 0, currency_code })}
+          <span data-testid="cart-shipping" data-value={shipping_total || 0}>
+            {!shipping_methods?.length
+              ? "Calculated at checkout"
+              : shipping_total
+                ? money(shipping_total)
+                : "Free"}
           </span>
         </div>
-        {!!discount_subtotal && (
+        {!!discount_total && (
           <div className="flex items-center justify-between">
             <span>Discount</span>
             <span
               className="text-ui-fg-interactive"
               data-testid="cart-discount"
-              data-value={discount_subtotal || 0}
+              data-value={discount_total || 0}
             >
-              -{" "}
-              {convertToLocale({
-                amount: discount_subtotal ?? 0,
-                currency_code,
-              })}
+              - {money(discount_total)}
             </span>
           </div>
         )}
-        <div className="flex justify-between">
-          <span className="flex gap-x-1 items-center ">Taxes</span>
-          <span data-testid="cart-taxes" data-value={tax_total || 0}>
-            {convertToLocale({ amount: tax_total ?? 0, currency_code })}
-          </span>
-        </div>
       </div>
-      <div className="h-px w-full border-b border-gray-200 my-4" />
-      <div className="flex items-center justify-between text-ui-fg-base mb-2 txt-medium ">
+      <div className="h-px w-full border-b border-champagne my-4" />
+      <div className="flex items-center justify-between text-ui-fg-base txt-medium">
         <span>Total</span>
-        <span
-          className="txt-xlarge-plus"
-          data-testid="cart-total"
-          data-value={total || 0}
-        >
-          {convertToLocale({ amount: total ?? 0, currency_code })}
+        <span className="txt-xlarge-plus" data-testid="cart-total" data-value={total || 0}>
+          {money(total)}
         </span>
       </div>
-      <div className="h-px w-full border-b border-gray-200 mt-4" />
+      <p className="mt-1 text-right text-xs text-ui-fg-muted" data-testid="cart-taxes">
+        Inclusive of all taxes (GST {money(tax_total)})
+      </p>
+      <div className="h-px w-full border-b border-champagne mt-4" />
     </div>
   )
 }

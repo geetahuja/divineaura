@@ -1,5 +1,6 @@
 "use client"
 
+import { ShoppingBag } from "lucide-react"
 import {
   Popover,
   PopoverButton,
@@ -110,10 +111,18 @@ const CartDropdown = ({
       <Popover className="relative h-full">
         <PopoverButton className="h-full">
           <LocalizedClientLink
-            className="hover:text-ui-fg-base"
+            className="relative flex items-center p-2 text-primary hover:text-primary-hover"
             href="/cart"
+            aria-label={`Cart, ${totalItems} items`}
             data-testid="nav-cart-link"
-          >{`Cart (${totalItems})`}</LocalizedClientLink>
+          >
+            <ShoppingBag className="h-5 w-5" aria-hidden />
+            {totalItems > 0 && (
+              <span className="absolute right-0 top-0.5 min-w-[18px] rounded-full bg-primary px-1 text-center text-[10px] leading-[18px] text-white">
+                {totalItems}
+              </span>
+            )}
+          </LocalizedClientLink>
         </PopoverButton>
         <Transition
           show={cartDropdownOpen}
@@ -127,7 +136,7 @@ const CartDropdown = ({
         >
           <PopoverPanel
             static
-            className="hidden small:block absolute top-[calc(100%+1px)] right-0 bg-white border-x border-b border-gray-200 w-[420px] text-ui-fg-base"
+            className="hidden small:block absolute top-[calc(100%+1px)] right-0 bg-ivory border-x border-b border-champagne w-[420px] text-ui-fg-base"
             data-testid="nav-cart-dropdown"
           >
             <div className="p-4 flex items-center justify-center">
@@ -238,7 +247,7 @@ const CartDropdown = ({
                   </div>
                   <span>Your shopping bag is empty.</span>
                   <div>
-                    <LocalizedClientLink href="/store">
+                    <LocalizedClientLink href="/shop">
                       <>
                         <span className="sr-only">Go to all products page</span>
                         <Button onClick={close}>Explore products</Button>

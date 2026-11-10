@@ -4,6 +4,8 @@ export type StorePolicies = {
   returnWindowDays: number
   freeReturns: boolean
   shippingRate: number
+  /** Order value from which shipping is free; null when not set. */
+  freeShippingThreshold: number | null
   handlingDays: { min: number; max: number }
   transitDays: { min: number; max: number }
 }
@@ -40,6 +42,7 @@ export const getRegionPolicies = (
     freeReturns:
       metadata.free_returns === true || metadata.free_returns === "true",
     shippingRate: values.shippingRate!,
+    freeShippingThreshold: toNumber(metadata.free_shipping_threshold),
     handlingDays: { min: values.handlingMin!, max: values.handlingMax! },
     transitDays: { min: values.transitMin!, max: values.transitMax! },
   }

@@ -247,7 +247,7 @@ export async function confirmEmailVerification(
   }
 }
 
-export async function signout(countryCode: string) {
+export async function signout() {
   await sdk.auth.logout()
 
   await removeAuthToken()

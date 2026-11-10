@@ -45,7 +45,7 @@ export default async function SearchPage(props: Props) {
       <h1 className="text-2xl-semi mb-6">
         {query ? `Search results for "${query}"` : "Search"}
       </h1>
-      <SearchForm countryCode={countryCode} defaultValue={query} className="mb-8 max-w-xl" />
+      <SearchForm defaultValue={query} className="mb-8 max-w-xl" />
       {query && (
         <p className="text-small-regular text-ui-fg-subtle mb-6">
           {response.count} {response.count === 1 ? "product" : "products"} found

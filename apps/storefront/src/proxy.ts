@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server"
 const COUNTRY = (process.env.NEXT_PUBLIC_DEFAULT_REGION || "in").toLowerCase()
 const PREFIX = `/${COUNTRY}`
 
-export async function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl
 
   if (pathname.includes(".")) {

@@ -1,13 +1,12 @@
 import { clx } from "@modules/common/components/ui"
 
 type SearchFormProps = {
-  countryCode: string
   defaultValue?: string
   className?: string
 }
 
 /** Plain GET form so search works without JavaScript and for browser agents. */
-const SearchForm = ({ countryCode, defaultValue, className }: SearchFormProps) => (
+const SearchForm = ({ defaultValue, className }: SearchFormProps) => (
   <form
     role="search"
     method="get"

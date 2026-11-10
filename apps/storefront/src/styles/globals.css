@@ -110,3 +110,35 @@
     @apply text-[32px] leading-[44px] font-semibold;
   }
 }
+
+/* DivineAura theme: re-point the Medusa UI tokens the starter uses everywhere. */
+html[data-mode="light"] {
+  --bg-base: #fff5e8;
+  --bg-base-hover: #fbebd6;
+  --bg-subtle: #fbebd6;
+  --bg-subtle-hover: #f6e0c4;
+  --bg-field: #ffffff;
+  --bg-field-hover: #fffaf3;
+  --bg-interactive: #762019;
+  --fg-base: #2a1a14;
+  --fg-subtle: #5c4a40;
+  --fg-muted: #7a6253;
+  --fg-interactive: #762019;
+  --fg-interactive-hover: #5e1913;
+  --border-base: #e8cda9;
+  --border-interactive: #762019;
+  --button-inverted: #762019;
+  --button-inverted-hover: #5e1913;
+  --button-inverted-pressed: #4a130f;
+}
+
+@layer base {
+  body {
+    @apply bg-ivory font-sans text-ink antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-serif text-primary;
+  }
+}

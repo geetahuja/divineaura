@@ -92,14 +92,15 @@ divineaura/
 │   │   └── medusa-config.ts
 │   └── storefront/            # Next.js site
 │       ├── src/
-│       │   ├── app/           # routes (see §6)
-│       │   ├── components/    # UI components (see §7)
+│       │   ├── app/           # routes (see §6); [countryCode] segment is internal only — proxy.ts serves unprefixed URLs
+│       │   ├── modules/       # UI by feature (layout, products, cart, checkout…), kept from the Medusa starter
 │       │   ├── lib/
-│       │   │   ├── medusa/    # SDK client + data functions (products, cart, orders)
-│       │   │   ├── seo/       # metadata + JSON-LD helpers
-│       │   │   └── utils/     # money formatting (INR), pincode, validators
-│       │   └── styles/
-│       └── tailwind.config.ts
+│       │   │   ├── data/      # SDK data functions (products, cart, orders)
+│       │   │   ├── util/      # money formatting (INR), store policies, site URL helpers
+│       │   │   └── nav.ts     # main menu + footer links
+│       │   ├── styles/
+│       │   └── proxy.ts       # Next 16 proxy (formerly middleware): /x → /in/x rewrite
+│       └── tailwind.config.js # brand tokens (§8)
 ├── packages/                  # (later) shared types/API client for the Expo apps
 └── products.csv               # initial catalogue import
 ```

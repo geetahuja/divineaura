@@ -7,6 +7,7 @@ import { StoreCartShippingOption } from "@medusajs/types"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
+import MobileBottomBar from "@modules/layout/components/mobile-bottom-bar"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 
 export const metadata: Metadata = {
@@ -40,6 +41,11 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       )}
       {props.children}
       <Footer />
+      {/* Space so the fixed mobile bottom bar never covers the footer. */}
+      <div className="small:hidden h-[calc(4rem+env(safe-area-inset-bottom))] bg-primary-hover" aria-hidden />
+      <MobileBottomBar
+        cartCount={cart?.items?.reduce((n, i) => n + i.quantity, 0) ?? 0}
+      />
     </>
   )
 }

@@ -1,67 +1,70 @@
 import { Suspense } from "react"
 
-import { listLocales } from "@lib/data/locales"
-import { getLocale } from "@lib/data/locale-actions"
-import { listRegions } from "@lib/data/regions"
-import { StoreRegion } from "@medusajs/types"
+import { getRegion } from "@lib/data/regions"
+import { convertToLocale } from "@lib/util/money"
+import { DEFAULT_COUNTRY_CODE } from "@lib/util/site"
+import { getRegionPolicies } from "@lib/util/store-policies"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
+import MegaMenu from "@modules/layout/components/mega-menu"
+import MobileMenu from "@modules/layout/components/mobile-menu"
 import Search from "@modules/layout/components/search"
-import SideMenu from "@modules/layout/components/side-menu"
+import { ShoppingBag, User } from "lucide-react"
 
 export default async function Nav() {
-  const [regions, locales, currentLocale] = await Promise.all([
-    listRegions().then((regions: StoreRegion[]) => regions),
-    listLocales(),
-    getLocale(),
-  ])
+  const region = await getRegion(DEFAULT_COUNTRY_CODE)
+  const threshold = getRegionPolicies(region)?.freeShippingThreshold
 
   return (
-    <div className="sticky top-0 inset-x-0 z-50 group">
-      <header className="relative h-16 mx-auto border-b duration-200 bg-white border-ui-border-base">
-        <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
-          <div className="flex-1 basis-0 h-full flex items-center">
-            <div className="h-full">
-              <SideMenu regions={regions} locales={locales} currentLocale={currentLocale} />
-            </div>
-          </div>
-
-          <div className="flex items-center h-full">
+    <div className="sticky top-0 inset-x-0 z-50">
+      {region && threshold != null && (
+        <p className="bg-primary px-4 py-1.5 text-center text-xs font-semibold text-ivory">
+          Free shipping on orders above{" "}
+          {convertToLocale({ amount: threshold, currency_code: region.currency_code })}
+        </p>
+      )}
+      <header className="bg-ivory border-b border-champagne">
+        <div className="content-container flex h-14 small:h-16 items-center justify-between gap-2">
+          <div className="flex flex-1 basis-0 items-center">
+            <MobileMenu />
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
+              className="hidden small:block font-serif text-3xl font-semibold text-primary"
               data-testid="nav-store-link"
             >
-              Medusa Store
+              DivineAura
             </LocalizedClientLink>
           </div>
 
-          <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
+          <LocalizedClientLink
+            href="/"
+            className="small:hidden font-serif text-2xl font-semibold text-primary"
+          >
+            DivineAura
+          </LocalizedClientLink>
+
+          <div className="flex flex-1 basis-0 items-center justify-end gap-x-1 small:gap-x-3">
             <Search />
-            <div className="hidden small:flex items-center gap-x-6 h-full">
-              <LocalizedClientLink
-                className="hover:text-ui-fg-base"
-                href="/account"
-                data-testid="nav-account-link"
-              >
-                Account
-              </LocalizedClientLink>
-            </div>
+            <LocalizedClientLink
+              href="/account"
+              aria-label="Account"
+              className="hidden small:flex p-2 text-primary hover:text-primary-hover"
+              data-testid="nav-account-link"
+            >
+              <User className="h-5 w-5" aria-hidden />
+            </LocalizedClientLink>
             <Suspense
               fallback={
-                <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex gap-2"
-                  href="/cart"
-                  data-testid="nav-cart-link"
-                >
-                  Cart (0)
+                <LocalizedClientLink href="/cart" aria-label="Cart" className="p-2 text-primary">
+                  <ShoppingBag className="h-5 w-5" aria-hidden />
                 </LocalizedClientLink>
               }
             >
               <CartButton />
             </Suspense>
           </div>
-        </nav>
+        </div>
+        <MegaMenu />
       </header>
     </div>
   )
