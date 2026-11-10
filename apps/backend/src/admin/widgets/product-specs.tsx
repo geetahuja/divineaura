@@ -20,6 +20,7 @@ type Specs = Record<string, string | number | boolean | null>
 type SpecsResponse = {
   specs: Specs | null
   gst: { rate: number; name: string; code: string } | null
+  gst_override: number | null
 }
 
 type Field = {
@@ -74,8 +75,10 @@ const display = (field: Field, value: Specs[string]) => {
 }
 
 // Form keeps strings; convert to API types on save.
-const toBody = (form: Record<string, string>) =>
-  Object.fromEntries(
+const toBody = (form: Record<string, string>) => ({
+  // Blank = no product-level rate (inherit product-type override / India default).
+  gst_rate: (form.gst_rate ?? "").trim() === "" ? null : Number(form.gst_rate),
+  ...Object.fromEntries(
     FIELDS.map((f) => {
       const raw = (form[f.key] ?? "").trim()
       if (!raw || raw === NONE) {
@@ -89,7 +92,8 @@ const toBody = (form: Record<string, string>) =>
       }
       return [f.key, raw]
     })
-  )
+  ),
+})
 
 const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) => {
   const queryClient = useQueryClient()
@@ -119,11 +123,12 @@ const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
 
   const openEditor = () => {
     const specs = data?.specs ?? {}
-    setForm(
-      Object.fromEntries(
+    setForm({
+      gst_rate: data?.gst_override != null ? String(data.gst_override) : "",
+      ...Object.fromEntries(
         FIELDS.map((f) => [f.key, specs[f.key] === null || specs[f.key] === undefined ? "" : String(specs[f.key])])
-      )
-    )
+      ),
+    })
     setOpen(true)
   }
 
@@ -155,10 +160,20 @@ const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
       <div className="px-6 py-4 grid grid-cols-2 gap-x-4 gap-y-2">
         <Text size="small" weight="plus">GST rate</Text>
         <Text size="small">
-          {data?.gst ? `${data.gst.rate}% (${data.gst.name})` : "–"}{" "}
-          <a href="/app/settings/tax-regions" className="text-ui-fg-interactive hover:underline">
-            change in Tax Regions
-          </a>
+          {data?.gst ? `${data.gst.rate}%` : "–"}{" "}
+          <span className="text-ui-fg-muted">
+            {data?.gst_override != null ? (
+              "(set on this product)"
+            ) : (
+              <>
+                (default —{" "}
+                <a href="/app/settings/tax-regions" className="text-ui-fg-interactive hover:underline">
+                  Tax Regions
+                </a>
+                )
+              </>
+            )}
+          </span>
         </Text>
         {FIELDS.map((f) => (
           <div key={f.key} className="contents">
@@ -187,6 +202,26 @@ const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
             <Drawer.Title>DivineAura details</Drawer.Title>
           </Drawer.Header>
           <Drawer.Body className="flex flex-col gap-y-4 overflow-y-auto">
+            <div className="flex flex-col gap-y-1">
+              <Label size="small" htmlFor="spec-gst_rate">GST rate (%)</Label>
+              <Input
+                id="spec-gst_rate"
+                type="number"
+                step="any"
+                min={0}
+                max={40}
+                placeholder={
+                  data?.gst && data.gst_override == null
+                    ? `${data.gst.rate} (default)`
+                    : "Default"
+                }
+                value={form.gst_rate ?? ""}
+                onChange={(e) => set("gst_rate", e.target.value)}
+              />
+              <Text size="xsmall" className="text-ui-fg-muted">
+                Leave empty to use the default rate. Check the rate for this product's HSN code.
+              </Text>
+            </div>
             {FIELDS.map((f) => (
               <div key={f.key} className="flex flex-col gap-y-1">
                 <Label size="small" htmlFor={`spec-${f.key}`}>{f.label}</Label>

@@ -5,8 +5,7 @@ const text = z.string().trim().max(2000).nullish().transform((v) => v || null)
 const num = z.number().nonnegative().nullish()
 const int = z.number().int().nonnegative().nullish()
 
-export const ProductSpecsSchema = z
-  .object({
+const ProductSpecsFields = z.object({
     material: text,
     stone_type: text,
     stone_origin: z.enum(STONE_ORIGINS).nullish(),
@@ -28,14 +27,25 @@ export const ProductSpecsSchema = z
       .regex(/^(\d{4}|\d{6}|\d{8})$/, "HSN code must be 4, 6 or 8 digits")
       .nullish()
       .or(z.literal("").transform(() => null)),
-  })
-  // Gemstone descriptions must be truthful (CLAUDE.md): a stone needs its origin.
-  .refine((s) => !s.stone_type || !!s.stone_origin, {
-    message: "Stone origin is required when a stone type is set",
-    path: ["stone_origin"],
-  })
+})
 
+// Gemstone descriptions must be truthful (CLAUDE.md): a stone needs its origin.
+const stoneNeedsOrigin = (s: { stone_type?: string | null; stone_origin?: string | null }) =>
+  !s.stone_type || !!s.stone_origin
+const stoneNeedsOriginError = {
+  message: "Stone origin is required when a stone type is set",
+  path: ["stone_origin"],
+}
+
+export const ProductSpecsSchema = ProductSpecsFields.refine(stoneNeedsOrigin, stoneNeedsOriginError)
 export type ProductSpecsBody = z.infer<typeof ProductSpecsSchema>
+
+// Admin panel save: specs plus the product's GST rate. gst_rate null = use the
+// India default (or product-type override); a number = product-level override.
+export const AdminProductSpecsSchema = ProductSpecsFields.extend({
+  gst_rate: z.number().min(0).max(40).nullish(),
+}).refine(stoneNeedsOrigin, stoneNeedsOriginError)
+export type AdminProductSpecsBody = z.infer<typeof AdminProductSpecsSchema>
 
 const SacredPlaceFields = {
   name: z.string().trim().min(1).max(200),

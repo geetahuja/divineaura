@@ -141,7 +141,7 @@ Every product is tagged three ways so the same catalogue can be browsed by **dei
 | certificate_url | string? | gemstones with a lab certificate |
 | country_of_origin | string | all (legal requirement) |
 | hsn_code | string | all (GST invoice) |
-| gst_rate | number | all |
+| gst_rate | number | all — *not stored in specs*: a Medusa tax-rate override (Tax Regions → India; default 3 %). Editable in the DivineAura details panel; blank = default |
 
 Plus standard Medusa fields: title, handle (URL slug), description, images, SKU per variant, price in INR, compare-at price (MRP), inventory quantity.
 

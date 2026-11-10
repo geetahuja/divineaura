@@ -5,8 +5,8 @@ import {
   validateAndTransformBody,
 } from "@medusajs/framework/http"
 import {
+  AdminProductSpecsSchema,
   CreateSacredPlaceSchema,
-  ProductSpecsSchema,
   ReorderSacredPlacesSchema,
   UpdateSacredPlaceSchema,
 } from "./validators"
@@ -55,7 +55,7 @@ export default defineMiddlewares({
     {
       method: ["POST"],
       matcher: "/admin/products/:id/specs",
-      middlewares: [validateAndTransformBody(ProductSpecsSchema)],
+      middlewares: [validateAndTransformBody(AdminProductSpecsSchema)],
     },
     {
       method: ["POST"],
