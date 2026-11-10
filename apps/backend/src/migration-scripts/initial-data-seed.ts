@@ -178,68 +178,6 @@ export default async function initial_data_seed({
     input: { id: stockLocation.id, add: [defaultSalesChannel.id] },
   });
 
-  // Demo products so the storefront has something to show. Replaced by the
-  // real catalogue in milestone 3.
-  logger.info("Seeding demo product data...");
-  const { result: categories } = await createProductCategoriesWorkflow(container).run({
-    input: {
-      product_categories: ["Shirts", "Sweatshirts", "Pants", "Merch"].map((name) => ({
-        name,
-        is_active: true,
-      })),
-    },
-  });
-  const categoryId = (name: string) => categories.find((c) => c.name === name)!.id;
-
-  const sizes = ["S", "M", "L", "XL"];
-  const { result: options } = await createProductOptionsWorkflow(container).run({
-    input: { product_options: [{ title: "Size", values: sizes }] },
-  });
-
-  const img = (file: string) => ({
-    url: `https://medusa-public-images.s3.eu-west-1.amazonaws.com/${file}.png`,
-  });
-
-  const demo = [
-    { title: "Medusa T-Shirt", handle: "t-shirt", sku: "SHIRT", category: "Shirts", price: 799, images: ["tee-black-front", "tee-black-back"] },
-    { title: "Medusa Sweatshirt", handle: "sweatshirt", sku: "SWEATSHIRT", category: "Sweatshirts", price: 1499, images: ["sweatshirt-vintage-front", "sweatshirt-vintage-back"] },
-    { title: "Medusa Sweatpants", handle: "sweatpants", sku: "SWEATPANTS", category: "Pants", price: 1299, images: ["sweatpants-gray-front", "sweatpants-gray-back"] },
-    { title: "Medusa Shorts", handle: "shorts", sku: "SHORTS", category: "Merch", price: 499, images: ["shorts-vintage-front", "shorts-vintage-back"] },
-  ];
-
-  await createProductsWorkflow(container).run({
-    input: {
-      products: demo.map((p) => ({
-        title: p.title,
-        handle: p.handle,
-        description: `Demo product: ${p.title}.`,
-        category_ids: [categoryId(p.category)],
-        weight: 400,
-        status: ProductStatus.PUBLISHED,
-        shipping_profile_id: shippingProfile.id,
-        images: p.images.map(img),
-        options: [{ id: options[0].id }],
-        variants: sizes.map((size) => ({
-          title: size,
-          sku: `${p.sku}-${size}`,
-          options: { Size: size },
-          prices: [{ amount: p.price, currency_code: CURRENCY }],
-        })),
-        sales_channels: [{ id: defaultSalesChannel.id }],
-      })),
-    },
-  });
-
-  const { data: inventoryItems } = await query.graph({ entity: "inventory_item", fields: ["id"] });
-  await createInventoryLevelsWorkflow(container).run({
-    input: {
-      inventory_levels: inventoryItems.map((item) => ({
-        location_id: stockLocation.id,
-        stocked_quantity: 100,
-        inventory_item_id: item.id,
-      })),
-    },
-  });
-
+  // Catalogue defaults (categories, tags, samples…) come from seed-catalogue-defaults.ts.
   logger.info("Finished seeding India store.");
 }
