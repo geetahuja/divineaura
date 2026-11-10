@@ -1,6 +1,6 @@
 # DivineAura
 
-Devotional e-commerce store for India — lockets, spiritual and gemstone bracelets, hand ties, malas and gift sets.
+**https://divineaura.com** — devotional e-commerce store for India — lockets, spiritual and gemstone bracelets, hand ties, malas and gift sets.
 
 - **Storefront:** Next.js (App Router) + Tailwind — `apps/storefront`
 - **Backend + admin:** Medusa v2 + PostgreSQL + Redis — `apps/backend`

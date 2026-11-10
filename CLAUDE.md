@@ -16,6 +16,7 @@ Read `docs/ARCHITECTURE.md` before starting any task. It is the source of truth 
 - Ask me before adding a new paid service or a major dependency.
 
 ## Non-negotiable rules
+- Production domain is **divineaura.com** (API at api.divineaura.com). Never hard-code it: build every absolute URL from env variables (ARCHITECTURE.md §0).
 - Prices, discounts, shipping, COD fee and taxes are calculated on the server only.
 - Online orders are marked paid only from a verified Razorpay webhook; handlers are idempotent.
 - Stock is rechecked when an order is placed.
