@@ -1,81 +1,57 @@
+import { getProduct } from "@lib/data/product"
+import { isVariantInStock } from "@lib/util/inventory"
+import { buildProductStructuredData, getPricedVariants, toJsonLd } from "@lib/util/product-structured-data"
+import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
+import ProductTemplate from "@modules/product/template"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { listProducts } from "@lib/data/products"
-import { getRegion } from "@lib/data/regions"
-import ProductTemplate from "@modules/products/templates"
-import { HttpTypes } from "@medusajs/types"
-import { isVariantInStock } from "@lib/util/inventory"
-import {
-  buildProductStructuredData,
-  getPricedVariants,
-  toJsonLd,
-} from "@lib/util/product-structured-data"
-import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 
-type Props = {
-  params: Promise<{ countryCode: string; handle: string }>
-}
+type Props = { params: Promise<{ countryCode: string; handle: string }> }
 
 export const dynamic = "force-static"
 export const revalidate = 60
 
+async function load(props: Props) {
+  const { handle } = await props.params
+  const { product, region } = await getProduct(handle)
+  if (!product || !region) {
+    notFound()
+  }
+  return { product, region }
+}
+
+// First ~155 characters of the description, cut at a word boundary.
+const summary = (text: string) =>
+  text.length <= 155 ? text : `${text.slice(0, 155).replace(/\s+\S*$/, "")}…`
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params
-  const { handle } = params
-  const region = await getRegion(params.countryCode)
-
-  if (!region) {
-    notFound()
-  }
-
-  const product = await listProducts({
-    countryCode: params.countryCode,
-    queryParams: { handle },
-  }).then(({ response }) => response.products[0])
-
-  if (!product) {
-    notFound()
-  }
-
-  const origin = await getSiteOrigin()
-  const path = `/products/${product.handle}`
-  const productUrl = `${origin}${path}`
-  const description = product.description || product.title
+  const { product } = await load(props)
+  const url = `${await getSiteOrigin()}/products/${product.handle}`
+  const title = `${product.title} | ${STORE_NAME}`
+  const description = summary(
+    product.description || `${product.title} from ${STORE_NAME}. Prices inclusive of all taxes, delivered across India.`
+  )
+  const image = product.thumbnail || product.images?.[0]?.url
 
   return {
-    title: `${product.title} | ${STORE_NAME}`,
+    title,
     description,
-    alternates: {
-      canonical: productUrl,
-      types: { "text/markdown": `${productUrl}.md` },
-    },
-    openGraph: {
-      title: `${product.title} | ${STORE_NAME}`,
-      description,
-      url: productUrl,
-      images: product.thumbnail ? [product.thumbnail] : [],
-    },
+    alternates: { canonical: url, types: { "text/markdown": `${url}.md` } },
+    // No product photo yet → leave images out so the site-wide default OG image applies.
+    openGraph: { title, description, url, siteName: STORE_NAME, ...(image ? { images: [image] } : {}) },
+    twitter: { card: image ? "summary_large_image" : "summary", title, description, ...(image ? { images: [image] } : {}) },
   }
 }
 
-const ProductMetaTags = ({
-  product,
-  region,
-}: {
-  product: HttpTypes.StoreProduct
-  region: HttpTypes.StoreRegion
-}) => {
+export default async function ProductPage(props: Props) {
+  const { product, region } = await load(props)
+  const { countryCode } = await props.params
+  const origin = await getSiteOrigin()
   const variants = getPricedVariants(product)
-  const cheapest = variants.reduce<HttpTypes.StoreProductVariant | undefined>(
-    (min, v) =>
-      !min ||
-      v.calculated_price!.calculated_amount! <
-        min.calculated_price!.calculated_amount!
-        ? v
-        : min,
+  const cheapest = variants.reduce<(typeof variants)[number] | undefined>(
+    (min, v) => (!min || v.calculated_price!.calculated_amount! < min.calculated_price!.calculated_amount! ? v : min),
     undefined
   )
-  const currency = region.currency_code.toUpperCase()
   const amount = cheapest?.calculated_price?.calculated_amount?.toFixed(2)
 
   return (
@@ -84,56 +60,19 @@ const ProductMetaTags = ({
       {amount && (
         <>
           <meta property="product:price:amount" content={amount} />
-          <meta property="product:price:currency" content={currency} />
-          <meta property="og:price:amount" content={amount} />
-          <meta property="og:price:currency" content={currency} />
+          <meta property="product:price:currency" content="INR" />
         </>
       )}
-      <meta
-        property="product:availability"
-        content={variants.some(isVariantInStock) ? "in stock" : "out of stock"}
-      />
-    </>
-  )
-}
-
-export default async function ProductPage(props: Props) {
-  const params = await props.params
-  const region = await getRegion(params.countryCode)
-
-  if (!region) {
-    notFound()
-  }
-
-  const pricedProduct = await listProducts({
-    countryCode: params.countryCode,
-    queryParams: { handle: params.handle },
-  }).then(({ response }) => response.products[0])
-
-  if (!pricedProduct) {
-    notFound()
-  }
-
-  const origin = await getSiteOrigin()
-  const structuredData = buildProductStructuredData({
-    product: pricedProduct,
-    region,
-    countryCode: params.countryCode,
-    productUrl: `${origin}/products/${pricedProduct.handle}`,
-  })
-
-  return (
-    <>
-      <ProductMetaTags product={pricedProduct} region={region} />
+      <meta property="product:availability" content={variants.some(isVariantInStock) ? "in stock" : "out of stock"} />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
+        dangerouslySetInnerHTML={{
+          __html: toJsonLd(
+            buildProductStructuredData({ product, region, countryCode, productUrl: `${origin}/products/${product.handle}` })
+          ),
+        }}
       />
-      <ProductTemplate
-        product={pricedProduct}
-        region={region}
-        countryCode={params.countryCode}
-      />
+      <ProductTemplate product={product} />
     </>
   )
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { addToCart } from "@lib/data/cart"
+import { notifyCartUpdated } from "@lib/util/cart-events"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useParams } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -50,6 +51,7 @@ export default function QuickAdd({
             setError(false)
             try {
               await addToCart({ variantId, quantity: 1, countryCode })
+              notifyCartUpdated()
               setAdded(true)
               setTimeout(() => setAdded(false), 2000)
             } catch {
