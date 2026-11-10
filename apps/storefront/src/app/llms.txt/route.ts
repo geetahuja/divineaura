@@ -26,7 +26,7 @@ export async function GET(request: Request) {
   const links = [
     ...categories
       .filter((c) => !c.parent_category_id)
-      .map((c) => `- [${c.name}](${base}/categories/${c.handle})`),
+      .map((c) => `- [${c.name}](${base}/category/${c.handle})`),
     ...collections.map((c) => `- [${c.title}](${base}/collections/${c.handle})`),
   ]
 

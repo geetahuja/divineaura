@@ -1,59 +1,38 @@
-import { Metadata } from "next"
+import { listCatalogue, listCollectionsAll } from "@lib/data/catalogue"
+import ListingTemplate, { listingMetadata, SearchParams } from "@modules/listing/listing-template"
 import { notFound } from "next/navigation"
 
-import { getCollectionByHandle } from "@lib/data/collections"
-import CollectionTemplate from "@modules/collections/templates"
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-import { parseOptionValueIds } from "@lib/util/product-option-filters"
+type Props = { params: Promise<{ handle: string }>; searchParams: Promise<SearchParams> }
 
-type Props = {
-  params: Promise<{ handle: string; countryCode: string }>
-  searchParams: Promise<
-    Record<string, string | string[] | undefined> & {
-      page?: string
-      sortBy?: SortOptions
-      optionValueIds?: string | string[]
-    }
-  >
-}
-
-export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params
-  const collection = await getCollectionByHandle(params.handle)
-
+async function resolve(props: Props) {
+  const handle = (await props.params).handle
+  const collection = (await listCollectionsAll()).find((c) => c.handle === handle)
   if (!collection) {
     notFound()
   }
+  return collection
+}
 
-  const metadata = {
-    title: `${collection.title} | DivineAura`,
-    description: `${collection.title} collection`,
-  } as Metadata
-
-  return metadata
+export async function generateMetadata(props: Props) {
+  const c = await resolve(props)
+  return listingMetadata(
+    c.title,
+    `${c.title} at DivineAura: devotional lockets, bracelets, malas and gifts for the occasion. Prices inclusive of all taxes.`,
+    `/collections/${c.handle}`
+  )
 }
 
 export default async function CollectionPage(props: Props) {
-  const searchParams = await props.searchParams
-  const params = await props.params
-  const { sortBy, page } = searchParams
-  const optionValueIds = parseOptionValueIds(searchParams)
-
-  const collection = await getCollectionByHandle(params.handle).then(
-    (collection) => collection,
-  )
-
-  if (!collection) {
-    notFound()
-  }
-
+  const c = await resolve(props)
   return (
-    <CollectionTemplate
-      collection={collection}
-      page={page}
-      sortBy={sortBy}
-      countryCode={params.countryCode}
-      optionValueIds={optionValueIds}
+    <ListingTemplate
+      title={c.title}
+      crumbs={[
+        { label: "Shop", href: "/shop" },
+        { label: c.title, href: `/collections/${c.handle}` },
+      ]}
+      products={(await listCatalogue()).filter((p) => p.collection_id === c.id)}
+      searchParams={await props.searchParams}
     />
   )
 }

@@ -1,23 +1,22 @@
-import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { listCatalogue } from "@lib/data/catalogue"
+import ListingTemplate, { listingMetadata, SearchParams } from "@modules/listing/listing-template"
 
-import { getRegion } from "@lib/data/regions"
-import StoreTemplate from "@modules/store/templates"
+type Props = { searchParams: Promise<SearchParams> }
 
-export const metadata: Metadata = {
-  title: "Store",
-  description: "Explore all of our products.",
-}
+export const generateMetadata = () =>
+  listingMetadata(
+    "Shop all",
+    "Devotional lockets, spiritual and gemstone bracelets, hand ties, malas and gift sets. Prices inclusive of all taxes.",
+    "/shop"
+  )
 
-export default async function StorePage(props: {
-  params: Promise<{ countryCode: string }>
-}) {
-  const { countryCode } = await props.params
-  const region = await getRegion(countryCode)
-
-  if (!region) {
-    notFound()
-  }
-
-  return <StoreTemplate currencyCode={region.currency_code} />
+export default async function ShopPage(props: Props) {
+  return (
+    <ListingTemplate
+      title="Shop all"
+      crumbs={[{ label: "Shop", href: "/shop" }]}
+      products={await listCatalogue()}
+      searchParams={await props.searchParams}
+    />
+  )
 }

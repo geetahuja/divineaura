@@ -12,7 +12,8 @@
     "build": "next build",
     "start": "next start -p 8000",
     "lint": "eslint .",
-    "analyze": "ANALYZE=true next build"
+    "analyze": "ANALYZE=true next build",
+    "test": "node --import jiti/register --test src/lib/*.test.ts"
   },
   "dependencies": {
     "@adyen/adyen-web": "^6.46.0",

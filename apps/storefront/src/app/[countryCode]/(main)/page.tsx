@@ -1,10 +1,12 @@
 import { Metadata } from "next"
 
-import FeaturedProducts from "@modules/home/components/featured-products"
+import Bestsellers from "@modules/home/components/bestsellers"
 import Hero from "@modules/home/components/hero"
 import SacredPlaces from "@modules/home/components/sacred-places"
-import { listCollections } from "@lib/data/collections"
-import { getRegion, listRegions } from "@lib/data/regions"
+import { BrandStory, PhotoReviews } from "@modules/home/components/story"
+import { DeityTiles, IntentionTiles } from "@modules/home/components/tiles"
+import TrustStrip from "@modules/home/components/trust-strip"
+import { listRegions } from "@lib/data/regions"
 import { toJsonLd } from "@lib/util/product-structured-data"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import { buildRegionsReturnPolicies } from "@lib/util/store-policies"
@@ -23,23 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default async function Home(props: {
-  params: Promise<{ countryCode: string }>
-}) {
-  const params = await props.params
-
-  const { countryCode } = params
-
-  const region = await getRegion(countryCode)
-
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  })
-
-  if (!collections || !region) {
-    return null
-  }
-
+export default async function Home() {
   const [origin, regions] = await Promise.all([getSiteOrigin(), listRegions()])
   const homeUrl = origin
   const returnPolicies = buildRegionsReturnPolicies(regions)
@@ -75,14 +61,15 @@ export default async function Home(props: {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
       />
+      {/* Order: ARCHITECTURE.md §7 + Sacred Places. Footer comes from the layout. */}
       <Hero />
-      {/* Temporary placement for review; final homepage order comes in milestone 4. */}
+      <DeityTiles />
       <SacredPlaces />
-      <div className="py-12">
-        <ul className="flex flex-col gap-x-6">
-          <FeaturedProducts collections={collections} region={region} />
-        </ul>
-      </div>
+      <Bestsellers />
+      <IntentionTiles />
+      <TrustStrip />
+      <PhotoReviews />
+      <BrandStory />
     </>
   )
 }

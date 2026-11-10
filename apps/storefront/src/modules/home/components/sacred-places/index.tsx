@@ -1,5 +1,5 @@
 import { listSacredPlaces, SacredPlace } from "@lib/data/sacred-places"
-import { tagLink } from "@lib/nav"
+import { tagHref } from "@lib/slug"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Image from "next/image"
 
@@ -34,7 +34,7 @@ const hrefFor = (p: SacredPlace) =>
   p.collection_handle
     ? `/collections/${p.collection_handle}`
     : p.deity_tag
-      ? tagLink(p.deity_tag)?.href ?? null
+      ? tagHref(p.deity_tag)
       : null
 
 const Card = ({ place }: { place: SacredPlace }) => {

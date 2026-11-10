@@ -1,4 +1,5 @@
 import { sdk } from "@lib/config"
+import { categoryHref, listCategories, listTags } from "@lib/data/catalogue"
 import { getSiteOrigin } from "@lib/util/site"
 import type { MetadataRoute } from "next"
 
@@ -31,18 +32,15 @@ type Entry = { handle?: string | null; updated_at?: string | Date | null }
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const query = { fields: "handle,updated_at", limit: PAGE_SIZE }
 
-  const [origin, products, categories, collections] = await Promise.all([
+  const [origin, products, cats, tags, collections] = await Promise.all([
     getSiteOrigin(),
     listAll<Entry>((offset) =>
       sdk.store.product
         .list({ ...query, offset })
         .then((res) => ({ items: res.products, count: res.count }))
     ),
-    listAll<Entry>((offset) =>
-      sdk.store.category
-        .list({ ...query, offset })
-        .then((res) => ({ items: res.product_categories, count: res.count }))
-    ),
+    listCategories(),
+    listTags(),
     listAll<Entry>((offset) =>
       sdk.store.collection
         .list({ ...query, offset })
@@ -62,7 +60,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...STATIC_PATHS.map((path) => ({ url: `${base}${path}` })),
     ...toEntries(base, "products", products),
-    ...toEntries(base, "categories", categories),
+    ...cats.map((c) => ({ url: `${base}${categoryHref(c, cats)}` })),
+    ...tags.map((t) => ({ url: `${base}/${t.kind}/${t.slug}` })),
     ...toEntries(base, "collections", collections),
   ]
 }

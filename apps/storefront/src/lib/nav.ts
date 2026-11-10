@@ -1,64 +1,20 @@
 import "server-only"
-import { sdk } from "@lib/config"
-import { HttpTypes } from "@medusajs/types"
+import { categoryHref, listCategories, listCollectionsAll, listTags } from "@lib/data/catalogue"
 
 // Menu built from Medusa data (ARCHITECTURE.md §7), so categories, deity /
 // intention tags and collections added in the admin appear on their own.
-// Their listing pages arrive in milestone 4; until then those links 404.
 export type NavLink = { label: string; href: string }
 export type NavItem = NavLink & { columns?: { title: string; links: NavLink[] }[] }
 
-export const slugify = (s: string) =>
-  s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
-
-// "deity:Sai Baba" → { label: "Sai Baba", href: "/deity/sai-baba" }
-export const tagLink = (value: string): NavLink | null => {
-  const [prefix, ...rest] = value.split(":")
-  const label = rest.join(":").trim()
-  if (!label || (prefix !== "deity" && prefix !== "intention")) {
-    return null
-  }
-  return { label, href: `/${prefix}/${slugify(label)}` }
-}
-
-// Admin changes show up within 5 minutes.
-const fetchOpts = { next: { revalidate: 300 }, cache: "force-cache" as const }
-
 export async function getMainMenu(): Promise<NavItem[]> {
   const [categories, tags, collections] = await Promise.all([
-    sdk.client
-      .fetch<{ product_categories: HttpTypes.StoreProductCategory[] }>("/store/product-categories", {
-        query: {
-          fields: "id,name,handle,rank,parent_category_id,*category_children",
-          parent_category_id: "null",
-          limit: 100,
-        },
-        ...fetchOpts,
-      })
-      .then((r) => r.product_categories)
-      .catch(() => []),
-    sdk.client
-      .fetch<{ product_tags: HttpTypes.StoreProductTag[] }>("/store/product-tags", {
-        query: { fields: "id,value", limit: 200 },
-        ...fetchOpts,
-      })
-      .then((r) => r.product_tags)
-      .catch(() => []),
-    sdk.client
-      .fetch<{ collections: HttpTypes.StoreCollection[] }>("/store/collections", {
-        query: { fields: "id,title,handle", limit: 100 },
-        ...fetchOpts,
-      })
-      .then((r) => r.collections)
-      .catch(() => []),
+    listCategories(),
+    listTags(),
+    listCollectionsAll(),
   ])
 
-  const tagLinks = (prefix: string) =>
-    tags
-      .filter((t) => t.value.startsWith(`${prefix}:`))
-      .map((t) => tagLink(t.value))
-      .filter((l): l is NavLink => !!l)
-      .sort((a, b) => a.label.localeCompare(b.label))
+  const tagLinks = (kind: "deity" | "intention") =>
+    tags.filter((t) => t.kind === kind).map((t) => ({ label: t.label, href: `/${kind}/${t.slug}` }))
 
   const menu: NavItem[] = []
 
@@ -75,11 +31,11 @@ export async function getMainMenu(): Promise<NavItem[]> {
     })
   }
 
-  for (const c of [...categories].sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))) {
-    const href = `/category/${c.handle}`
-    const children = (c.category_children ?? [])
-      .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
-      .map((child) => ({ label: child.name, href: `/category/${child.handle}` }))
+  for (const c of categories.filter((c) => !c.parent_id)) {
+    const href = categoryHref(c, categories)
+    const children = categories
+      .filter((child) => child.parent_id === c.id)
+      .map((child) => ({ label: child.name, href: categoryHref(child, categories) }))
     menu.push({
       label: c.name,
       href,

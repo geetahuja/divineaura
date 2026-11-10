@@ -49,6 +49,7 @@
     ".next",
     ".nyc_output",
     "coverage",
-    "jest-coverage"
+    "jest-coverage",
+    "src/**/*.test.ts"
   ]
 }
