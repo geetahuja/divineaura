@@ -1,13 +1,13 @@
-import { MAIN_MENU } from "@lib/nav"
+import type { NavItem } from "@lib/nav"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ChevronDown } from "lucide-react"
 
 // Desktop only. Panels open on hover and on keyboard focus (focus-within), no JS.
-export default function MegaMenu() {
+export default function MegaMenu({ items }: { items: NavItem[] }) {
   return (
     <nav aria-label="Main" className="hidden small:block border-t border-champagne/60">
-      <ul className="content-container flex items-center justify-center gap-x-8 h-11">
-        {MAIN_MENU.map((item) => (
+      <ul className="content-container flex items-center justify-center gap-x-6 medium:gap-x-8 h-11">
+        {items.map((item) => (
           <li key={item.label} className="group relative h-full flex items-center">
             <LocalizedClientLink
               href={item.href}

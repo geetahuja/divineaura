@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 
 import { getRegion } from "@lib/data/regions"
+import { getMainMenu } from "@lib/nav"
 import { convertToLocale } from "@lib/util/money"
 import { DEFAULT_COUNTRY_CODE } from "@lib/util/site"
 import { getRegionPolicies } from "@lib/util/store-policies"
@@ -12,7 +13,7 @@ import Search from "@modules/layout/components/search"
 import { ShoppingBag, User } from "lucide-react"
 
 export default async function Nav() {
-  const region = await getRegion(DEFAULT_COUNTRY_CODE)
+  const [region, menu] = await Promise.all([getRegion(DEFAULT_COUNTRY_CODE), getMainMenu()])
   const threshold = getRegionPolicies(region)?.freeShippingThreshold
 
   return (
@@ -26,7 +27,7 @@ export default async function Nav() {
       <header className="bg-ivory border-b border-champagne">
         <div className="content-container flex h-14 small:h-16 items-center justify-between gap-2">
           <div className="flex flex-1 basis-0 items-center">
-            <MobileMenu />
+            <MobileMenu items={menu} />
             <LocalizedClientLink
               href="/"
               className="hidden small:block font-serif text-3xl font-semibold text-primary"
@@ -64,7 +65,7 @@ export default async function Nav() {
             </Suspense>
           </div>
         </div>
-        <MegaMenu />
+        <MegaMenu items={menu} />
       </header>
     </div>
   )

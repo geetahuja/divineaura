@@ -1,4 +1,4 @@
-import { FOOTER_HELP, FOOTER_POLICIES, MAIN_MENU, NavLink } from "@lib/nav"
+import { FOOTER_HELP, FOOTER_POLICIES, getMainMenu, NavLink } from "@lib/nav"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Mail } from "lucide-react"
 
@@ -9,7 +9,7 @@ const Column = ({ title, links }: { title: string; links: NavLink[] }) => (
     <p className="font-serif text-lg font-semibold text-champagne mb-3">{title}</p>
     <ul className="flex flex-col gap-2 text-sm">
       {links.map((l) => (
-        <li key={l.href}>
+        <li key={l.label}>
           <LocalizedClientLink href={l.href} className="text-ivory/90 hover:text-white">
             {l.label}
           </LocalizedClientLink>
@@ -19,7 +19,8 @@ const Column = ({ title, links }: { title: string; links: NavLink[] }) => (
   </div>
 )
 
-export default function Footer() {
+export default async function Footer() {
+  const menu = await getMainMenu()
   return (
     <footer className="bg-primary-hover text-ivory">
       <div className="content-container py-12 grid gap-10 grid-cols-2 small:grid-cols-4">
@@ -40,7 +41,7 @@ export default function Footer() {
             </a>
           )}
         </div>
-        <Column title="Shop" links={MAIN_MENU} />
+        <Column title="Shop" links={menu} />
         <Column title="Help" links={FOOTER_HELP} />
         <Column title="Policies" links={FOOTER_POLICIES} />
       </div>

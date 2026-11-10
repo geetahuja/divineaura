@@ -2,6 +2,7 @@ import { Metadata } from "next"
 
 import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
+import SacredPlaces from "@modules/home/components/sacred-places"
 import { listCollections } from "@lib/data/collections"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { toJsonLd } from "@lib/util/product-structured-data"
@@ -40,7 +41,7 @@ export default async function Home(props: {
   }
 
   const [origin, regions] = await Promise.all([getSiteOrigin(), listRegions()])
-  const homeUrl = `${origin}/${countryCode}`
+  const homeUrl = origin
   const returnPolicies = buildRegionsReturnPolicies(regions)
   const structuredData = [
     {
@@ -75,6 +76,8 @@ export default async function Home(props: {
         dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
       />
       <Hero />
+      {/* Temporary placement for review; final homepage order comes in milestone 4. */}
+      <SacredPlaces />
       <div className="py-12">
         <ul className="flex flex-col gap-x-6">
           <FeaturedProducts collections={collections} region={region} />

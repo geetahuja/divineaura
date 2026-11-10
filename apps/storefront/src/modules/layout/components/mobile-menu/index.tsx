@@ -1,12 +1,12 @@
 "use client"
 
 import { Dialog, DialogPanel } from "@headlessui/react"
-import { MAIN_MENU } from "@lib/nav"
+import type { NavItem } from "@lib/nav"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ChevronDown, Menu, X } from "lucide-react"
 import { useState } from "react"
 
-export default function MobileMenu() {
+export default function MobileMenu({ items }: { items: NavItem[] }) {
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
 
@@ -31,7 +31,7 @@ export default function MobileMenu() {
             </button>
           </div>
           <ul className="divide-y divide-champagne">
-            {MAIN_MENU.map((item) => (
+            {items.map((item) => (
               <li key={item.label}>
                 {item.columns ? (
                   <details className="group">
