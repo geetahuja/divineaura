@@ -17,7 +17,8 @@ export type Category = {
   parent_id: string | null
   description: string | null
 }
-export type Tag = { value: string; kind: TagKind; label: string; slug: string }
+// image_url: optional tile image uploaded in admin (tag metadata).
+export type Tag = { value: string; kind: TagKind; label: string; slug: string; image_url: string | null }
 export type Collection = { id: string; title: string; handle: string }
 
 export type CatalogueProduct = {
@@ -61,14 +62,15 @@ export async function listCategories(): Promise<Category[]> {
 export async function listTags(): Promise<Tag[]> {
   return sdk.client
     .fetch<{ product_tags: HttpTypes.StoreProductTag[] }>("/store/product-tags", {
-      query: { fields: "id,value", limit: 500 },
+      query: { fields: "id,value,metadata", limit: 500 },
       ...cached,
     })
     .then((r) =>
       r.product_tags
         .map((t) => {
           const p = parseTag(t.value)
-          return p ? { value: t.value, ...p } : null
+          const image = t.metadata?.image_url
+          return p ? { value: t.value, ...p, image_url: typeof image === "string" && image ? image : null } : null
         })
         .filter((t): t is Tag => !!t)
         .sort((a, b) => a.label.localeCompare(b.label))

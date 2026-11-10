@@ -10,7 +10,7 @@ const cats: Category[] = [
   { id: "c2", name: "Gemstone", handle: "gemstone-bracelets", rank: 0, parent_id: "c1", description: null },
   { id: "c3", name: "Lockets", handle: "lockets", rank: 1, parent_id: null, description: null },
 ]
-const tags: Tag[] = ["deity:Sai Baba", "intention:Focus & Confidence"].map((v) => ({ value: v, ...parseTag(v)! }))
+const tags: Tag[] = ["deity:Sai Baba", "intention:Focus & Confidence"].map((v) => ({ value: v, ...parseTag(v)!, image_url: null }))
 const p = (id: string, o: Partial<CatalogueProduct>): CatalogueProduct => ({
   id, title: id, handle: id, thumbnail: null, created_at: "2026-01-01", category_ids: [], collection_id: null,
   tags: [], material: null, price: 100, mrp: null, in_stock: true, single_variant_id: null, ...o,

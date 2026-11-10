@@ -1,5 +1,6 @@
 import { listTags } from "@lib/data/catalogue"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Image from "next/image"
 import { Flower2, Gift, HandHeart, Leaf, LucideIcon, Shield, Sparkles, Target } from "lucide-react"
 
 // Icons for known intentions; any new intention tag gets the lotus-like flower.
@@ -29,8 +30,12 @@ export async function DeityTiles() {
         {deities.map((d) => (
           <li key={d.slug} className="shrink-0">
             <LocalizedClientLink href={`/deity/${d.slug}`} className="group flex w-20 flex-col items-center gap-2 text-center small:w-auto">
-              <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-accent bg-gradient-to-b from-ivory to-champagne font-serif text-3xl font-semibold text-primary transition-transform group-hover:scale-105">
-                {d.label.charAt(0)}
+              <span className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-accent bg-gradient-to-b from-ivory to-champagne font-serif text-3xl font-semibold text-primary transition-transform group-hover:scale-105">
+                {d.image_url ? (
+                  <Image src={d.image_url} alt="" fill sizes="80px" className="object-cover" />
+                ) : (
+                  d.label.charAt(0)
+                )}
               </span>
               <span className="text-sm font-medium leading-tight text-ink group-hover:text-primary">{d.label}</span>
             </LocalizedClientLink>
@@ -53,10 +58,16 @@ export async function IntentionTiles() {
             <li key={t.slug}>
               <LocalizedClientLink
                 href={`/intention/${t.slug}`}
-                className="flex h-full flex-col items-center gap-2 rounded-lg border border-champagne bg-ivory-deep px-3 py-5 text-center transition-colors hover:border-primary"
+                className="flex h-full flex-col items-center gap-2 overflow-hidden rounded-lg border border-champagne bg-ivory-deep text-center transition-colors hover:border-primary"
               >
-                <Icon aria-hidden className="h-7 w-7 text-accent" strokeWidth={1.5} />
-                <span className="text-sm font-semibold text-ink">{t.label}</span>
+                {t.image_url ? (
+                  <span className="relative block aspect-[4/3] w-full">
+                    <Image src={t.image_url} alt="" fill sizes="(min-width: 1024px) 16vw, 50vw" className="object-cover" />
+                  </span>
+                ) : (
+                  <Icon aria-hidden className="mt-5 h-7 w-7 text-accent" strokeWidth={1.5} />
+                )}
+                <span className="px-3 pb-4 text-sm font-semibold text-ink">{t.label}</span>
               </LocalizedClientLink>
             </li>
           )
