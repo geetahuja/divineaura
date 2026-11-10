@@ -1,0 +1,24 @@
+diff --git a/dist/commands/develop.js b/dist/commands/develop.js
+index a0eb3a372ffe3e01d32f36fa5d8d5b037dbcffcb..90ab247ce7945b28bfdab7381835d8e738db2efa 100644
+--- a/dist/commands/develop.js
++++ b/dist/commands/develop.js
+@@ -144,7 +144,10 @@ async function default_1({ types, directory, lint, fix }) {
+             if (this.childProcess) {
+                 this.childProcess.removeAllListeners();
+                 if (process.platform === "win32") {
+-                    (0, child_process_1.execSync)(`taskkill /PID ${this.childProcess.pid} /F /T`);
++                    try {
++                        (0, child_process_1.execSync)(`taskkill /PID ${this.childProcess.pid} /F /T`, { stdio: "ignore" });
++                    }
++                    catch { } // child already exited
+                 }
+                 else {
+                     this.childProcess.kill("SIGINT");
+@@ -173,6 +176,7 @@ async function default_1({ types, directory, lint, fix }) {
+                     "private",
+                     "src/admin",
+                     ".medusa",
++                    /(^|[\\/])_tmp_\d+_/, // pnpm install temp files
+                 ],
+             });
+             async function handleFileChange(action, file) {

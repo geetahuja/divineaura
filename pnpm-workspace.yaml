@@ -18,3 +18,6 @@ overrides:
   "@types/react": "19.0.5"
   "@types/react-dom": "19.0.5"
   tsconfig-paths: "^4.2.0"
+
+patchedDependencies:
+  '@medusajs/medusa@2.22.4': patches/@medusajs__medusa@2.22.4.patch
