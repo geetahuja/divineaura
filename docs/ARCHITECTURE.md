@@ -61,11 +61,11 @@ Goals for v1:
 | Shipping | Shiprocket |
 | Email | Resend (or SendGrid) |
 | Messaging | Channel-agnostic messaging layer (§19) with three providers: `console` (dev), `sms` (MSG91, DLT) and `whatsapp` (Meta WhatsApp Cloud API or MSG91 WhatsApp). Channel chosen by config; final choice made later by the owner. |
-| Images | Cloudflare R2 or Cloudinary (kept off the VPS so they survive server problems); `next/image` on the storefront |
+| Images | Stored on the VPS disk via Medusa's local file provider (`/var/www/divineaura/uploads`), served by Nginx with long cache headers; `next/image` on the storefront. No third-party image service. |
 | Hosting | **One Hostinger KVM VPS (Ubuntu, India data centre)** running everything — see §18. No Vercel. |
 | Process manager | PM2 (or Docker Compose) to keep Next.js and Medusa running and restart them on crash/reboot |
 | Web server / SSL | Nginx reverse proxy + free Let's Encrypt SSL (Certbot) |
-| CDN / protection | Cloudflare free plan in front of the domain (DNS, caching of static files, DDoS protection) |
+| CDN / protection | None (not used). DNS at the domain registrar pointing straight to the VPS. Nginx handles caching and rate limiting. |
 | Analytics | Google Analytics 4 + Meta Pixel (with consent) |
 | Errors | Sentry (storefront + backend) |
 
@@ -305,7 +305,7 @@ Custom extensions to build:
 
 ## 15. Environment variables (names only)
 
-Backend: `MEDUSA_BACKEND_URL` (`https://api.divineaura.com`), `COOKIE_DOMAIN`, `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `COOKIE_SECRET`, `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SHIPROCKET_EMAIL`, `SHIPROCKET_PASSWORD`, `SHIPROCKET_PICKUP_LOCATION`, `RESEND_API_KEY`, `MESSAGING_CHANNEL` (`console` | `sms` | `whatsapp` | `both`), `OTP_CHANNEL` (`sms` | `whatsapp` | `sms_then_whatsapp`), `MSG91_AUTH_KEY`, `SMS_SENDER_ID`, `DLT_ENTITY_ID`, `SMS_TEMPLATE_IDS`, `WHATSAPP_PROVIDER` (`meta` | `msg91`), `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_TEMPLATE_NAMES`, `MEDIA_STORAGE_*`, `SELLER_GSTIN`, `SELLER_STATE_CODE`, `SENTRY_DSN`.
+Backend: `MEDUSA_BACKEND_URL` (`https://api.divineaura.com`), `COOKIE_DOMAIN`, `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `COOKIE_SECRET`, `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SHIPROCKET_EMAIL`, `SHIPROCKET_PASSWORD`, `SHIPROCKET_PICKUP_LOCATION`, `RESEND_API_KEY`, `MESSAGING_CHANNEL` (`console` | `sms` | `whatsapp` | `both`), `OTP_CHANNEL` (`sms` | `whatsapp` | `sms_then_whatsapp`), `MSG91_AUTH_KEY`, `SMS_SENDER_ID`, `DLT_ENTITY_ID`, `SMS_TEMPLATE_IDS`, `WHATSAPP_PROVIDER` (`meta` | `msg91`), `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_TEMPLATE_NAMES`, `FILE_UPLOAD_DIR` (dev: `apps/backend/static`; prod: `/var/www/divineaura/uploads`), `FILE_BACKEND_URL` (dev: `http://localhost:9000/static`; prod: `https://api.divineaura.com/uploads`), `SELLER_GSTIN`, `SELLER_STATE_CODE`, `SENTRY_DSN`.
 
 Storefront: `NEXT_PUBLIC_MEDUSA_BACKEND_URL`, `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`, `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `NEXT_PUBLIC_SITE_URL` (`https://divineaura.com`), `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `REVALIDATE_SECRET`, `SENTRY_DSN`.
 
@@ -329,7 +329,7 @@ Provide `.env.example` files for both apps.
 | 10 | Accounts, wishlist, order history, GST invoice PDF, return request | Customer can see and download everything |
 | 11 | Reviews (verified buyers, moderation, photos) | Approved reviews show with rating |
 | 12 | Content & legal pages, SEO (metadata, JSON-LD, sitemap), analytics + consent | Lighthouse targets met |
-| 13 | QA + deploy to the Hostinger VPS (§18): Nginx, SSL, PM2, PostgreSQL, Redis, backups, Cloudflare, domain, live keys | Real order placed and delivered end to end |
+| 13 | QA + deploy to the Hostinger VPS (§18): Nginx, SSL, PM2, PostgreSQL, Redis, backups, domain DNS, live keys | Real order placed and delivered end to end |
 
 Phase 2 (after launch): Find-your-bracelet quiz, rashi pages, build-your-own combo, Hindi language, blog, abandoned-cart email, optional WhatsApp channel, loyalty points, PWA install. Phase 3: Expo (React Native) apps using `packages/` shared client.
 
@@ -349,8 +349,8 @@ Marketplace sellers, international shipping, subscriptions, multi-currency, live
 Customer browser
       │  https://divineaura.com           https://api.divineaura.com
       ▼                                    ▼
-  Cloudflare (DNS, CDN, DDoS) ───────────────┐
-      ▼                                      ▼
+  (DNS at registrar → VPS IP)               │
+      ▼                                     ▼
   Nginx on VPS (SSL via Let's Encrypt, reverse proxy)
       │                                      │
       ▼                                      ▼
@@ -370,9 +370,10 @@ Customer browser
 - After changing products in admin, the backend calls the storefront's revalidate endpoint (`REVALIDATE_SECRET`) so product pages update without a full rebuild.
 
 **Backups & monitoring (required, since there is no managed host):**
-- Daily `pg_dump` of the database, compressed, uploaded to Cloudflare R2 (or similar); keep 14 days. Test a restore once before launch.
+- Daily `pg_dump` of the database, compressed, kept on the VPS for 14 days (`/var/backups/divineaura`). Test a restore once before launch.
 - Hostinger weekly VPS backups/snapshots enabled; take a snapshot before every major update.
-- Product images stored in R2/Cloudinary, not only on the VPS disk.
+- Product images live in `/var/www/divineaura/uploads` and are included in the daily backup (tar, kept 14 days).
+- Off-server copy (so a VPS failure can't lose data): Hostinger's automatic VPS backups enabled, plus a weekly copy of the database dump and uploads folder downloaded to the owner's PC/external drive with a provided `backup-download.ps1` script (scp over SSH). No third-party storage service required.
 - Uptime monitor (e.g. UptimeRobot, free) on the homepage and `api.divineaura.com/health`, alerting by email/SMS.
 - Sentry for errors; PM2 log rotation; automatic Ubuntu security updates.
 
