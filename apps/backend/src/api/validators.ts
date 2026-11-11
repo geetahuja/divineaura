@@ -191,6 +191,11 @@ export const BusinessSettingsSchema = z.object({
   invoice_prefix: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,4}$/, "1–4 letters or digits"),
   credit_note_prefix: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,4}$/, "1–4 letters or digits"),
   return_window_days: z.number().int().min(0).max(60),
+  grievance_name: z.string().trim().max(100).nullish().transform((v) => v || null),
+  grievance_email: z.string().trim().email().nullish().or(z.literal("").transform(() => null)),
+  grievance_phone: z.string().trim().max(20).nullish().transform((v) => v || null),
+  grievance_ack_hours: z.number().int().min(1).max(168).default(48),
+  grievance_resolve_days: z.number().int().min(1).max(60).default(30),
 })
 export type ReturnRequestBody = z.infer<typeof ReturnRequestSchema>
 export type WishlistBody = z.infer<typeof WishlistSchema>
@@ -220,3 +225,40 @@ export const ReviewSettingsSchema = z.object({
 export type CreateReviewBody = z.infer<typeof CreateReviewSchema>
 export type UpdateReviewBody = z.infer<typeof UpdateReviewSchema>
 export type ReviewSettingsBody = z.infer<typeof ReviewSettingsSchema>
+
+// ── Content, contact, privacy (Milestone 12) ────────────────────────────
+const optText = (max: number) => z.string().trim().max(max).nullish().transform((v) => v || null)
+export const ContactSchema = z
+  .object({
+    name: z.string().trim().min(2).max(80),
+    email: z.string().trim().email().max(254).nullish().or(z.literal("").transform(() => null)),
+    phone: optText(20),
+    order_number: optText(20),
+    topic: z.enum(["order", "product", "return", "other"]).default("other"),
+    message: z.string().trim().min(10).max(2000),
+    website: z.string().max(0).optional(), // honeypot: must stay empty
+  })
+  .refine((b) => b.email || b.phone, "Give an email or a phone number so we can reply")
+export const PrivacyRequestSchema = z
+  .object({
+    kind: z.enum(["delete_data", "access_data", "correct_data"]),
+    name: z.string().trim().min(2).max(80),
+    email: z.string().trim().email().max(254).nullish().or(z.literal("").transform(() => null)),
+    phone: optText(20),
+    details: optText(1000),
+    website: z.string().max(0).optional(),
+  })
+  .refine((b) => b.email || b.phone, "Give the email or mobile number used with your orders")
+export const UpdatePageSchema = z.object({
+  title: z.string().trim().min(2).max(120),
+  body: z.string().max(50000),
+  faq: z.array(z.object({ q: z.string().trim().min(3).max(300), a: z.string().trim().min(1).max(3000) })).max(100).nullish(),
+  seo_title: optText(70),
+  seo_description: optText(170),
+  published: z.boolean(),
+})
+export const PreviewPageSchema = z.object({ body: z.string().max(50000) })
+export const UpdatePrivacyRequestSchema = z.object({ status: z.enum(["open", "done", "rejected"]), admin_note: optText(1000) })
+export type ContactBody = z.infer<typeof ContactSchema>
+export type PrivacyRequestBody = z.infer<typeof PrivacyRequestSchema>
+export type UpdatePageBody = z.infer<typeof UpdatePageSchema>

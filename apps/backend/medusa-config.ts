@@ -86,6 +86,8 @@ module.exports = defineConfig({
     { resolve: './src/modules/returns' },
     // Verified-buyer product reviews (milestone 11).
     { resolve: './src/modules/reviews' },
+    // Content pages (About, FAQ, policies) + privacy requests (milestone 12).
+    { resolve: './src/modules/content' },
     {
       resolve: '@medusajs/medusa/auth',
       dependencies: ['cache', 'logger'],

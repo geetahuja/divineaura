@@ -110,3 +110,11 @@ not change.
 - Photos (up to 4) are resized in the browser and their EXIF/GPS metadata is stripped again on the server (`src/lib/image-privacy.ts`) before saving to the product-image storage. Public names are "First L., City" or "Verified buyer".
 - **Admin → Reviews**: pending / approved / rejected / hidden, filters (rating, photos, product or order), approve, reject (private reason), hide, public reply. Admins can't edit a review's text or rating. **Settings** there: request delay (default 5 days), minimum length, blocked words, and the photo-review coupon (off by default; coupon only after approval, any rating, shown as "Received a coupon for reviewing").
 - Product page reviews section, stars on product cards, homepage "From our devotees" (hidden when there are no approved photo reviews), and `aggregateRating` / `review` JSON-LD — all from approved reviews only.
+
+## Content, legal, SEO and analytics (milestone 12)
+
+- **Admin → Pages**: About, Contact, FAQ (question list) and the policies (shipping, returns-refunds, cancellation, privacy, terms, grievance) at `/about`, `/contact`, `/faq`, `/policies/<slug>`. Markdown text with `{{placeholders}}` filled from live settings (fees, thresholds, days, seller and grievance details) — open "Placeholders" in the editor to see them all. First drafts are marked "DRAFT – owner to review".
+- **Admin → Business details** now also holds the Grievance Officer (name, email, phone, response times) — shown in the footer, Contact and Grievance page. **Admin → Privacy requests** lists "delete / copy / correct my data" requests from the privacy page.
+- Cookie banner (Accept / Reject / Choose; "Cookie settings" in the footer). GA4 and Meta Pixel load only when their IDs are set **and** the visitor consented; events: view_item, add_to_cart, begin_checkout, add_payment_info, purchase (no personal data).
+- SEO: title template, canonical + OG image on every indexable page, noindex for account/cart/checkout/search/wishlist/filtered listings, Organization + WebSite + BreadcrumbList + Product + FAQPage JSON-LD, sitemap.xml, robots.txt, Search Console via `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`.
+- Storefront builds with webpack (`pnpm build` = `next build --webpack`): Turbopack's production build fails on `next/font/google` on Windows.
