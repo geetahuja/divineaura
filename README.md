@@ -103,3 +103,10 @@ not change.
 - **Cancel**: customers can cancel until the order is packed (stock released; prepaid refunded through the payment provider; COD simply cancelled).
 - **Returns**: after delivery, within the return window; per-product "Not returnable" in the DivineAura details card. **Admin → Returns**: approve (books a reverse pickup) / reject → mark received → refund (prepaid automatically; COD: pay the customer's UPI / bank account, then "Mark refund paid"). Shipping and the COD fee are not refunded on returns.
 - Needs `PAYOUT_ENCRYPTION_KEY` in `apps/backend/.env` (encrypts COD refund details; deleted once paid).
+
+## Reviews (milestone 11)
+
+- Verified buyers only: "Review your items" on the account order page appears for delivered products (one review per order item; editable until moderated). One review-request message per order goes out X days after delivery (hourly job, `src/jobs/review-requests.ts`).
+- Photos (up to 4) are resized in the browser and their EXIF/GPS metadata is stripped again on the server (`src/lib/image-privacy.ts`) before saving to the product-image storage. Public names are "First L., City" or "Verified buyer".
+- **Admin → Reviews**: pending / approved / rejected / hidden, filters (rating, photos, product or order), approve, reject (private reason), hide, public reply. Admins can't edit a review's text or rating. **Settings** there: request delay (default 5 days), minimum length, blocked words, and the photo-review coupon (off by default; coupon only after approval, any rating, shown as "Received a coupon for reviewing").
+- Product page reviews section, stars on product cards, homepage "From our devotees" (hidden when there are no approved photo reviews), and `aggregateRating` / `review` JSON-LD — all from approved reviews only.
