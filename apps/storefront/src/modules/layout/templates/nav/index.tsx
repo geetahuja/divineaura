@@ -10,6 +10,7 @@ import CartButton from "@modules/layout/components/cart-button"
 import MegaMenu from "@modules/layout/components/mega-menu"
 import MobileMenu from "@modules/layout/components/mobile-menu"
 import Search from "@modules/layout/components/search"
+import WishlistHeaderLink from "@modules/wishlist/header-link"
 import { ShoppingBag, User } from "lucide-react"
 
 export default async function Nav() {
@@ -46,6 +47,7 @@ export default async function Nav() {
 
           <div className="flex flex-1 basis-0 items-center justify-end gap-x-1 small:gap-x-3">
             <Search />
+            <WishlistHeaderLink />
             <LocalizedClientLink
               href="/account"
               aria-label="Account"

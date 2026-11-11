@@ -1,4 +1,4 @@
-import { convertToLocale } from "@lib/util/money"
+import { isServiceLine } from "@lib/util/cart-availability"
 import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
 import { Table } from "@modules/common/components/ui"
@@ -25,16 +25,8 @@ const Items = ({ order }: ItemsProps) => {
                   return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
                 })
                 .map((item) => {
-                  if (item.metadata?.type === "cod_fee") {
-                    return (
-                      <Table.Row key={item.id}>
-                        <Table.Cell className="!pl-0 py-3 text-sm text-ink-soft" colSpan={2}>{item.title}</Table.Cell>
-                        <Table.Cell className="!pr-0 py-3 text-right text-sm text-ink">
-                          {convertToLocale({ amount: Number(item.total ?? item.unit_price), currency_code: order.currency_code })}
-                        </Table.Cell>
-                      </Table.Row>
-                    )
-                  }
+                  // The COD fee is not a product: it appears in the totals instead.
+                  if (isServiceLine(item)) return null
                   return (
                     <Item
                       key={item.id}

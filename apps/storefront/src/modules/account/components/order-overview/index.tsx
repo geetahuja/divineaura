@@ -1,45 +1,26 @@
-"use client"
-
-import { Button } from "@modules/common/components/ui"
-
-import OrderCard from "../order-card"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import OrderCard from "../order-card"
 
-const OrderOverview = ({ orders }: { orders: HttpTypes.StoreOrder[] }) => {
+export default function OrderOverview({ orders }: { orders: HttpTypes.StoreOrder[] }) {
   if (orders?.length) {
     return (
-      <div className="flex flex-col gap-y-8 w-full">
+      <ul className="flex w-full flex-col gap-4">
         {orders.map((o) => (
-          <div
-            key={o.id}
-            className="border-b border-gray-200 pb-6 last:pb-0 last:border-none"
-          >
+          <li key={o.id}>
             <OrderCard order={o} />
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     )
   }
-
   return (
-    <div
-      className="w-full flex flex-col items-center gap-y-4"
-      data-testid="no-orders-container"
-    >
-      <h2 className="text-large-semi">Nothing to see here</h2>
-      <p className="text-base-regular">
-        You don&apos;t have any orders yet, let us change that {":)"}
-      </p>
-      <div className="mt-4">
-        <LocalizedClientLink href="/" passHref>
-          <Button data-testid="continue-shopping-button">
-            Continue shopping
-          </Button>
-        </LocalizedClientLink>
-      </div>
+    <div className="flex w-full flex-col items-start gap-3 rounded-lg border border-champagne bg-white p-6" data-testid="no-orders-container">
+      <p className="font-serif text-xl font-semibold text-primary">No orders yet</p>
+      <p className="text-sm text-ink-soft">Orders you place with this mobile number will appear here.</p>
+      <LocalizedClientLink href="/shop" className="rounded-full bg-primary px-5 py-2.5 font-semibold text-white hover:bg-primary-hover" data-testid="continue-shopping-button">
+        Start shopping
+      </LocalizedClientLink>
     </div>
   )
 }
-
-export default OrderOverview

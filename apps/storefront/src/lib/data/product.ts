@@ -23,6 +23,7 @@ export const SPEC_FIELDS = [
   "certificate_url",
   "country_of_origin",
   "hsn_code",
+  "not_returnable",
 ] as const
 
 export type ProductSpecs = Partial<Record<(typeof SPEC_FIELDS)[number], string | number | boolean | null>>

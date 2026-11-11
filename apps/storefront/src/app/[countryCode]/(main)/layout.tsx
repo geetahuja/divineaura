@@ -3,6 +3,8 @@ import { Metadata } from "next"
 import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { getBaseURL } from "@lib/util/env"
+import { countProducts } from "@lib/util/cart-availability"
+import { WishlistProvider } from "@modules/wishlist/context"
 import { StoreCartShippingOption } from "@medusajs/types"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import Footer from "@modules/layout/templates/footer"
@@ -26,7 +28,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   }
 
   return (
-    <>
+    <WishlistProvider loggedIn={!!customer}>
       <Nav />
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />
@@ -44,8 +46,8 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       {/* Space so the fixed mobile bottom bar never covers the footer. */}
       <div className="small:hidden h-[calc(4rem+env(safe-area-inset-bottom))] bg-primary-hover" aria-hidden />
       <MobileBottomBar
-        cartCount={cart?.items?.reduce((n, i) => n + i.quantity, 0) ?? 0}
+        cartCount={countProducts(cart?.items)}
       />
-    </>
+    </WishlistProvider>
   )
 }

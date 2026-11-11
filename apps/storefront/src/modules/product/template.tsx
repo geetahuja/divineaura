@@ -6,7 +6,10 @@ import Breadcrumbs from "@modules/listing/breadcrumbs"
 import ProductCard from "@modules/listing/product-card"
 import { getPublicPaymentSettings } from "@lib/data/payment-options"
 import { convertToLocale } from "@lib/util/money"
-import { Banknote, MessageSquareHeart } from "lucide-react"
+import { Banknote, MessageSquareHeart, RotateCcw } from "lucide-react"
+import HeartButton from "@modules/wishlist/heart-button"
+import { getStorePolicies } from "@lib/data/store-policies"
+import { DEFAULT_COUNTRY_CODE } from "@lib/util/site"
 import BuyBox from "./buy-box"
 import ProductDetails from "./details"
 import Gallery from "./gallery"
@@ -37,7 +40,8 @@ async function related(product: FullProduct, categories: Category[]) {
 }
 
 export default async function ProductTemplate({ product }: { product: FullProduct }) {
-  const [categories, origin, payments] = await Promise.all([listCategories(), getSiteOrigin(), getPublicPaymentSettings()])
+  const [categories, origin, payments, policies] = await Promise.all([listCategories(), getSiteOrigin(), getPublicPaymentSettings(), getStorePolicies(DEFAULT_COUNTRY_CODE)])
+  const returnDays = policies.current?.returnWindowDays ?? 7
   const relatedProducts = await related(product, categories)
 
   const primary = categories.find((c) => c.id === product.categories?.[0]?.id)
@@ -75,6 +79,15 @@ export default async function ProductTemplate({ product }: { product: FullProduc
             {product.subtitle && <p className="mt-1 text-ink-soft">{product.subtitle}</p>}
           </div>
           <BuyBox product={product} showSizeGuide={isBracelet} />
+          <HeartButton productId={product.id} title={product.title} variant="page" />
+          <p className="-mt-2 flex items-center gap-2 text-sm text-ink-soft" data-testid="return-policy">
+            <RotateCcw className="h-4 w-4 text-accent" aria-hidden />
+            {product.product_specs?.not_returnable ? (
+              <span><span className="font-semibold text-ink">Not returnable</span> once delivered (sacred items that can&apos;t be resold once opened).</span>
+            ) : (
+              <span>Easy returns within {returnDays} days of delivery</span>
+            )}
+          </p>
           {payments?.cod_enabled && (
             <p className="-mt-2 flex items-center gap-2 text-sm text-ink-soft">
               <Banknote className="h-4 w-4 text-accent" aria-hidden />
