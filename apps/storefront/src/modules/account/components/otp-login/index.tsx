@@ -2,6 +2,7 @@
 
 import { loginWithTicket } from "@lib/data/otp-login"
 import { OtpTarget, requestCode, verifyCode } from "@lib/otp-client"
+import { useWishlist } from "@modules/wishlist/context"
 import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useRef, useState } from "react"
 
@@ -17,6 +18,7 @@ const VIA: Record<string, string> = { sms: "by SMS", whatsapp: "on WhatsApp", em
  */
 export default function OtpLogin({ next }: { next?: string }) {
   const router = useRouter()
+  const wishlist = useWishlist()
   const [mode, setMode] = useState<"phone" | "email">("phone")
   const [value, setValue] = useState("")
   const [target, setTarget] = useState<OtpTarget | null>(null)
@@ -93,6 +95,7 @@ export default function OtpLogin({ next }: { next?: string }) {
       setBusy(false)
       return setError(done.error)
     }
+    await wishlist.sync() // guest hearts join the account list
     router.replace(next ?? "/account")
     router.refresh()
   }

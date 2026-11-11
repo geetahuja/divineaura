@@ -3,6 +3,7 @@ import { convertToLocale } from "@lib/util/money"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Image from "next/image"
 import QuickAdd from "./quick-add"
+import HeartButton from "@modules/wishlist/heart-button"
 
 export const inr = (amount: number) => convertToLocale({ amount, currency_code: "inr" })
 
@@ -37,6 +38,7 @@ export default function ProductCard({ product, priority }: { product: CatalogueP
           ) : (
             <LotusPlaceholder />
           )}
+          <HeartButton productId={product.id} title={product.title} />
           {!product.in_stock && (
             <span className="absolute left-2 top-2 rounded-full bg-ink/80 px-2 py-0.5 text-[11px] font-semibold text-white">
               Out of stock

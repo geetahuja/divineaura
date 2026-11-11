@@ -123,6 +123,46 @@ export class ShiprocketCourier implements Courier {
     }
   }
 
+  // TO VERIFY WITH A REAL TEST SHIPMENT: Shiprocket return order + AWB for the reverse pickup.
+  async createReturnPickup(i: Parameters<Courier["createReturnPickup"]>[0]) {
+    const order = await this.call<{ order_id: number; shipment_id: number }>("/orders/create/return", {
+      method: "POST",
+      body: {
+        order_id: `R${i.orderNumber}-${i.returnId.slice(-6)}`,
+        order_date: new Date().toISOString().slice(0, 10),
+        pickup_customer_name: i.from.name,
+        pickup_address: i.from.address1,
+        pickup_address_2: i.from.address2 ?? "",
+        pickup_city: i.from.city,
+        pickup_state: i.from.state,
+        pickup_country: "India",
+        pickup_pincode: i.from.pincode,
+        pickup_phone: i.from.phone.replace(/^\+91/, ""),
+        shipping_customer_name: i.to.name,
+        shipping_address: i.to.address1,
+        shipping_city: i.to.city,
+        shipping_state: i.to.state,
+        shipping_country: "India",
+        shipping_pincode: i.to.pincode,
+        shipping_phone: i.to.phone.replace(/^\+91/, ""),
+        order_items: i.items.map((it) => ({ name: it.name, sku: it.sku, units: it.quantity, selling_price: it.unitPrice })),
+        payment_method: "Prepaid",
+        sub_total: i.items.reduce((a, it) => a + it.unitPrice * it.quantity, 0),
+        length: 15,
+        breadth: 10,
+        height: 5,
+        weight: i.weightGrams / 1000,
+      },
+    })
+    const awb = await this.call<{ response?: { data?: { awb_code?: string; courier_name?: string } } }>("/courier/assign/awb", {
+      method: "POST",
+      body: { shipment_id: order.shipment_id, is_return: 1 },
+    })
+    const code = awb.response?.data?.awb_code
+    if (!code) throw new Error("Shiprocket did not assign a return AWB")
+    return { awb: code, courierName: awb.response?.data?.courier_name ?? "Courier", trackingUrl: `https://shiprocket.co/tracking/${code}` }
+  }
+
   async track(awb: string): Promise<TrackingEvent[]> {
     type R = { tracking_data?: { shipment_track_activities?: { date: string; "sr-status-label"?: string; activity?: string }[] } }
     const r = await this.call<R>(`/courier/track/awb/${awb}`).catch(() => null)

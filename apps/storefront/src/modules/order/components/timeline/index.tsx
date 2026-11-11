@@ -11,14 +11,18 @@ const LABEL: Record<string, string> = {
   delivered: "Delivered",
   rto: "Returned to us",
   cancelled: "Cancelled",
+  return_requested: "Return requested",
+  returned: "Returned",
+  refunded: "Refunded",
 }
+const AFTER_SALES = ["return_requested", "returned", "refunded"]
 const when = (iso: string) => new Date(iso).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })
 
 // Placed → Confirmed → Packed → Shipped → Out for delivery → Delivered (+ RTO / Cancelled).
 export default function OrderTimeline({ events, shipment }: { events: TimelineEvent[]; shipment: TimelineShipment }) {
   const at = new Map(events.map((e) => [e.status, e.occurred_at]))
   const end = at.has("cancelled") ? "cancelled" : at.has("rto") ? "rto" : null
-  const steps: string[] = end ? [...STEPS.filter((s) => at.has(s)), end] : [...STEPS]
+  const steps: string[] = [...(end ? [...STEPS.filter((s) => at.has(s)), end] : [...STEPS]), ...AFTER_SALES.filter((s) => at.has(s))]
 
   return (
     <section aria-labelledby="timeline-heading" className="py-6">

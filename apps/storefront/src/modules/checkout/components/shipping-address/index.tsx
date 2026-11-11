@@ -26,8 +26,10 @@ export default function ShippingAddress({
   checked: boolean
   onChange: () => void
 }) {
+  // Logged in with a saved default address → pre-filled (the customer can still change it).
+  const defaultAddress = customer?.addresses?.find((a) => a.is_default_shipping && a.country_code === "in")
   const [values, setValues] = useState<Record<string, string>>(() => ({
-    ...fromAddress(cart?.shipping_address),
+    ...fromAddress(cart?.shipping_address ?? (defaultAddress as unknown as HttpTypes.StoreCartAddress | undefined)),
     email: cart?.email || customer?.email || "",
   }))
   const set = (name: string, value: string) => setValues((v) => ({ ...v, [name]: value }))

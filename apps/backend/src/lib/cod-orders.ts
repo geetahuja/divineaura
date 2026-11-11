@@ -4,6 +4,7 @@ import { cancelOrderWorkflow } from "@medusajs/medusa/core-flows"
 import { COD_MODULE } from "../modules/cod"
 import type CodModuleService from "../modules/cod/service"
 import { notifyOrder } from "./notify"
+import { getOrIssueInvoice } from "./invoices"
 import { COD_PROVIDER_ID, createConfirmToken } from "./cod"
 import { recordEvent } from "./shipments"
 
@@ -94,6 +95,8 @@ export async function confirmCodOrder(container: MedusaContainer, orderId: strin
     await setOrderCodStatus(container, orderId, "confirmed")
     await recordEvent(container, orderId, "confirmed", "cod")
     await notifyOrder(container, "cod_confirmed", orderId)
+    // GST invoice on confirmation; never block the confirmation on it (downloads retry).
+    await getOrIssueInvoice(container, orderId).catch((e) => container.resolve("logger").error(`invoice for ${orderId}: ${(e as Error).message}`))
     return { status: "confirmed", changed: true, order_display_id: order.display_id }
   })
 }

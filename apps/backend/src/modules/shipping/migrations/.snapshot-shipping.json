@@ -59,7 +59,10 @@
             "out_for_delivery",
             "delivered",
             "rto",
-            "cancelled"
+            "cancelled",
+            "return_requested",
+            "returned",
+            "refunded"
           ],
           "mappedType": "enum"
         },

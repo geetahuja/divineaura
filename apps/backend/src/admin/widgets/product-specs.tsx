@@ -62,6 +62,7 @@ const FIELDS: Field[] = [
   { key: "certificate_url", label: "Certificate", kind: "file", hint: "Lab certificate (PDF or image) for gemstones." },
   { key: "country_of_origin", label: "Country of origin", kind: "text", placeholder: "India" },
   { key: "hsn_code", label: "HSN code", kind: "text", placeholder: "4, 6 or 8 digits" },
+  { key: "not_returnable", label: "Not returnable", kind: "select", options: YES_NO, hint: "Yes for items that can't be returned once opened (e.g. sacred threads, malas). Shown on the product page." },
 ]
 
 const display = (field: Field, value: Specs[string]) => {
@@ -87,7 +88,7 @@ const toBody = (form: Record<string, string>) => ({
       if (f.kind === "number" || f.kind === "int") {
         return [f.key, Number(raw)]
       }
-      if (f.key === "chain_included") {
+      if (f.key === "chain_included" || f.key === "not_returnable") {
         return [f.key, raw === "true"]
       }
       return [f.key, raw]

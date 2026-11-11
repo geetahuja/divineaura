@@ -15,6 +15,7 @@ import { COD_MODULE } from "../modules/cod"
 import type CodModuleService from "../modules/cod/service"
 import type { MessageEvent } from "../modules/messaging/templates"
 import { notifyOrder } from "./notify"
+import { documentUrl, getOrIssueInvoice } from "./invoices"
 import { SHIPPING_MODULE } from "../modules/shipping"
 import type ShippingModuleService from "../modules/shipping/service"
 
@@ -98,9 +99,11 @@ export async function recordEvent(
       const event = status === "confirmed" && source === "payment" ? "order_placed" : MESSAGE_FOR[status]
       if (event) {
         const [shipment] = await svc(c).listShipments({ order_id: orderId })
+        // Shipped email links the GST invoice (signed link, no login needed).
+        const invoice = event === "order_shipped" ? await getOrIssueInvoice(c, orderId).catch(() => null) : null
         const extra: Record<string, string> =
           event === "order_shipped"
-            ? { courier: shipment?.courier_name ?? "our courier", ...(shipment?.tracking_url ? { link: shipment.tracking_url } : {}) }
+            ? { courier: shipment?.courier_name ?? "our courier", invoice: invoice ? documentUrl("invoice", invoice.id) : `${(process.env.STOREFRONT_URL ?? "").replace(/\/$/, "")}/account/orders`, ...(shipment?.tracking_url ? { link: shipment.tracking_url } : {}) }
             : event === "order_cancelled"
               ? { reason: opts.note ?? "cancelled by DivineAura" }
               : {}

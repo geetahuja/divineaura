@@ -28,18 +28,6 @@ export default function CartLine({ item, currencyCode }: { item: HttpTypes.Store
   const options = item.variant?.options?.map((o) => o.value).join(" · ") || item.variant_title
   const money = (n: number) => convertToLocale({ amount: n, currency_code: currencyCode })
 
-  // COD fee: priced by the server when Cash on Delivery is chosen; not editable here.
-  if (item.metadata?.type === "cod_fee") {
-    return (
-      <li className="flex items-center justify-between border-b border-champagne py-4 text-sm">
-        <span className="text-ink-soft">
-          {item.title} <span className="text-ink-muted">(changes if you pay online at checkout)</span>
-        </span>
-        <span className="font-semibold text-ink">{money(Number(item.total ?? item.unit_price))}</span>
-      </li>
-    )
-  }
-
   return (
     <li className={`flex gap-4 border-b border-champagne py-4 ${pending ? "opacity-60" : ""}`} data-testid="product-row">
       <LocalizedClientLink href={`/products/${item.product_handle}`} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border border-champagne bg-ivory-deep small:h-24 small:w-24">

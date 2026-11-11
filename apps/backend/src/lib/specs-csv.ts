@@ -21,7 +21,7 @@ export function csvRowToSpecs(row: Record<string, string>): SpecsRowResult {
       input[key] = null
     } else if (NUMBER_FIELDS.includes(key)) {
       input[key] = Number(v) // NaN fails validation with a clear message
-    } else if (key === "chain_included") {
+    } else if (key === "chain_included" || key === "not_returnable") {
       input[key] = /^(yes|true|1|y)$/i.test(v) ? true : /^(no|false|0|n)$/i.test(v) ? false : v
     } else {
       input[key] = v

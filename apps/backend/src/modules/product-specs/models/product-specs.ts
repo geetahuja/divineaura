@@ -22,6 +22,8 @@ const ProductSpecs = model.define("product_specs", {
   certificate_url: model.text().nullable(),
   country_of_origin: model.text().nullable(),
   hsn_code: model.text().nullable(),
+  // Yes = excluded from returns (e.g. opened sacred threads / malas). Empty = returnable.
+  not_returnable: model.boolean().nullable(),
 })
 
 export default ProductSpecs

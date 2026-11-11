@@ -15,6 +15,7 @@ const ProductSpecsFields = z.object({
     dimensions_mm: text,
     weight_g: num,
     chain_included: z.boolean().nullish(),
+    not_returnable: z.boolean().nullish(),
     colour: text,
     pack_quantity: int,
     care_instructions: text,
@@ -146,3 +147,51 @@ export type OtpRequestBody = z.infer<typeof OtpRequestSchema>
 export type OtpVerifyBody = z.infer<typeof OtpVerifySchema>
 export type NewsletterBody = z.infer<typeof NewsletterSchema>
 export type MarketingConsentBody = z.infer<typeof MarketingConsentSchema>
+
+// ── Accounts, documents, returns (Milestone 10) ─────────────────────────
+const upi = z.string().trim().regex(/^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/, "Enter a valid UPI ID, e.g. name@okicici")
+export const ReturnRequestSchema = z.object({
+  items: z.array(z.object({ item_id: z.string(), quantity: z.number().int().positive() })).min(1).max(50),
+  reason: z.enum(["damaged", "wrong_item", "not_as_described", "quality", "changed_mind", "other"]),
+  details: z.string().trim().max(1000).nullish(),
+  photos: z.array(z.string().max(4_200_000)).max(3).optional(),
+  payout: z
+    .discriminatedUnion("method", [
+      z.object({ method: z.literal("upi"), upi_id: upi }),
+      z.object({
+        method: z.literal("bank"),
+        account_name: z.string().trim().min(2).max(100),
+        account_number: z.string().trim().regex(/^\d{9,18}$/, "Account number must be 9–18 digits"),
+        ifsc: z.string().trim().toUpperCase().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Enter a valid IFSC code"),
+      }),
+    ])
+    .nullish(),
+})
+export const WishlistSchema = z.object({
+  action: z.enum(["add", "remove", "merge"]),
+  product_ids: z.array(z.string().regex(/^prod_[A-Za-z0-9]+$/)).max(100),
+})
+export const AdminReturnNoteSchema = z.object({ note: z.string().trim().max(500).nullish() })
+export const AdminReturnRejectSchema = z.object({ note: z.string().trim().min(3, "Tell the customer why").max(500) })
+export const AdminRefundPaidSchema = z.object({ reference: z.string().trim().max(100).nullish() })
+export const BusinessSettingsSchema = z.object({
+  legal_name: z.string().trim().min(2).max(120),
+  brand_name: z.string().trim().min(2).max(60),
+  address: z.string().trim().max(500),
+  state: z.string().trim().min(2).max(60),
+  gstin: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/, "GSTIN must be 15 characters, e.g. 27ABCDE1234F1Z5")
+    .nullish()
+    .or(z.literal("").transform(() => null)),
+  email: z.string().trim().email().nullish().or(z.literal("").transform(() => null)),
+  phone: z.string().trim().max(20).nullish(),
+  invoice_prefix: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,4}$/, "1–4 letters or digits"),
+  credit_note_prefix: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,4}$/, "1–4 letters or digits"),
+  return_window_days: z.number().int().min(0).max(60),
+})
+export type ReturnRequestBody = z.infer<typeof ReturnRequestSchema>
+export type WishlistBody = z.infer<typeof WishlistSchema>
+export type BusinessSettingsBody = z.infer<typeof BusinessSettingsSchema>

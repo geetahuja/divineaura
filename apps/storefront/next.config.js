@@ -11,6 +11,8 @@ const backend = new URL(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://lo
  */
 const nextConfig = {
   reactStrictMode: true,
+  // Return requests carry up to 3 photos (resized to ~0.5 MB each in the browser).
+  experimental: { serverActions: { bodySizeLimit: "3mb" } },
   async headers() {
     return [
       {

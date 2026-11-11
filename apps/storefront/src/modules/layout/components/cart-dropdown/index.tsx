@@ -18,10 +18,10 @@ import LineItemPrice from "@modules/common/components/line-item-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
 import { usePathname } from "next/navigation"
+import { countProducts, productLines } from "@lib/util/cart-availability"
 import { Fragment, useEffect, useRef, useState } from "react"
 
-const countItems = (cart?: HttpTypes.StoreCart | null) =>
-  cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0
+const countItems = (cart?: HttpTypes.StoreCart | null) => countProducts(cart?.items)
 
 const CartDropdown = ({
   cart: serverCart,
@@ -41,7 +41,8 @@ const CartDropdown = ({
 
   const totalItems = countItems(cartState)
 
-  const subtotal = cartState?.subtotal ?? 0
+  // Products only (GST-inclusive); the COD fee is shown at checkout as a fee line.
+  const subtotal = productLines(cartState?.items).reduce((n, i) => n + Number(i.total ?? 0), 0)
   const itemRef = useRef<number>(totalItems || 0)
 
   useEffect(() => {
@@ -145,7 +146,7 @@ const CartDropdown = ({
             {cartState && cartState.items?.length ? (
               <>
                 <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
-                  {cartState.items
+                  {productLines(cartState.items)
                     .sort((a, b) => {
                       return (a.created_at ?? "") > (b.created_at ?? "")
                         ? -1
@@ -215,7 +216,7 @@ const CartDropdown = ({
                   <div className="flex items-center justify-between">
                     <span className="text-ui-fg-base font-semibold">
                       Subtotal{" "}
-                      <span className="font-normal">(excl. taxes)</span>
+                      <span className="font-normal">(incl. taxes)</span>
                     </span>
                     <span
                       className="text-large-semi"

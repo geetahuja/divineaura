@@ -1,38 +1,22 @@
+import { retrieveCustomer } from "@lib/data/customer"
+import AddressBook from "@modules/account/components/address-book"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-import AddressBook from "@modules/account/components/address-book"
-
-import { getRegion } from "@lib/data/regions"
-import { retrieveCustomer } from "@lib/data/customer"
-
 export const metadata: Metadata = {
   title: "Addresses",
-  description: "View your addresses",
+  description: "Your saved delivery addresses.",
 }
 
-export default async function Addresses(props: {
-  params: Promise<{ countryCode: string }>
-}) {
-  const params = await props.params
-  const { countryCode } = params
+export default async function Addresses() {
   const customer = await retrieveCustomer()
-  const region = await getRegion(countryCode)
-
-  if (!customer || !region) {
-    notFound()
-  }
+  if (!customer) notFound()
 
   return (
     <div className="w-full" data-testid="addresses-page-wrapper">
-      <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="text-2xl-semi">Shipping Addresses</h1>
-        <p className="text-base-regular">
-          View and update your shipping addresses, you can add as many as you
-          like. Saving your addresses will make them available during checkout.
-        </p>
-      </div>
-      <AddressBook customer={customer} region={region} />
+      <h1 className="font-serif text-3xl font-semibold text-primary">Addresses</h1>
+      <p className="mb-6 mt-1 text-sm text-ink-soft">Your default address is filled in automatically at checkout.</p>
+      <AddressBook customer={customer} />
     </div>
   )
 }
