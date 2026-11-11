@@ -106,6 +106,8 @@ export const UpdatePaymentSettingsSchema = z
     cod_max_order_value: z.number().int().min(1),
     prepaid_discount_percent: z.number().min(0).max(50),
     cod_confirm_minutes: z.number().int().min(1).max(60 * 24 * 7),
+    cod_fee_tax_mode: z.enum(["goods", "fixed"]),
+    cod_fee_tax_rate: z.number().min(0).max(28),
   })
   .partial()
 export const AddBlockedPincodesSchema = z.object({ pincodes: z.string().max(100_000) })
@@ -115,6 +117,14 @@ export type CodConfirmBody = z.infer<typeof CodConfirmSchema>
 export type UpdatePaymentSettingsBody = z.infer<typeof UpdatePaymentSettingsSchema>
 export type AddBlockedPincodesBody = z.infer<typeof AddBlockedPincodesSchema>
 export type CodCancelBody = z.infer<typeof CodCancelSchema>
+
+// Shipping (milestone 8)
+export const TrackOrderSchema = z.object({ order_number: z.coerce.number().int().positive(), phone: z.string().trim().min(10).max(15) })
+export const CreateShipmentSchema = z.object({ courier_id: z.string().max(50).nullish() })
+export const SimulateTrackingSchema = z.object({ status: z.enum(["shipped", "out_for_delivery", "delivered", "rto"]).optional() })
+export type TrackOrderBody = z.infer<typeof TrackOrderSchema>
+export type CreateShipmentBody = z.infer<typeof CreateShipmentSchema>
+export type SimulateTrackingBody = z.infer<typeof SimulateTrackingSchema>
 
 export type CreateSacredPlaceBody = z.infer<typeof CreateSacredPlaceSchema>
 export type UpdateSacredPlaceBody = z.infer<typeof UpdateSacredPlaceSchema>

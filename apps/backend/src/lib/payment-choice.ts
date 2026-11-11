@@ -8,8 +8,10 @@ import {
   updatePromotionsWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { COD_MODULE } from "../modules/cod"
+import { COD_FEE_TAX_TYPE } from "../modules/gst-tax/service"
 import type CodModuleService from "../modules/cod/service"
 import { COD_FEE_ITEM_TYPE, codEligibility, PREPAID_PROMO_CODE, prepaidSaving } from "./cod"
+import { courierCodAvailable } from "./shipments"
 
 /**
  * Server-side pricing of the payment choice (ARCHITECTURE.md §5 rules 5–6):
@@ -49,6 +51,7 @@ export async function loadCartForPayment(container: MedusaContainer, cartId: str
     merchandiseTotal,
     pincode,
     pincodeBlocked: pincode ? await codService(container).isPincodeBlocked(pincode) : false,
+    courierCod: await courierCodAvailable(container, pincode),
   })
   return {
     cart,
@@ -91,6 +94,10 @@ export async function applyPaymentChoice(container: MedusaContainer, cartId: str
                 is_discountable: false,
                 requires_shipping: false,
                 metadata: { type: COD_FEE_ITEM_TYPE },
+                // Lets the GST tax provider / a fixed-rate override find this line.
+                // Supported at runtime (prepare-line-item-data copies item.product_type_id)
+                // but missing from the TS type in Medusa 2.22.
+                ...({ product_type_id: COD_FEE_TAX_TYPE } as object),
               },
             ],
           },

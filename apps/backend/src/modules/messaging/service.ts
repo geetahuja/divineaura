@@ -9,6 +9,8 @@ const TEMPLATES = {
     `DivineAura: Thank you! Your COD order #${d.order_number} is confirmed and will be shipped soon.`,
   cod_cancelled: (d: Record<string, string>) =>
     `DivineAura: Your COD order #${d.order_number} was cancelled (${d.reason}). You can order again anytime.`,
+  order_status: (d: Record<string, string>) =>
+    `DivineAura: Your order #${d.order_number} is ${d.status}.${d.tracking ? ` Track: ${d.tracking}` : ""}`,
 } as const
 
 export type MessageTemplate = keyof typeof TEMPLATES

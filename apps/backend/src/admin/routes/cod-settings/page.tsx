@@ -1,6 +1,6 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { CurrencyDollar, Trash } from "@medusajs/icons"
-import { Badge, Button, Container, Heading, IconButton, Input, Label, Switch, Text, Textarea, toast } from "@medusajs/ui"
+import { Badge, Button, Container, Heading, IconButton, Input, Label, Select, Switch, Text, Textarea, toast } from "@medusajs/ui"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { sdk } from "../../lib/sdk"
@@ -11,6 +11,8 @@ type Settings = {
   cod_max_order_value: number
   prepaid_discount_percent: number
   cod_confirm_minutes: number
+  cod_fee_tax_mode: "goods" | "fixed"
+  cod_fee_tax_rate: number
 }
 
 const field = (label: string, hint: string, input: React.ReactNode) => (
@@ -33,6 +35,7 @@ const CodSettingsPage = () => {
   })
   const [form, setForm] = useState<Record<keyof Settings, string> | null>(null)
   const [enabled, setEnabled] = useState(true)
+  const [taxMode, setTaxMode] = useState<"goods" | "fixed">("goods")
   const [paste, setPaste] = useState("")
   const [filter, setFilter] = useState("")
 
@@ -40,12 +43,15 @@ const CodSettingsPage = () => {
     if (!data) return
     const s = data.settings
     setEnabled(s.cod_enabled)
+    setTaxMode(s.cod_fee_tax_mode)
     setForm({
       cod_enabled: String(s.cod_enabled),
       cod_fee: String(s.cod_fee),
       cod_max_order_value: String(s.cod_max_order_value),
       prepaid_discount_percent: String(s.prepaid_discount_percent),
       cod_confirm_minutes: String(s.cod_confirm_minutes),
+      cod_fee_tax_mode: s.cod_fee_tax_mode,
+      cod_fee_tax_rate: String(s.cod_fee_tax_rate),
     })
   }, [data])
 
@@ -104,6 +110,19 @@ const CodSettingsPage = () => {
               `${minutes >= 60 ? `${+(minutes / 60).toFixed(1)} hours` : `${minutes} minute(s)`}. Default 1440 = 24 hours.`,
               <Input type="number" min={1} step={1} value={form.cod_confirm_minutes} onChange={set("cod_confirm_minutes")} />
             )}
+            {field(
+              "GST on the COD fee",
+              "Same as the goods = the highest GST rate among the items in the cart. Confirm the right treatment with your CA.",
+              <Select value={taxMode} onValueChange={(v) => setTaxMode(v as "goods" | "fixed")}>
+                <Select.Trigger><Select.Value /></Select.Trigger>
+                <Select.Content>
+                  <Select.Item value="goods">Same as the goods (highest rate in the cart)</Select.Item>
+                  <Select.Item value="fixed">Fixed rate</Select.Item>
+                </Select.Content>
+              </Select>
+            )}
+            {taxMode === "fixed" &&
+              field("COD fee GST rate (%)", "Applied as a tax override (also listed in Settings → Tax Regions → India).", <Input type="number" min={0} max={28} step={0.5} value={form.cod_fee_tax_rate} onChange={set("cod_fee_tax_rate")} />)}
           </div>
         )}
         <div className="flex justify-end px-6 py-4">
@@ -117,6 +136,8 @@ const CodSettingsPage = () => {
                 cod_max_order_value: num("cod_max_order_value"),
                 prepaid_discount_percent: num("prepaid_discount_percent"),
                 cod_confirm_minutes: num("cod_confirm_minutes"),
+                cod_fee_tax_mode: taxMode,
+                cod_fee_tax_rate: num("cod_fee_tax_rate"),
               })
             }
           >

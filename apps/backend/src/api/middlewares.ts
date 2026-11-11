@@ -6,6 +6,9 @@ import {
 } from "@medusajs/framework/http"
 import {
   AddBlockedPincodesSchema,
+  CreateShipmentSchema,
+  SimulateTrackingSchema,
+  TrackOrderSchema,
   AdminProductSpecsSchema,
   CodCancelSchema,
   CodConfirmSchema,
@@ -65,6 +68,11 @@ export default defineMiddlewares({
       matcher: "/admin/products/:id/specs",
       middlewares: [validateAndTransformBody(AdminProductSpecsSchema)],
     },
+    // Courier webhooks are verified against the exact raw body.
+    { method: ["POST"], matcher: "/hooks/shipping/*", bodyParser: { preserveRawBody: true } },
+    { method: ["POST"], matcher: "/store/track", middlewares: [validateAndTransformBody(TrackOrderSchema)] },
+    { method: ["POST"], matcher: "/admin/shipping/orders/:id/shipment", middlewares: [validateAndTransformBody(CreateShipmentSchema)] },
+    { method: ["POST"], matcher: "/admin/shipping/orders/:id/simulate", middlewares: [validateAndTransformBody(SimulateTrackingSchema)] },
     { method: ["POST"], matcher: "/store/carts/:id/payment-method", middlewares: [validateAndTransformBody(PaymentMethodSchema)] },
     { method: ["POST"], matcher: "/store/cod/confirm", middlewares: [validateAndTransformBody(CodConfirmSchema)] },
     { method: ["POST"], matcher: "/admin/payment-settings", middlewares: [validateAndTransformBody(UpdatePaymentSettingsSchema)] },

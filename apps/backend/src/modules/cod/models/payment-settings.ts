@@ -10,6 +10,10 @@ const PaymentSettings = model.define("payment_settings", {
   prepaid_discount_percent: model.float().default(5),
   // Unconfirmed COD orders are auto-cancelled after this many minutes (24 h).
   cod_confirm_minutes: model.number().default(1440),
+  // GST on the COD fee: "goods" = highest rate among the cart's goods (default);
+  // "fixed" = cod_fee_tax_rate %, applied as a tax override on product type "cod_fee".
+  cod_fee_tax_mode: model.enum(["goods", "fixed"]).default("goods"),
+  cod_fee_tax_rate: model.float().default(18),
 })
 
 export default PaymentSettings

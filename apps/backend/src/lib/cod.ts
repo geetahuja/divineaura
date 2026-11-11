@@ -15,7 +15,7 @@ export type CodSettings = {
   cod_confirm_minutes: number
 }
 
-export type CodIneligibleReason = "disabled" | "over_limit" | "pincode_blocked" | "no_address"
+export type CodIneligibleReason = "disabled" | "over_limit" | "pincode_blocked" | "no_address" | "courier_no_cod"
 
 /**
  * COD is offered when it is switched on, the order value (merchandise, before
@@ -23,11 +23,13 @@ export type CodIneligibleReason = "disabled" | "over_limit" | "pincode_blocked" 
  */
 export function codEligibility(
   s: CodSettings,
-  input: { merchandiseTotal: number; pincode?: string | null; pincodeBlocked: boolean }
+  input: { merchandiseTotal: number; pincode?: string | null; pincodeBlocked: boolean; courierCod?: boolean }
 ): { eligible: true } | { eligible: false; reason: CodIneligibleReason } {
   if (!s.cod_enabled) return { eligible: false, reason: "disabled" }
   if (!input.pincode) return { eligible: false, reason: "no_address" }
   if (input.pincodeBlocked) return { eligible: false, reason: "pincode_blocked" }
+  // The courier must also offer COD for this PIN (unknown = allowed; checked again at shipment).
+  if (input.courierCod === false) return { eligible: false, reason: "courier_no_cod" }
   if (input.merchandiseTotal > s.cod_max_order_value) return { eligible: false, reason: "over_limit" }
   return { eligible: true }
 }

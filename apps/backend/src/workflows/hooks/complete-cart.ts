@@ -1,6 +1,7 @@
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 import { COD_FEE_ITEM_TYPE, COD_PROVIDER_ID, codEligibility, PREPAID_PROMO_CODE } from "../../lib/cod"
+import { courierCodAvailable } from "../../lib/shipments"
 import { COD_MODULE } from "../../modules/cod"
 import type CodModuleService from "../../modules/cod/service"
 
@@ -34,6 +35,7 @@ completeCartWorkflow.hooks.validate(async ({ cart }, { container }) => {
     merchandiseTotal,
     pincode,
     pincodeBlocked: pincode ? await cod.isPincodeBlocked(pincode) : false,
+    courierCod: await courierCodAvailable(container, pincode),
   })
   if (!eligibility.eligible) {
     throw new MedusaError(MedusaError.Types.NOT_ALLOWED, `Cash on Delivery is not available for this order (${eligibility.reason}).`)

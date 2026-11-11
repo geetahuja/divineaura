@@ -62,6 +62,20 @@ module.exports = defineConfig({
     { resolve: './src/modules/hero-banners' },
     { resolve: '@medusajs/medusa/payment', options: { providers: paymentProviders } },
     { resolve: './src/modules/cod' },
+    // Delivery pricing + courier shipments (ARCHITECTURE.md §5.4, §5.9). The
+    // courier (test / Shiprocket) is chosen in src/lib/couriers from .env.
+    {
+      resolve: '@medusajs/medusa/fulfillment',
+      options: {
+        providers: [
+          { resolve: '@medusajs/medusa/fulfillment-manual', id: 'manual' },
+          { resolve: './src/modules/courier-fulfillment', id: 'courier', options: {} },
+        ],
+      },
+    },
+    { resolve: './src/modules/shipping' },
+    // GST: Medusa's rates for goods; the COD fee follows its own setting.
+    { resolve: '@medusajs/medusa/tax', options: { providers: [{ resolve: './src/modules/gst-tax', id: 'gst' }] } },
     // Customer messages (ARCHITECTURE.md §19). Console in development; SMS /
     // WhatsApp providers arrive in milestone 9 behind the same interface.
     { resolve: './src/modules/messaging', options: { channel: process.env.MESSAGING_CHANNEL || 'console' } },

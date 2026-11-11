@@ -6,6 +6,7 @@ import type CodModuleService from "../modules/cod/service"
 import { MESSAGING_MODULE } from "../modules/messaging"
 import type MessagingModuleService from "../modules/messaging/service"
 import { COD_PROVIDER_ID, createConfirmToken } from "./cod"
+import { recordEvent } from "./shipments"
 
 /**
  * COD order lifecycle (ARCHITECTURE.md §5.5, §10): Pending confirmation →
@@ -98,6 +99,7 @@ export async function confirmCodOrder(container: MedusaContainer, orderId: strin
 
     await cod(container).updateCodConfirmations({ id: c.id, status: "confirmed", confirmed_at: new Date(), confirmed_by: by })
     await setOrderCodStatus(container, orderId, "confirmed")
+    await recordEvent(container, orderId, "confirmed", "cod")
     await container.resolve<MessagingModuleService>(MESSAGING_MODULE).send({
       to: { phone: order.shipping_address?.phone, email: order.email },
       template: "cod_confirmed",

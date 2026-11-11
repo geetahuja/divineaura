@@ -443,6 +443,41 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "cod_fee_tax_mode": {
+          "name": "cod_fee_tax_mode",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'goods'",
+          "comment": null,
+          "enumItems": [
+            "goods",
+            "fixed"
+          ],
+          "mappedType": "enum"
+        },
+        "cod_fee_tax_rate": {
+          "name": "cod_fee_tax_rate",
+          "type": "real",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "18",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "float"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
