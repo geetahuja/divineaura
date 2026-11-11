@@ -2,6 +2,9 @@ import "server-only"
 import { headers } from "next/headers"
 
 export const STORE_NAME = "DivineAura"
+// Site-wide share image (app/opengraph-image.jpg). Pages that set their own openGraph
+// must include an image explicitly, or Next drops the inherited one.
+export const DEFAULT_OG_IMAGE = "/opengraph-image.jpg"
 
 export const DEFAULT_COUNTRY_CODE = (
   process.env.NEXT_PUBLIC_DEFAULT_REGION || "in"

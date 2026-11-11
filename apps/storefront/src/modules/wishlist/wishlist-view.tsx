@@ -1,6 +1,7 @@
 "use client"
 
 import { addToCart } from "@lib/data/cart"
+import { track } from "@lib/analytics"
 import type { CatalogueProduct } from "@lib/data/catalogue"
 import { getWishlistProducts } from "@lib/data/wishlist"
 import { notifyCartUpdated } from "@lib/util/cart-events"
@@ -40,6 +41,7 @@ export default function WishlistView() {
     try {
       await addToCart({ variantId: p.single_variant_id!, quantity: 1, countryCode })
       notifyCartUpdated()
+      track({ name: "add_to_cart", value: p.price ?? 0, items: [{ item_id: p.single_variant_id!, item_name: p.title, price: p.price ?? 0, quantity: 1 }] })
       w.remove(p.id)
     } catch {
       setError(`Couldn't add ${p.title} to your cart. Please try again.`)

@@ -1,6 +1,7 @@
 "use client"
 
 import { addToCart } from "@lib/data/cart"
+import { track } from "@lib/analytics"
 import { notifyCartUpdated } from "@lib/util/cart-events"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useParams } from "next/navigation"
@@ -14,10 +15,14 @@ export default function QuickAdd({
   handle,
   variantId,
   inStock,
+  title,
+  price,
 }: {
   handle: string
   variantId: string | null
   inStock: boolean
+  title: string
+  price: number | null
 }) {
   const countryCode = useParams().countryCode as string
   const [pending, start] = useTransition()
@@ -52,6 +57,7 @@ export default function QuickAdd({
             try {
               await addToCart({ variantId, quantity: 1, countryCode })
               notifyCartUpdated()
+              track({ name: "add_to_cart", value: price ?? 0, items: [{ item_id: variantId, item_name: title, price: price ?? 0, quantity: 1 }] })
               setAdded(true)
               setTimeout(() => setAdded(false), 2000)
             } catch {

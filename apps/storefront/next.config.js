@@ -13,6 +13,14 @@ const nextConfig = {
   reactStrictMode: true,
   // Return requests (3 photos) and reviews (4 photos) carry photos resized in the browser.
   experimental: { serverActions: { bodySizeLimit: "4mb" } },
+  // Milestone 12: policies moved under /policies (content pages edited in admin).
+  async redirects() {
+    const moved = { shipping: "shipping", returns: "returns-refunds", privacy: "privacy", terms: "terms" }
+    return Object.entries(moved).flatMap(([from, to]) => [
+      { source: `/${from}`, destination: `/policies/${to}`, permanent: true },
+      { source: `/:countryCode(in)/${from}`, destination: `/policies/${to}`, permanent: true },
+    ])
+  },
   async headers() {
     return [
       {

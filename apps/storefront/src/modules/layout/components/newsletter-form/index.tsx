@@ -21,7 +21,7 @@ export default function NewsletterForm() {
           placeholder="Your email"
           className="h-11 min-w-0 flex-1 rounded-full border border-champagne/50 bg-white px-4 text-base text-ink focus:border-accent focus:outline-none"
         />
-        <button disabled={pending} className="h-11 shrink-0 rounded-full bg-accent px-5 font-semibold text-white hover:opacity-90 disabled:opacity-50">
+        <button disabled={pending} className="h-11 shrink-0 rounded-full bg-accent px-5 font-semibold text-ink hover:bg-champagne disabled:opacity-50">
           {pending ? "…" : "Subscribe"}
         </button>
       </div>

@@ -3,7 +3,7 @@ import { Metadata } from "next"
 import ConfirmCod from "./confirm-cod"
 
 export const metadata: Metadata = {
-  title: "Confirm your order | DivineAura",
+  title: "Confirm your order",
   robots: { index: false, follow: false },
 }
 // Always fresh: the link's state changes when confirmed or cancelled.

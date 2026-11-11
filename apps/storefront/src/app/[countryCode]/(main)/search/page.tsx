@@ -20,6 +20,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const query = getQuery((await props.searchParams).q)
   return {
     title: query ? `Search results for "${query}"` : "Search",
+    description: "Search DivineAura lockets, bracelets, malas and sacred threads.",
     robots: { index: false, follow: true },
   }
 }

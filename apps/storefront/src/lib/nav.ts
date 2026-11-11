@@ -60,12 +60,16 @@ export async function getMainMenu(): Promise<NavItem[]> {
 
 export const FOOTER_HELP: NavLink[] = [
   { label: "Track your order", href: "/track-order" },
-  { label: "Shipping", href: "/shipping" },
-  { label: "Returns", href: "/returns" },
+  { label: "FAQ", href: "/faq" },
   { label: "Contact us", href: "/contact" },
+  { label: "About us", href: "/about" },
 ]
 
 export const FOOTER_POLICIES: NavLink[] = [
-  { label: "Terms of service", href: "/terms" },
-  { label: "Privacy policy", href: "/privacy" },
+  { label: "Shipping", href: "/policies/shipping" },
+  { label: "Returns & refunds", href: "/policies/returns-refunds" },
+  { label: "Cancellation", href: "/policies/cancellation" },
+  { label: "Privacy policy", href: "/policies/privacy" },
+  { label: "Terms of use", href: "/policies/terms" },
+  { label: "Grievance redressal", href: "/policies/grievance" },
 ]

@@ -1,6 +1,10 @@
 import { retrieveCustomer } from "@lib/data/customer"
 // TODO: Re-add Toaster component when needed
 import AccountLayout from "@modules/account/templates/account-layout"
+import type { Metadata } from "next"
+
+// Private area: never in search results.
+export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 export default async function AccountPageLayout({
   dashboard,

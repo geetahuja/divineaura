@@ -6,8 +6,10 @@ import Breadcrumbs from "@modules/listing/breadcrumbs"
 import ProductCard from "@modules/listing/product-card"
 import { getPublicPaymentSettings } from "@lib/data/payment-options"
 import { convertToLocale } from "@lib/util/money"
-import { Banknote, RotateCcw } from "lucide-react"
+import { Banknote, Globe, RotateCcw } from "lucide-react"
 import ProductReviews from "@modules/reviews/product-reviews"
+import TrackEvent from "@modules/consent/track-event"
+import { getPricedVariants } from "@lib/util/product-structured-data"
 import type { ReviewPage } from "@lib/data/reviews"
 import HeartButton from "@modules/wishlist/heart-button"
 import { getStorePolicies } from "@lib/data/store-policies"
@@ -44,6 +46,8 @@ async function related(product: FullProduct, categories: Category[]) {
 export default async function ProductTemplate({ product, reviews }: { product: FullProduct; reviews: ReviewPage }) {
   const [categories, origin, payments, policies] = await Promise.all([listCategories(), getSiteOrigin(), getPublicPaymentSettings(), getStorePolicies(DEFAULT_COUNTRY_CODE)])
   const returnDays = policies.current?.returnWindowDays ?? 7
+  const fromPrice = Math.min(...getPricedVariants(product).map((v) => v.calculated_price!.calculated_amount!), Infinity)
+  const fromPriceSafe = Number.isFinite(fromPrice) ? fromPrice : 0
   const relatedProducts = await related(product, categories)
 
   const primary = categories.find((c) => c.id === product.categories?.[0]?.id)
@@ -81,6 +85,7 @@ export default async function ProductTemplate({ product, reviews }: { product: F
             {product.subtitle && <p className="mt-1 text-ink-soft">{product.subtitle}</p>}
           </div>
           <BuyBox product={product} showSizeGuide={isBracelet} />
+          <TrackEvent event={{ name: "view_item", value: fromPriceSafe, items: [{ item_id: product.id, item_name: product.title, price: fromPriceSafe, quantity: 1 }] }} />
           <HeartButton productId={product.id} title={product.title} variant="page" />
           <p className="-mt-2 flex items-center gap-2 text-sm text-ink-soft" data-testid="return-policy">
             <RotateCcw className="h-4 w-4 text-accent" aria-hidden />
@@ -89,6 +94,14 @@ export default async function ProductTemplate({ product, reviews }: { product: F
             ) : (
               <span>Easy returns within {returnDays} days of delivery</span>
             )}
+          </p>
+          {/* Required on every product page (Consumer Protection (E-Commerce) Rules 2020). */}
+          <p className="-mt-2 flex items-center gap-2 text-sm text-ink-soft" data-testid="country-of-origin">
+            <Globe className="h-4 w-4 text-accent" aria-hidden />
+            <span>
+              Country of origin:{" "}
+              <span className="font-semibold text-ink">{(product.product_specs?.country_of_origin as string | undefined) || "to be confirmed – please ask us"}</span>
+            </span>
           </p>
           {payments?.cod_enabled && (
             <p className="-mt-2 flex items-center gap-2 text-sm text-ink-soft">
