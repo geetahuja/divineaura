@@ -5,7 +5,12 @@ import {
   validateAndTransformBody,
 } from "@medusajs/framework/http"
 import {
+  AddBlockedPincodesSchema,
   AdminProductSpecsSchema,
+  CodCancelSchema,
+  CodConfirmSchema,
+  PaymentMethodSchema,
+  UpdatePaymentSettingsSchema,
   CreateHeroBannerSchema,
   CreateSacredPlaceSchema,
   SimulateTestPaymentSchema,
@@ -60,6 +65,11 @@ export default defineMiddlewares({
       matcher: "/admin/products/:id/specs",
       middlewares: [validateAndTransformBody(AdminProductSpecsSchema)],
     },
+    { method: ["POST"], matcher: "/store/carts/:id/payment-method", middlewares: [validateAndTransformBody(PaymentMethodSchema)] },
+    { method: ["POST"], matcher: "/store/cod/confirm", middlewares: [validateAndTransformBody(CodConfirmSchema)] },
+    { method: ["POST"], matcher: "/admin/payment-settings", middlewares: [validateAndTransformBody(UpdatePaymentSettingsSchema)] },
+    { method: ["POST"], matcher: "/admin/cod/blocklist", middlewares: [validateAndTransformBody(AddBlockedPincodesSchema)] },
+    { method: ["POST"], matcher: "/admin/cod/orders/:id/cancel", middlewares: [validateAndTransformBody(CodCancelSchema)] },
     {
       method: ["POST"],
       matcher: "/store/test-payment/simulate",

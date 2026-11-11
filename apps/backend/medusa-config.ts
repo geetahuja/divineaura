@@ -10,6 +10,8 @@ const TEST_PAYMENT_ENABLED =
   process.env.TEST_PAYMENT_ENABLED === 'true' && process.env.NODE_ENV !== 'production'
 
 const paymentProviders = [
+  // Cash on Delivery (always available; switched on/off in Admin → COD & payments).
+  { resolve: './src/modules/cod-payment', id: 'cod', options: {} },
   ...(TEST_PAYMENT_ENABLED
     ? [
         {
@@ -58,8 +60,10 @@ module.exports = defineConfig({
     { resolve: './src/modules/product-specs' },
     { resolve: './src/modules/sacred-places' },
     { resolve: './src/modules/hero-banners' },
-    ...(paymentProviders.length
-      ? [{ resolve: '@medusajs/medusa/payment', options: { providers: paymentProviders } }]
-      : []),
+    { resolve: '@medusajs/medusa/payment', options: { providers: paymentProviders } },
+    { resolve: './src/modules/cod' },
+    // Customer messages (ARCHITECTURE.md §19). Console in development; SMS /
+    // WhatsApp providers arrive in milestone 9 behind the same interface.
+    { resolve: './src/modules/messaging', options: { channel: process.env.MESSAGING_CHANNEL || 'console' } },
   ],
 })

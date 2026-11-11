@@ -96,6 +96,26 @@ export const SimulateTestPaymentSchema = z.object({
 })
 export type SimulateTestPaymentBody = z.infer<typeof SimulateTestPaymentSchema>
 
+// COD & payment choice (milestone 7)
+export const PaymentMethodSchema = z.object({ method: z.enum(["cod", "online"]) })
+export const CodConfirmSchema = z.object({ token: z.string().min(10).max(500) })
+export const UpdatePaymentSettingsSchema = z
+  .object({
+    cod_enabled: z.boolean(),
+    cod_fee: z.number().int().min(0).max(500),
+    cod_max_order_value: z.number().int().min(1),
+    prepaid_discount_percent: z.number().min(0).max(50),
+    cod_confirm_minutes: z.number().int().min(1).max(60 * 24 * 7),
+  })
+  .partial()
+export const AddBlockedPincodesSchema = z.object({ pincodes: z.string().max(100_000) })
+export const CodCancelSchema = z.object({ reason: z.string().trim().max(200).optional() })
+export type PaymentMethodBody = z.infer<typeof PaymentMethodSchema>
+export type CodConfirmBody = z.infer<typeof CodConfirmSchema>
+export type UpdatePaymentSettingsBody = z.infer<typeof UpdatePaymentSettingsSchema>
+export type AddBlockedPincodesBody = z.infer<typeof AddBlockedPincodesSchema>
+export type CodCancelBody = z.infer<typeof CodCancelSchema>
+
 export type CreateSacredPlaceBody = z.infer<typeof CreateSacredPlaceSchema>
 export type UpdateSacredPlaceBody = z.infer<typeof UpdateSacredPlaceSchema>
 export type ReorderSacredPlacesBody = z.infer<typeof ReorderSacredPlacesSchema>
