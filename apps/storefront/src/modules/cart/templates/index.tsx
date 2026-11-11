@@ -1,51 +1,47 @@
+import { HttpTypes } from "@medusajs/types"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import EmptyCartMessage from "../components/empty-cart-message"
 import ItemsTemplate from "./items"
 import Summary from "./summary"
-import EmptyCartMessage from "../components/empty-cart-message"
-import SignInPrompt from "../components/sign-in-prompt"
-import Divider from "@modules/common/components/divider"
-import { HttpTypes } from "@medusajs/types"
 
-const CartTemplate = ({
+export default function CartTemplate({
   cart,
   customer,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
-}) => {
+}) {
+  if (!cart?.items?.length) {
+    return (
+      <div className="content-container py-12">
+        <EmptyCartMessage />
+      </div>
+    )
+  }
+
   return (
-    <div className="py-12">
-      <div className="content-container" data-testid="cart-container">
-        {cart?.items?.length ? (
-          <div className="grid grid-cols-1 small:grid-cols-[1fr_360px] gap-x-40">
-            <div className="flex flex-col bg-white py-6 gap-y-6">
-              {!customer && (
-                <>
-                  <SignInPrompt />
-                  <Divider />
-                </>
-              )}
-              <ItemsTemplate cart={cart} />
+    <div className="content-container py-6 small:py-12" data-testid="cart-container">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 small:grid-cols-[minmax(0,1fr)_380px] small:gap-12">
+        <div className="min-w-0">
+          <ItemsTemplate cart={cart} />
+          {!customer && (
+            <p className="mt-4 text-sm text-ink-soft">
+              Have an account?{" "}
+              <LocalizedClientLink href="/account" className="font-semibold text-primary hover:underline" data-testid="sign-in-button">
+                Sign in
+              </LocalizedClientLink>{" "}
+              to check out faster.
+            </p>
+          )}
+        </div>
+        {cart.region && (
+          <div className="small:sticky small:top-28 small:self-start">
+            <div className="rounded-lg border border-champagne bg-white p-5">
+              <Summary cart={cart} />
             </div>
-            <div className="relative">
-              <div className="flex flex-col gap-y-8 sticky top-12">
-                {cart && cart.region && (
-                  <>
-                    <div className="bg-white py-6">
-                      <Summary cart={cart} />
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <EmptyCartMessage />
           </div>
         )}
       </div>
     </div>
   )
 }
-
-export default CartTemplate

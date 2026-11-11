@@ -2,6 +2,7 @@ import { Heading } from "@modules/common/components/ui"
 import { cookies as nextCookies } from "next/headers"
 
 import CartTotals from "@modules/common/components/cart-totals"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Help from "@modules/order/components/help"
 import Items from "@modules/order/components/items"
 import OnboardingCta from "@modules/order/components/onboarding-cta"
@@ -26,18 +27,17 @@ export default async function OrderCompletedTemplate({
       <div className="content-container flex flex-col justify-center items-center gap-y-10 max-w-4xl h-full w-full">
         {isOnboarding && <OnboardingCta orderId={order.id} />}
         <div
-          className="flex flex-col gap-4 max-w-4xl h-full bg-white w-full py-10"
+          className="flex h-full w-full max-w-4xl flex-col gap-4 rounded-lg border border-champagne bg-white px-5 py-8 small:px-10"
           data-testid="order-complete-container"
         >
-          <Heading
-            level="h1"
-            className="flex flex-col gap-y-3 text-ui-fg-base text-3xl mb-4"
-          >
-            <span>Thank you!</span>
-            <span>Your order was placed successfully.</span>
-          </Heading>
+          <h1 className="font-serif text-3xl font-semibold text-primary small:text-4xl">
+            Thank you! Your order is placed.
+          </h1>
           <OrderDetails order={order} />
-          <Heading level="h2" className="flex flex-row text-3xl-regular">
+          <LocalizedClientLink href="/shop" className="text-sm font-semibold text-primary hover:underline">
+            Continue shopping →
+          </LocalizedClientLink>
+          <Heading level="h2" className="mt-4 font-serif text-2xl font-semibold text-primary">
             Summary
           </Heading>
           <Items order={order} />

@@ -13,10 +13,9 @@
     "start": "next start -p 8000",
     "lint": "eslint .",
     "analyze": "ANALYZE=true next build",
-    "test": "node --import jiti/register --test src/lib/*.test.ts"
+    "test": "node --import jiti/register --test src/lib/*.test.ts src/lib/util/*.test.ts"
   },
   "dependencies": {
-    "@adyen/adyen-web": "^6.46.0",
     "@headlessui/react": "^2.2.0",
     "@medusajs/icons": "2.22.4",
     "@medusajs/instantsearch-adapter": "2.22.4",
@@ -24,8 +23,6 @@
     "@medusajs/ui-preset": "2.22.4",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-slider": "^1.4.7",
-    "@stripe/react-stripe-js": "^5.3.0",
-    "@stripe/stripe-js": "^8.2.0",
     "clsx": "^2.1.1",
     "instantsearch.js": "4.113.0",
     "lodash": "^4.17.21",

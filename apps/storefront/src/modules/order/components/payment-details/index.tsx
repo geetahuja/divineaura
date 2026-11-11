@@ -1,63 +1,43 @@
-import { Container, Heading, Text } from "@modules/common/components/ui"
-
-import { getPaymentInfo, isStripeLike } from "@lib/constants"
-import Divider from "@modules/common/components/divider"
+import { getPaymentAdapter } from "@lib/payments"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 
-type PaymentDetailsProps = {
-  order: HttpTypes.StoreOrder
+// Order payment_status → what the customer sees. "authorized" means the gateway
+// confirmed the payment but its webhook hasn't been processed yet (seconds).
+const STATUS: Record<string, { label: string; tone: string }> = {
+  captured: { label: "Paid", tone: "bg-green-700 text-white" },
+  authorized: { label: "Confirming payment", tone: "bg-accent-soft text-ink" },
+  partially_refunded: { label: "Partially refunded", tone: "bg-accent-soft text-ink" },
+  refunded: { label: "Refunded", tone: "bg-champagne text-ink" },
+  canceled: { label: "Cancelled", tone: "bg-champagne text-ink" },
 }
 
-const PaymentDetails = ({ order }: PaymentDetailsProps) => {
-  const payment = order.payment_collections?.[0].payments?.[0]
+export const paymentStatusLabel = (status?: string) =>
+  STATUS[status ?? ""] ?? { label: "Awaiting payment", tone: "bg-champagne text-ink" }
+
+export default function PaymentDetails({ order }: { order: HttpTypes.StoreOrder }) {
+  const payment = order.payment_collections?.[0]?.payments?.[0]
+  const status = paymentStatusLabel(order.payment_status)
+  const adapter = getPaymentAdapter(payment?.provider_id)
 
   return (
-    <div>
-      <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
-        Payment
-      </Heading>
-      <div>
+    <section aria-labelledby="payment-details-heading" className="py-6">
+      <h2 id="payment-details-heading" className="font-serif text-2xl font-semibold text-primary">Payment</h2>
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.tone}`}>{status.label}</span>
         {payment && (
-          <div className="flex items-start gap-x-1 w-full">
-            <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                Payment method
-              </Text>
-              <Text
-                className="txt-medium text-ui-fg-subtle"
-                data-testid="payment-method"
-              >
-                {getPaymentInfo(payment.provider_id)?.title || payment.provider_id}
-              </Text>
-            </div>
-            <div className="flex flex-col w-2/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                Payment details
-              </Text>
-              <div className="flex gap-2 txt-medium text-ui-fg-subtle items-center">
-                <Container className="flex items-center h-7 w-fit p-2 bg-ui-button-neutral-hover">
-                  {getPaymentInfo(payment.provider_id)?.icon}
-                </Container>
-                <Text data-testid="payment-amount">
-                  {isStripeLike(payment.provider_id) && payment.data?.card_last4
-                    ? `**** **** **** ${payment.data.card_last4}`
-                    : `${convertToLocale({
-                        amount: payment.amount,
-                        currency_code: order.currency_code,
-                      })} paid at ${new Date(
-                        payment.created_at ?? ""
-                      ).toLocaleString()}`}
-                </Text>
-              </div>
-            </div>
-          </div>
+          <span className="flex items-center gap-2 text-ink-soft">
+            {adapter?.icon}
+            {adapter?.title ?? "Online payment"} ·{" "}
+            {convertToLocale({ amount: Number(payment.amount), currency_code: order.currency_code })}
+          </span>
         )}
       </div>
-
-      <Divider className="mt-8" />
-    </div>
+      {order.payment_status === "authorized" && (
+        <p className="mt-2 text-xs text-ink-muted">
+          Your payment was received. Confirmation from the payment provider usually takes a few seconds.
+        </p>
+      )}
+    </section>
   )
 }
-
-export default PaymentDetails

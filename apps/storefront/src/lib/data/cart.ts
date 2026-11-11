@@ -1,6 +1,8 @@
 "use server"
 
 import { sdk } from "@lib/config"
+import { unavailableItems } from "@lib/util/cart-availability"
+import { isValidEmail, validateIndianAddress } from "@lib/util/india-address"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
@@ -217,6 +219,14 @@ export async function deleteLineItem(lineId: string) {
     .catch(medusaError)
 }
 
+export async function removeUnavailableItems() {
+  const cart = await retrieveCart()
+  if (!cart) return
+  for (const item of unavailableItems(cart)) {
+    await deleteLineItem(item.id)
+  }
+}
+
 export async function setShippingMethod({
   cartId,
   shippingMethodId,
@@ -344,39 +354,38 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       throw new Error("No existing cart found when setting addresses")
     }
 
-    const data = {
-      shipping_address: {
-        first_name: formData.get("shipping_address.first_name"),
-        last_name: formData.get("shipping_address.last_name"),
-        address_1: formData.get("shipping_address.address_1"),
-        address_2: "",
-        company: formData.get("shipping_address.company"),
-        postal_code: formData.get("shipping_address.postal_code"),
-        city: formData.get("shipping_address.city"),
-        country_code: formData.get("shipping_address.country_code"),
-        province: formData.get("shipping_address.province"),
-        phone: formData.get("shipping_address.phone"),
-      },
-      email: formData.get("email"),
-    } as any
+    // India only (ARCHITECTURE.md §9): validated here, not just in the browser.
+    const read = (prefix: string) => ({
+      first_name: String(formData.get(`${prefix}.first_name`) ?? ""),
+      last_name: String(formData.get(`${prefix}.last_name`) ?? ""),
+      address_1: String(formData.get(`${prefix}.address_1`) ?? ""),
+      address_2: String(formData.get(`${prefix}.address_2`) ?? ""),
+      postal_code: String(formData.get(`${prefix}.postal_code`) ?? ""),
+      city: String(formData.get(`${prefix}.city`) ?? ""),
+      province: String(formData.get(`${prefix}.province`) ?? ""),
+      phone: String(formData.get(`${prefix}.phone`) ?? ""),
+    })
+    const shipping = validateIndianAddress(read("shipping_address"))
+    if (!shipping.ok) return shipping.error
 
-    const sameAsBilling = formData.get("same_as_billing")
-    if (sameAsBilling === "on") data.billing_address = data.shipping_address
+    // Billing: same as delivery, or its own address (needed for GST invoices).
+    let billingAddress = shipping.address
+    if (formData.get("same_as_billing") !== "on") {
+      const b = read("billing_address")
+      const billing = validateIndianAddress({ ...b, phone: b.phone || shipping.address.phone })
+      if (!billing.ok) return `Billing address: ${billing.error}`
+      billingAddress = billing.address
+    }
 
-    if (sameAsBilling !== "on")
-      data.billing_address = {
-        first_name: formData.get("billing_address.first_name"),
-        last_name: formData.get("billing_address.last_name"),
-        address_1: formData.get("billing_address.address_1"),
-        address_2: "",
-        company: formData.get("billing_address.company"),
-        postal_code: formData.get("billing_address.postal_code"),
-        city: formData.get("billing_address.city"),
-        country_code: formData.get("billing_address.country_code"),
-        province: formData.get("billing_address.province"),
-        phone: formData.get("billing_address.phone"),
-      }
-    await updateCart(data)
+    // Email is optional (mobile is the main contact) but must be valid if given.
+    const email = String(formData.get("email") ?? "").trim()
+    if (email && !isValidEmail(email)) return "Please enter a valid email address, or leave it empty."
+
+    await updateCart({
+      shipping_address: shipping.address,
+      billing_address: billingAddress,
+      ...(email ? { email } : {}),
+    })
   } catch (e: any) {
     return e.message
   }

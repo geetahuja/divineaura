@@ -1,184 +1,91 @@
 "use client"
+
 import { setAddresses } from "@lib/data/cart"
 import useToggleState from "@lib/hooks/use-toggle-state"
 import compareAddresses from "@lib/util/compare-addresses"
-import { CheckCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
-import Divider from "@modules/common/components/divider"
-import { Heading, Text } from "@modules/common/components/ui"
-import Spinner from "@modules/common/icons/spinner"
+import { CheckCircle2 } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useActionState } from "react"
+import { useFormStatus } from "react-dom"
 import BillingAddress from "../billing_address"
-import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
-import { SubmitButton } from "../submit-button"
 
-const Addresses = ({
+const Submit = () => {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="h-12 rounded-full bg-primary px-8 text-base font-semibold text-white hover:bg-primary-hover disabled:opacity-50 small:self-start"
+    >
+      {pending ? "Saving…" : "Continue to delivery"}
+    </button>
+  )
+}
+
+const oneLine = (a: HttpTypes.StoreCartAddress) =>
+  [a.address_1, a.address_2, a.city, a.province, a.postal_code].filter(Boolean).join(", ")
+
+export default function Addresses({
   cart,
   customer,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
-}) => {
-  const searchParams = useSearchParams()
+}) {
   const router = useRouter()
   const pathname = usePathname()
-
-  const isOpen = searchParams.get("step") === "address"
-
-  const { state: sameAsBilling, toggle: toggleSameAsBilling } = useToggleState(
-    cart?.shipping_address && cart?.billing_address
-      ? compareAddresses(cart?.shipping_address, cart?.billing_address)
-      : true
+  const isOpen = useSearchParams().get("step") === "address"
+  const { state: sameAsBilling, toggle } = useToggleState(
+    cart?.shipping_address && cart?.billing_address ? compareAddresses(cart.shipping_address, cart.billing_address) : true
   )
-
-  const handleEdit = () => {
-    router.push(pathname + "?step=address")
-  }
-
   const [message, formAction] = useActionState(setAddresses, null)
+  const a = cart?.shipping_address
 
   return (
-    <div className="bg-white">
-      <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
-          className="flex flex-row text-3xl-regular gap-x-2 items-baseline"
-        >
-          Shipping Address
-          {!isOpen && <CheckCircleSolid />}
-        </Heading>
-        {!isOpen && cart?.shipping_address && (
-          <Text>
-            <button
-              onClick={handleEdit}
-              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
-              data-testid="edit-address-button"
-            >
-              Edit
-            </button>
-          </Text>
+    <section aria-labelledby="address-heading" className="rounded-lg border border-champagne bg-white p-5 small:p-6">
+      <div className="flex items-center justify-between">
+        <h2 id="address-heading" className="flex items-center gap-2 font-serif text-2xl font-semibold text-primary">
+          1. Contact &amp; address
+          {!isOpen && a && <CheckCircle2 className="h-5 w-5 text-green-700" aria-label="Completed" />}
+        </h2>
+        {!isOpen && a && (
+          <button type="button" onClick={() => router.push(`${pathname}?step=address`)} className="text-sm font-semibold text-primary hover:underline">
+            Change
+          </button>
         )}
       </div>
+
       {isOpen ? (
-        <form action={formAction}>
-          <div className="pb-8">
-            <ShippingAddress
-              customer={customer}
-              checked={sameAsBilling}
-              onChange={toggleSameAsBilling}
-              cart={cart}
-            />
-
-            {!sameAsBilling && (
-              <div>
-                <Heading
-                  level="h2"
-                  className="text-3xl-regular gap-x-4 pb-6 pt-8"
-                >
-                  Billing address
-                </Heading>
-
-                <BillingAddress cart={cart} />
-              </div>
-            )}
-            <SubmitButton className="mt-6" data-testid="submit-address-button">
-              Continue to delivery
-            </SubmitButton>
-            <ErrorMessage error={message} data-testid="address-error-message" />
-          </div>
+        <form action={formAction} className="mt-4 flex flex-col gap-6">
+          <ShippingAddress customer={customer} cart={cart} checked={sameAsBilling} onChange={toggle} />
+          {!sameAsBilling && (
+            <fieldset>
+              <legend className="mb-3 text-base font-semibold text-ink">Billing address</legend>
+              <BillingAddress cart={cart} />
+            </fieldset>
+          )}
+          {message && (
+            <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{message}</p>
+          )}
+          <Submit />
         </form>
       ) : (
-        <div>
-          <div className="text-small-regular">
-            {cart && cart.shipping_address ? (
-              <div className="flex items-start gap-x-8">
-                <div className="flex items-start gap-x-1 w-full">
-                  <div
-                    className="flex flex-col w-1/3"
-                    data-testid="shipping-address-summary"
-                  >
-                    <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                      Shipping Address
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.first_name}{" "}
-                      {cart.shipping_address.last_name}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.address_1}{" "}
-                      {cart.shipping_address.address_2}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.postal_code},{" "}
-                      {cart.shipping_address.city}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.country_code?.toUpperCase()}
-                    </Text>
-                  </div>
-
-                  <div
-                    className="flex flex-col w-1/3 "
-                    data-testid="shipping-contact-summary"
-                  >
-                    <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                      Contact
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.phone}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.email}
-                    </Text>
-                  </div>
-
-                  <div
-                    className="flex flex-col w-1/3"
-                    data-testid="billing-address-summary"
-                  >
-                    <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                      Billing Address
-                    </Text>
-
-                    {sameAsBilling ? (
-                      <Text className="txt-medium text-ui-fg-subtle">
-                        Billing and delivery address are the same.
-                      </Text>
-                    ) : (
-                      <>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.first_name}{" "}
-                          {cart.billing_address?.last_name}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.address_1}{" "}
-                          {cart.billing_address?.address_2}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.postal_code},{" "}
-                          {cart.billing_address?.city}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.country_code?.toUpperCase()}
-                        </Text>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <Spinner />
-              </div>
-            )}
+        a && (
+          <div className="mt-3 grid gap-3 text-sm text-ink-soft small:grid-cols-2">
+            <div>
+              <p className="font-semibold text-ink">{[a.first_name, a.last_name].filter(Boolean).join(" ")}</p>
+              <p>{oneLine(a)}</p>
+            </div>
+            <div>
+              <p>{a.phone}</p>
+              {cart?.email && <p>{cart.email}</p>}
+              {!sameAsBilling && cart?.billing_address && <p className="mt-1">Billing: {oneLine(cart.billing_address)}</p>}
+            </div>
           </div>
-        </div>
+        )
       )}
-      <Divider className="mt-8" />
-    </div>
+    </section>
   )
 }
-
-export default Addresses

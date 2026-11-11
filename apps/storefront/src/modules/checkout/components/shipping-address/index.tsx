@@ -1,13 +1,20 @@
-import { HttpTypes } from "@medusajs/types"
-import { Container } from "@modules/common/components/ui"
-import Checkbox from "@modules/common/components/checkbox"
-import Input from "@modules/common/components/input"
-import { mapKeys } from "lodash"
-import React, { useEffect, useMemo, useState } from "react"
-import AddressSelect from "../address-select"
-import CountrySelect from "../country-select"
+"use client"
 
-const ShippingAddress = ({
+import { HttpTypes } from "@medusajs/types"
+import { mapKeys } from "lodash"
+import { useEffect, useState } from "react"
+import AddressFields, { field, labelCls } from "../address-fields"
+import AddressSelect from "../address-select"
+
+const KEYS = ["first_name", "last_name", "address_1", "address_2", "postal_code", "city", "province", "phone"] as const
+
+const fromAddress = (a?: HttpTypes.StoreCartAddress | null) =>
+  Object.fromEntries(
+    KEYS.map((k) => [`shipping_address.${k}`, k === "phone" ? (a?.phone ?? "").replace(/^\+91/, "") : (a?.[k] as string) ?? ""])
+  )
+
+// Contact first (mobile required, email optional — ARCHITECTURE.md §9), then the delivery address.
+export default function ShippingAddress({
   customer,
   cart,
   checked,
@@ -17,205 +24,88 @@ const ShippingAddress = ({
   cart: HttpTypes.StoreCart | null
   checked: boolean
   onChange: () => void
-}) => {
-  const [formData, setFormData] = useState<Record<string, string>>({
-    "shipping_address.first_name": cart?.shipping_address?.first_name || "",
-    "shipping_address.last_name": cart?.shipping_address?.last_name || "",
-    "shipping_address.address_1": cart?.shipping_address?.address_1 || "",
-    "shipping_address.company": cart?.shipping_address?.company || "",
-    "shipping_address.postal_code": cart?.shipping_address?.postal_code || "",
-    "shipping_address.city": cart?.shipping_address?.city || "",
-    "shipping_address.country_code": cart?.shipping_address?.country_code || "",
-    "shipping_address.province": cart?.shipping_address?.province || "",
-    "shipping_address.phone": cart?.shipping_address?.phone || "",
-    email: cart?.email || "",
-  })
-
-  const countriesInRegion = useMemo(
-    () => cart?.region?.countries?.map((c) => c.iso_2),
-    [cart?.region]
-  )
-
-  // check if customer has saved addresses that are in the current region
-  const addressesInRegion = useMemo(
-    () =>
-      customer?.addresses.filter(
-        (a) => a.country_code && countriesInRegion?.includes(a.country_code)
-      ),
-    [customer?.addresses, countriesInRegion]
-  )
-
-  const setFormAddress = (
-    address?: HttpTypes.StoreCartAddress,
-    email?: string
-  ) => {
-    if (address) {
-      setFormData((prevState: Record<string, string>) => ({
-        ...prevState,
-        "shipping_address.first_name": address?.first_name || "",
-        "shipping_address.last_name": address?.last_name || "",
-        "shipping_address.address_1": address?.address_1 || "",
-        "shipping_address.company": address?.company || "",
-        "shipping_address.postal_code": address?.postal_code || "",
-        "shipping_address.city": address?.city || "",
-        "shipping_address.country_code": address?.country_code || "",
-        "shipping_address.province": address?.province || "",
-        "shipping_address.phone": address?.phone || "",
-      }))
-    }
-
-    if (email) {
-      setFormData((prevState: Record<string, string>) => ({
-        ...prevState,
-        email: email,
-      }))
-    }
-  }
+}) {
+  const [values, setValues] = useState<Record<string, string>>(() => ({
+    ...fromAddress(cart?.shipping_address),
+    email: cart?.email || customer?.email || "",
+  }))
+  const set = (name: string, value: string) => setValues((v) => ({ ...v, [name]: value }))
 
   useEffect(() => {
-    // Ensure cart is not null and has a shipping_address before setting form data
-    if (cart && cart.shipping_address) {
-      setFormAddress(cart?.shipping_address, cart?.email)
+    if (cart?.shipping_address) {
+      setValues((v) => ({ ...v, ...fromAddress(cart.shipping_address), email: cart.email || v.email }))
     }
+  }, [cart?.shipping_address, cart?.email])
 
-    if (cart && !cart.email && customer?.email) {
-      setFormAddress(undefined, customer.email)
-    }
-  }, [cart]) // Add cart as a dependency
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLInputElement | HTMLSelectElement
-    >
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
-  }
+  const saved = customer?.addresses.filter((a) => a.country_code === "in") ?? []
 
   return (
-    <>
-      {customer && (addressesInRegion?.length || 0) > 0 && (
-        <Container className="mb-6 flex flex-col gap-y-4 p-5">
-          <p className="text-small-regular">
-            {`Hi ${customer.first_name}, do you want to use one of your saved addresses?`}
-          </p>
-          <AddressSelect
-            addresses={customer.addresses}
-            addressInput={
-              mapKeys(formData, (_, key) =>
-                key.replace("shipping_address.", "")
-              ) as unknown as HttpTypes.StoreCartAddress
-            }
-            onSelect={setFormAddress}
+    <div className="flex flex-col gap-6">
+      <fieldset className="grid grid-cols-1 gap-4 xsmall:grid-cols-2">
+        <legend className="mb-3 text-base font-semibold text-ink">Contact</legend>
+        <div>
+          <label htmlFor="shipping-phone" className={labelCls}>Mobile number</label>
+          <div className="flex">
+            <span className="flex h-12 items-center rounded-l-md border border-r-0 border-champagne bg-ivory-deep px-3 text-ink-soft">+91</span>
+            <input
+              id="shipping-phone"
+              name="shipping_address.phone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              pattern="[6-9][0-9]{9}"
+              title="10-digit mobile number"
+              maxLength={10}
+              required
+              value={values["shipping_address.phone"]}
+              onChange={(e) => set("shipping_address.phone", e.target.value.replace(/\D/g, "").slice(0, 10))}
+              className={`${field} rounded-l-none`}
+            />
+          </div>
+          <p className="mt-1 text-xs text-ink-muted">For order updates and delivery.</p>
+        </div>
+        <div>
+          <label htmlFor="shipping-email" className={labelCls}>
+            Email <span className="font-normal text-ink-muted">(optional, recommended)</span>
+          </label>
+          <input
+            id="shipping-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={values.email}
+            onChange={(e) => set("email", e.target.value)}
+            className={field}
           />
-        </Container>
-      )}
-      <div className="grid grid-cols-2 gap-4">
-        <Input
-          label="First name"
-          name="shipping_address.first_name"
-          autoComplete="given-name"
-          value={formData["shipping_address.first_name"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-first-name-input"
-        />
-        <Input
-          label="Last name"
-          name="shipping_address.last_name"
-          autoComplete="family-name"
-          value={formData["shipping_address.last_name"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-last-name-input"
-        />
-        <Input
-          label="Address"
-          name="shipping_address.address_1"
-          autoComplete="address-line1"
-          value={formData["shipping_address.address_1"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-address-input"
-        />
-        <Input
-          label="Company"
-          name="shipping_address.company"
-          value={formData["shipping_address.company"]}
-          onChange={handleChange}
-          autoComplete="organization"
-          data-testid="shipping-company-input"
-        />
-        <Input
-          label="Postal code"
-          name="shipping_address.postal_code"
-          autoComplete="postal-code"
-          value={formData["shipping_address.postal_code"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-postal-code-input"
-        />
-        <Input
-          label="City"
-          name="shipping_address.city"
-          autoComplete="address-level2"
-          value={formData["shipping_address.city"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-city-input"
-        />
-        <CountrySelect
-          name="shipping_address.country_code"
-          autoComplete="country"
-          region={cart?.region}
-          value={formData["shipping_address.country_code"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-country-select"
-        />
-        <Input
-          label="State / Province"
-          name="shipping_address.province"
-          autoComplete="address-level1"
-          value={formData["shipping_address.province"]}
-          onChange={handleChange}
-          data-testid="shipping-province-input"
-        />
-      </div>
-      <div className="my-8">
-        <Checkbox
-          label="Billing address same as shipping address"
+          <p className="mt-1 text-xs text-ink-muted">For your order confirmation and invoice.</p>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend className="mb-3 text-base font-semibold text-ink">Delivery address</legend>
+        {customer && saved.length > 0 && (
+          <div className="mb-4">
+            <p className="mb-2 text-sm text-ink-soft">Hi {customer.first_name}, use a saved address?</p>
+            <AddressSelect
+              addresses={saved}
+              addressInput={mapKeys(values, (_, k) => k.replace("shipping_address.", "")) as unknown as HttpTypes.StoreCartAddress}
+              onSelect={(a) => a && setValues((v) => ({ ...v, ...fromAddress(a) }))}
+            />
+          </div>
+        )}
+        <AddressFields prefix="shipping_address" values={values} onChange={set} />
+      </fieldset>
+
+      <label className="flex cursor-pointer items-center gap-3 text-sm text-ink">
+        <input
+          type="checkbox"
           name="same_as_billing"
           checked={checked}
           onChange={onChange}
-          data-testid="billing-address-checkbox"
+          className="h-4 w-4 accent-primary"
         />
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <Input
-          label="Email"
-          name="email"
-          type="email"
-          title="Enter a valid email address."
-          autoComplete="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          data-testid="shipping-email-input"
-        />
-        <Input
-          label="Phone"
-          name="shipping_address.phone"
-          autoComplete="tel"
-          value={formData["shipping_address.phone"]}
-          onChange={handleChange}
-          data-testid="shipping-phone-input"
-        />
-      </div>
-    </>
+        Billing address is the same as the delivery address
+      </label>
+    </div>
   )
 }
-
-export default ShippingAddress

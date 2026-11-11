@@ -1,63 +1,34 @@
 import { HttpTypes } from "@medusajs/types"
-import { Text } from "@modules/common/components/ui"
+import { paymentStatusLabel } from "../payment-details"
 
-type OrderDetailsProps = {
-  order: HttpTypes.StoreOrder
-  showStatus?: boolean
-}
-
-const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
-  const formatStatus = (str: string) => {
-    const formatted = str.split("_").join(" ")
-
-    return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
-  }
+// Order number, date, payment status and where updates go (ARCHITECTURE.md §9.6).
+// Messages are sent by the messaging layer (milestone 9); nothing here claims they already were.
+export default function OrderDetails({ order, showStatus }: { order: HttpTypes.StoreOrder; showStatus?: boolean }) {
+  const phone = order.shipping_address?.phone
+  const contacts = [phone, order.email].filter(Boolean).join(" and ")
+  const payment = paymentStatusLabel(order.payment_status)
 
   return (
-    <div>
-      <Text>
-        We have sent the order confirmation details to{" "}
-        <span
-          className="text-ui-fg-medium-plus font-semibold"
-          data-testid="order-email"
-        >
-          {order.email}
-        </span>
-        .
-      </Text>
-      <Text className="mt-2">
-        Order date:{" "}
+    <div className="flex flex-col gap-2 text-sm text-ink-soft">
+      <p className="text-base text-ink">
+        Order number <span className="font-semibold text-primary" data-testid="order-id">#{order.display_id}</span>
+      </p>
+      <p>
+        Placed on{" "}
         <span data-testid="order-date">
-          {new Date(order.created_at).toDateString()}
+          {new Date(order.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
         </span>
-      </Text>
-      <Text className="mt-2 text-ui-fg-interactive">
-        Order number: <span data-testid="order-id">{order.display_id}</span>
-      </Text>
-
-      <div className="flex items-center text-compact-small gap-x-4 mt-4">
-        {showStatus && (
-          <>
-            <Text>
-              Order status:{" "}
-              <span className="text-ui-fg-subtle " data-testid="order-status">
-                {formatStatus(order.fulfillment_status)}
-              </span>
-            </Text>
-            <Text>
-              Payment status:{" "}
-              <span
-                className="text-ui-fg-subtle "
-                sata-testid="order-payment-status"
-              >
-                {formatStatus(order.payment_status)}
-              </span>
-            </Text>
-          </>
-        )}
-      </div>
+      </p>
+      <p className="flex items-center gap-2">
+        Payment:
+        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${payment.tone}`}>{payment.label}</span>
+      </p>
+      {showStatus && (
+        <p>
+          Order status: <span className="text-ink">{order.fulfillment_status.replace(/_/g, " ")}</span>
+        </p>
+      )}
+      {contacts && <p>Order updates will be sent to <span className="font-semibold text-ink">{contacts}</span>.</p>}
     </div>
   )
 }
-
-export default OrderDetails
