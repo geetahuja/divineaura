@@ -1,15 +1,18 @@
+import { getPublicPaymentSettings } from "@lib/data/payment-options"
 import { getStorePolicies } from "@lib/data/store-policies"
 import { convertToLocale } from "@lib/util/money"
 import { DEFAULT_COUNTRY_CODE } from "@lib/util/site"
 import { Banknote, LockKeyhole, RotateCcw, Truck } from "lucide-react"
 
-// ponytail: COD is off until milestone 7 adds the COD provider; then read it from backend settings.
-const COD_ENABLED = false
-
 export default async function TrustStrip() {
-  const { current } = await getStorePolicies(DEFAULT_COUNTRY_CODE)
+  const [{ current }, payments] = await Promise.all([getStorePolicies(DEFAULT_COUNTRY_CODE), getPublicPaymentSettings()])
   const items = [
-    COD_ENABLED && { icon: Banknote, title: "Cash on delivery", sub: "Available on most PIN codes" },
+    // Switched on/off in Admin → COD & payments.
+    payments?.cod_enabled && {
+      icon: Banknote,
+      title: "Cash on delivery",
+      sub: `On orders up to ${convertToLocale({ amount: payments.cod_max_order_value, currency_code: "inr" })}`,
+    },
     current?.freeShippingThreshold != null && {
       icon: Truck,
       title: `Free shipping above ${convertToLocale({ amount: current.freeShippingThreshold, currency_code: "inr" })}`,

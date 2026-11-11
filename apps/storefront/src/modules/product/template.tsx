@@ -4,7 +4,9 @@ import { parseTag } from "@lib/slug"
 import { getSiteOrigin } from "@lib/util/site"
 import Breadcrumbs from "@modules/listing/breadcrumbs"
 import ProductCard from "@modules/listing/product-card"
-import { MessageSquareHeart } from "lucide-react"
+import { getPublicPaymentSettings } from "@lib/data/payment-options"
+import { convertToLocale } from "@lib/util/money"
+import { Banknote, MessageSquareHeart } from "lucide-react"
 import BuyBox from "./buy-box"
 import ProductDetails from "./details"
 import Gallery from "./gallery"
@@ -35,7 +37,7 @@ async function related(product: FullProduct, categories: Category[]) {
 }
 
 export default async function ProductTemplate({ product }: { product: FullProduct }) {
-  const [categories, origin] = await Promise.all([listCategories(), getSiteOrigin()])
+  const [categories, origin, payments] = await Promise.all([listCategories(), getSiteOrigin(), getPublicPaymentSettings()])
   const relatedProducts = await related(product, categories)
 
   const primary = categories.find((c) => c.id === product.categories?.[0]?.id)
@@ -73,6 +75,14 @@ export default async function ProductTemplate({ product }: { product: FullProduc
             {product.subtitle && <p className="mt-1 text-ink-soft">{product.subtitle}</p>}
           </div>
           <BuyBox product={product} showSizeGuide={isBracelet} />
+          {payments?.cod_enabled && (
+            <p className="-mt-2 flex items-center gap-2 text-sm text-ink-soft">
+              <Banknote className="h-4 w-4 text-accent" aria-hidden />
+              Cash on Delivery available on orders up to{" "}
+              {convertToLocale({ amount: payments.cod_max_order_value, currency_code: "inr" })}
+              {payments.prepaid_discount_percent > 0 && <> · {payments.prepaid_discount_percent}% off when you pay online</>}
+            </p>
+          )}
           <PincodeChecker />
           <ProductDetails specs={product.product_specs ?? null} description={product.description} />
         </div>

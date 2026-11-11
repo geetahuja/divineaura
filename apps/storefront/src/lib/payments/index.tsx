@@ -1,5 +1,6 @@
 import type { HttpTypes } from "@medusajs/types"
 import type { ComponentType, ReactNode } from "react"
+import { cod } from "./cod"
 import { testPayment } from "./test-payment"
 
 /**
@@ -10,10 +11,13 @@ import { testPayment } from "./test-payment"
  * Cashfree = backend provider module + `./razorpay.tsx` adapter added to
  * ADAPTERS. No checkout changes.
  *
- * Contract for PayButton: when the customer has paid at the gateway, send them
- * to `/api/payment-return?cart_id=…` (the server completes the cart after the
- * gateway confirms; the order turns Paid only via the verified webhook).
- * On failure/cancel, send them to `/checkout?step=payment&payment_error=failed|cancelled`.
+ * kind decides server-side pricing: "online" gets the prepaid discount,
+ * "cod" gets the COD fee and is only offered when the cart is eligible.
+ *
+ * Contract for PayButton (online): when the customer has paid at the gateway,
+ * send them to `/api/payment-return?cart_id=…` (the server completes the cart
+ * after the gateway confirms; the order turns Paid only via the verified
+ * webhook). On failure/cancel: `/checkout?step=payment&payment_error=failed|cancelled`.
  */
 export type PayButtonProps = {
   cart: HttpTypes.StoreCart
@@ -23,13 +27,14 @@ export type PayButtonProps = {
 
 export type PaymentAdapter = {
   match: (providerId: string) => boolean
+  kind: "online" | "cod"
   title: string
   description: string
   icon: ReactNode
   PayButton: ComponentType<PayButtonProps>
 }
 
-const ADAPTERS: PaymentAdapter[] = [testPayment]
+const ADAPTERS: PaymentAdapter[] = [testPayment, cod]
 
 export const getPaymentAdapter = (providerId?: string | null) =>
   providerId ? ADAPTERS.find((a) => a.match(providerId)) : undefined

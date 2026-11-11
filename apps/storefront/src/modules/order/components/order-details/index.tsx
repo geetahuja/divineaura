@@ -1,12 +1,13 @@
+import type { OrderCodStatus } from "@lib/data/cod-status"
 import { HttpTypes } from "@medusajs/types"
 import { paymentStatusLabel } from "../payment-details"
 
 // Order number, date, payment status and where updates go (ARCHITECTURE.md §9.6).
 // Messages are sent by the messaging layer (milestone 9); nothing here claims they already were.
-export default function OrderDetails({ order, showStatus }: { order: HttpTypes.StoreOrder; showStatus?: boolean }) {
+export default function OrderDetails({ order, showStatus, cod }: { order: HttpTypes.StoreOrder; showStatus?: boolean; cod?: OrderCodStatus }) {
   const phone = order.shipping_address?.phone
   const contacts = [phone, order.email].filter(Boolean).join(" and ")
-  const payment = paymentStatusLabel(order.payment_status)
+  const payment = paymentStatusLabel(order.payment_status, cod)
 
   return (
     <div className="flex flex-col gap-2 text-sm text-ink-soft">

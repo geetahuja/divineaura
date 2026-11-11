@@ -1,3 +1,4 @@
+import type { OrderCodStatus } from "@lib/data/cod-status"
 import { getPaymentAdapter } from "@lib/payments"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -12,12 +13,20 @@ const STATUS: Record<string, { label: string; tone: string }> = {
   canceled: { label: "Cancelled", tone: "bg-champagne text-ink" },
 }
 
-export const paymentStatusLabel = (status?: string) =>
-  STATUS[status ?? ""] ?? { label: "Awaiting payment", tone: "bg-champagne text-ink" }
+const COD: Record<NonNullable<OrderCodStatus>["status"], { label: string; tone: string }> = {
+  pending: { label: "Cash on Delivery · Pending confirmation", tone: "bg-accent-soft text-ink" },
+  confirmed: { label: "Cash on Delivery · Confirmed", tone: "bg-green-700 text-white" },
+  cancelled: { label: "Cash on Delivery · Cancelled", tone: "bg-champagne text-ink" },
+}
 
-export default function PaymentDetails({ order }: { order: HttpTypes.StoreOrder }) {
+export const paymentStatusLabel = (status?: string, cod?: OrderCodStatus) => {
+  if (cod) return status === "captured" ? STATUS.captured : COD[cod.status]
+  return STATUS[status ?? ""] ?? { label: "Awaiting payment", tone: "bg-champagne text-ink" }
+}
+
+export default function PaymentDetails({ order, cod }: { order: HttpTypes.StoreOrder; cod?: OrderCodStatus }) {
   const payment = order.payment_collections?.[0]?.payments?.[0]
-  const status = paymentStatusLabel(order.payment_status)
+  const status = paymentStatusLabel(order.payment_status, cod)
   const adapter = getPaymentAdapter(payment?.provider_id)
 
   return (
@@ -28,12 +37,19 @@ export default function PaymentDetails({ order }: { order: HttpTypes.StoreOrder 
         {payment && (
           <span className="flex items-center gap-2 text-ink-soft">
             {adapter?.icon}
-            {adapter?.title ?? "Online payment"} ·{" "}
-            {convertToLocale({ amount: Number(payment.amount), currency_code: order.currency_code })}
+            {cod ? "Pay on delivery" : adapter?.title ?? "Online payment"} ·{" "}
+            {convertToLocale({ amount: Number(cod ? order.total : payment.amount), currency_code: order.currency_code })}
           </span>
         )}
       </div>
-      {order.payment_status === "authorized" && (
+      {cod?.status === "pending" && (
+        <p className="mt-2 text-sm text-ink-soft">
+          Please confirm your order with the link we sent to your mobile number before{" "}
+          {new Date(cod.expires_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}. Unconfirmed
+          Cash on Delivery orders are cancelled automatically.
+        </p>
+      )}
+      {!cod && order.payment_status === "authorized" && (
         <p className="mt-2 text-xs text-ink-muted">
           Your payment was received. Confirmation from the payment provider usually takes a few seconds.
         </p>

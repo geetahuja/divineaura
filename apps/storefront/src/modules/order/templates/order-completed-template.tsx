@@ -9,6 +9,7 @@ import OnboardingCta from "@modules/order/components/onboarding-cta"
 import OrderDetails from "@modules/order/components/order-details"
 import ShippingDetails from "@modules/order/components/shipping-details"
 import PaymentDetails from "@modules/order/components/payment-details"
+import { getOrderCodStatus } from "@lib/data/cod-status"
 import { HttpTypes } from "@medusajs/types"
 
 type OrderCompletedTemplateProps = {
@@ -21,6 +22,7 @@ export default async function OrderCompletedTemplate({
   const cookies = await nextCookies()
 
   const isOnboarding = cookies.get("_medusa_onboarding")?.value === "true"
+  const cod = await getOrderCodStatus(order.id)
 
   return (
     <div className="py-6 min-h-[calc(100vh-64px)]">
@@ -33,7 +35,7 @@ export default async function OrderCompletedTemplate({
           <h1 className="font-serif text-3xl font-semibold text-primary small:text-4xl">
             Thank you! Your order is placed.
           </h1>
-          <OrderDetails order={order} />
+          <OrderDetails order={order} cod={cod} />
           <LocalizedClientLink href="/shop" className="text-sm font-semibold text-primary hover:underline">
             Continue shopping →
           </LocalizedClientLink>
@@ -43,7 +45,7 @@ export default async function OrderCompletedTemplate({
           <Items order={order} />
           <CartTotals totals={order} />
           <ShippingDetails order={order} />
-          <PaymentDetails order={order} />
+          <PaymentDetails order={order} cod={cod} />
           <Help />
         </div>
       </div>

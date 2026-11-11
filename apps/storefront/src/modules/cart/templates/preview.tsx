@@ -1,5 +1,6 @@
 "use client"
 
+import { convertToLocale } from "@lib/util/money"
 import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
 import { Table, clx } from "@modules/common/components/ui"
@@ -30,6 +31,17 @@ const ItemsPreviewTemplate = ({ cart }: ItemsTemplateProps) => {
                   return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
                 })
                 .map((item) => {
+                  // The COD fee is a priced line on the server, not a product.
+                  if (item.metadata?.type === "cod_fee") {
+                    return (
+                      <Table.Row key={item.id}>
+                        <Table.Cell className="!pl-0 py-3 text-sm text-ink-soft" colSpan={2}>{item.title}</Table.Cell>
+                        <Table.Cell className="!pr-0 py-3 text-right text-sm text-ink">
+                          {convertToLocale({ amount: Number(item.total ?? item.unit_price), currency_code: cart.currency_code })}
+                        </Table.Cell>
+                      </Table.Row>
+                    )
+                  }
                   return (
                     <Item
                       key={item.id}

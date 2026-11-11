@@ -51,6 +51,15 @@ npx medusa exec ./src/scripts/sync-region-payment-providers.ts   # offer it in t
 At checkout choose **Test payment (development only)** → *Pay successfully*,
 *Fail payment* or *Cancel*. It refuses to run in production.
 
+**Cash on Delivery** (always available; switch on/off in Admin → **COD & payments**,
+which also holds the COD fee, max COD order value, PIN-code blocklist, prepaid
+discount % and the auto-cancel window). COD orders start as *Pending
+confirmation*: the customer gets a signed link `/confirm/<token>` (through the
+messaging layer — printed in the backend console in development), or staff confirm
+by phone from Admin → **COD queue**. Unconfirmed orders are cancelled
+automatically and their stock released. Needs `COD_CONFIRM_SECRET` and
+`STOREFRONT_URL` in `apps\backend\.env`.
+
 **Adding Razorpay (or Cashfree) later:** add its provider to `paymentProviders`
 in `apps/backend/medusa-config.ts` with keys from `.env`, add
 `razorpay.tsx` to `ADAPTERS` in `apps/storefront/src/lib/payments/index.tsx`,

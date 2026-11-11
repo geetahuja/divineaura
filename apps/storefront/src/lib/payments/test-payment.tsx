@@ -6,6 +6,7 @@ import TestPayButton from "./test-payment-button"
 // TEST_PAYMENT_ENABLED=true (never in production), so this never shows live.
 export const testPayment: PaymentAdapter = {
   match: (id) => id.startsWith("pp_test-payment_"),
+  kind: "online",
   title: "Test payment (development only)",
   description: "Simulates a successful or failed online payment. Not shown on the live site.",
   icon: <FlaskConical className="h-5 w-5 text-accent" aria-hidden />,
