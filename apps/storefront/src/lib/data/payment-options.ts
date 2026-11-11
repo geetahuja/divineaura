@@ -5,7 +5,7 @@ import { revalidateTag } from "next/cache"
 import { getAuthHeaders, getCacheTag } from "./cookies"
 
 export type PaymentOptions = {
-  cod: { available: boolean; reason: "disabled" | "over_limit" | "pincode_blocked" | "no_address" | null; fee: number; max_order_value: number }
+  cod: { available: boolean; reason: "disabled" | "over_limit" | "pincode_blocked" | "no_address" | "courier_no_cod" | null; fee: number; max_order_value: number }
   prepaid: { percent: number; saving: number }
   selected: "cod" | "online" | null
 }

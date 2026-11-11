@@ -59,6 +59,7 @@ export async function getMainMenu(): Promise<NavItem[]> {
 }
 
 export const FOOTER_HELP: NavLink[] = [
+  { label: "Track your order", href: "/track-order" },
   { label: "Shipping", href: "/shipping" },
   { label: "Returns", href: "/returns" },
   { label: "Contact us", href: "/contact" },

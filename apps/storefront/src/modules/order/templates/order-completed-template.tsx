@@ -10,6 +10,8 @@ import OrderDetails from "@modules/order/components/order-details"
 import ShippingDetails from "@modules/order/components/shipping-details"
 import PaymentDetails from "@modules/order/components/payment-details"
 import { getOrderCodStatus } from "@lib/data/cod-status"
+import { getOrderTimeline } from "@lib/data/timeline"
+import OrderTimeline from "@modules/order/components/timeline"
 import { HttpTypes } from "@medusajs/types"
 
 type OrderCompletedTemplateProps = {
@@ -22,7 +24,7 @@ export default async function OrderCompletedTemplate({
   const cookies = await nextCookies()
 
   const isOnboarding = cookies.get("_medusa_onboarding")?.value === "true"
-  const cod = await getOrderCodStatus(order.id)
+  const [cod, timeline] = await Promise.all([getOrderCodStatus(order.id), getOrderTimeline(order.id)])
 
   return (
     <div className="py-6 min-h-[calc(100vh-64px)]">
@@ -46,6 +48,7 @@ export default async function OrderCompletedTemplate({
           <CartTotals totals={order} />
           <ShippingDetails order={order} />
           <PaymentDetails order={order} cod={cod} />
+          <OrderTimeline events={timeline.events} shipment={timeline.shipment} />
           <Help />
         </div>
       </div>

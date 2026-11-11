@@ -1,23 +1,31 @@
 "use client"
 
 import { checkDelivery, DeliveryCheck } from "@lib/data/delivery"
+import { deliveryBy } from "@lib/util/delivery-date"
 import { MapPin } from "lucide-react"
 import { useState, useTransition } from "react"
 
-const MESSAGES: Record<DeliveryCheck["status"], (r: DeliveryCheck) => string> = {
-  invalid: () => "Please enter a valid 6-digit PIN code.",
-  unavailable: () => "Delivery checks are coming soon. We deliver across India.",
-  not_serviceable: () => "Sorry, we don't deliver to this PIN code yet.",
-  serviceable: (r) => {
-    const s = r as Extract<DeliveryCheck, { status: "serviceable" }>
-    return `Delivery in ${s.etaDays.min}–${s.etaDays.max} days.${s.cod ? " Cash on delivery available." : ""}`
-  },
+function message(r: DeliveryCheck) {
+  switch (r.status) {
+    case "invalid":
+      return { ok: false, text: "Please enter a valid 6-digit PIN code." }
+    case "unavailable":
+      return { ok: false, text: "Delivery checks are coming soon. We deliver across India." }
+    case "not_serviceable":
+      return { ok: false, text: "Sorry, we don't deliver to this PIN code yet." }
+    case "serviceable":
+      return {
+        ok: true,
+        text: `Delivery by ${deliveryBy(r.etaDays.max)}${r.city ? ` to ${r.city}` : r.state ? ` in ${r.state}` : ""}. ${r.cod ? "Cash on Delivery available." : "Cash on Delivery isn't available here — pay online."}`,
+      }
+  }
 }
 
 export default function PincodeChecker() {
   const [pin, setPin] = useState("")
   const [result, setResult] = useState<DeliveryCheck | null>(null)
   const [pending, start] = useTransition()
+  const m = result && message(result)
 
   return (
     <form
@@ -46,9 +54,9 @@ export default function PincodeChecker() {
           {pending ? "Checking…" : "Check"}
         </button>
       </div>
-      {result && (
-        <p role="status" className={`mt-2 text-sm ${result.status === "serviceable" ? "text-green-700" : "text-ink-soft"}`}>
-          {MESSAGES[result.status](result)}
+      {m && (
+        <p role="status" className={`mt-2 text-sm ${m.ok ? "text-green-700" : "text-ink-soft"}`}>
+          {m.text}
         </p>
       )}
     </form>

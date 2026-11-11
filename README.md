@@ -60,6 +60,23 @@ by phone from Admin → **COD queue**. Unconfirmed orders are cancelled
 automatically and their stock released. Needs `COD_CONFIRM_SECRET` and
 `STOREFRONT_URL` in `apps\backend\.env`.
 
+## Shipping
+
+Couriers are pluggable (`apps/backend/src/lib/couriers/`). Without Shiprocket
+credentials the development **test courier** is used (needs
+`TEST_COURIER_WEBHOOK_SECRET`). Its rules: PIN codes starting with 9 aren't
+serviceable; PIN codes ending in 99 have no COD; same first digit as the
+warehouse = 2–4 days, otherwise 4–7. On an order in admin: **Mark packed**,
+**Create shipment** (AWB + label), then **Simulate next tracking event** to move
+it to Out for delivery → Delivered.
+
+Set the warehouse address and **PIN code** in Admin → Settings → Locations (the
+pickup address). Shiprocket switches on when `SHIPROCKET_EMAIL` and
+`SHIPROCKET_PASSWORD` are set; its webhook settings (`SHIPROCKET_WEBHOOK_HEADER`,
+`SHIPROCKET_WEBHOOK_TOKEN`) must be **verified with a real test shipment** before launch.
+Free shipping is decided on the product subtotal after coupons (the COD fee and
+the online-payment discount don't count).
+
 **Adding Razorpay (or Cashfree) later:** add its provider to `paymentProviders`
 in `apps/backend/medusa-config.ts` with keys from `.env`, add
 `razorpay.tsx` to `ADAPTERS` in `apps/storefront/src/lib/payments/index.tsx`,

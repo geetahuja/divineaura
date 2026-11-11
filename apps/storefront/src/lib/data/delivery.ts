@@ -1,18 +1,21 @@
 "use server"
 
-// PIN-code delivery check (ARCHITECTURE.md §5.9). The UI calls only this
-// function. Milestone 8 replaces the body with a call to the backend route that
-// asks Shiprocket; the result shape stays the same.
+import { sdk } from "@lib/config"
+
+// PIN-code delivery check (ARCHITECTURE.md §5.9), answered by the backend's
+// courier layer (test courier now, Shiprocket when connected). COD = courier
+// offers it AND the PIN isn't on the COD blocklist AND COD is switched on.
 export type DeliveryCheck =
   | { status: "invalid" }
-  | { status: "unavailable" } // checks not live yet (until milestone 8)
-  | { status: "serviceable"; etaDays: { min: number; max: number }; cod: boolean }
-  | { status: "not_serviceable" }
+  | { status: "unavailable" } // no courier configured yet
+  | { status: "serviceable"; etaDays: { min: number; max: number }; cod: boolean; city: string | null; state: string | null }
+  | { status: "not_serviceable"; city?: string | null; state?: string | null }
 
 export async function checkDelivery(pin: string): Promise<DeliveryCheck> {
-  // Indian PIN codes: 6 digits, first digit 1–9.
   if (!/^[1-9]\d{5}$/.test(pin.trim())) {
     return { status: "invalid" }
   }
-  return { status: "unavailable" }
+  return sdk.client
+    .fetch<DeliveryCheck>("/store/delivery-check", { query: { pincode: pin.trim() }, cache: "no-store" })
+    .catch(() => ({ status: "unavailable" }) as DeliveryCheck)
 }

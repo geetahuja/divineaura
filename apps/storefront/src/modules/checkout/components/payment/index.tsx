@@ -41,6 +41,8 @@ export default function Payment({
         ? `Cash on Delivery is available for orders up to ${inr(options.cod.max_order_value)}.`
         : options.cod.reason === "pincode_blocked"
           ? "Cash on Delivery isn't available for this PIN code yet."
+          : options.cod.reason === "courier_no_cod"
+          ? "Our courier doesn't collect cash at this PIN code, so please pay online."
           : null
       : null
 

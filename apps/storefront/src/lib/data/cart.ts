@@ -2,6 +2,7 @@
 
 import { sdk } from "@lib/config"
 import { unavailableItems } from "@lib/util/cart-availability"
+import { checkDelivery } from "./delivery"
 import { isValidEmail, validateIndianAddress } from "@lib/util/india-address"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
@@ -367,6 +368,10 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     })
     const shipping = validateIndianAddress(read("shipping_address"))
     if (!shipping.ok) return shipping.error
+    // Don't take orders we can't deliver (unknown = allowed; checked again at shipment).
+    if ((await checkDelivery(shipping.address.postal_code)).status === "not_serviceable") {
+      return "Sorry, we don't deliver to this PIN code yet."
+    }
 
     // Billing: same as delivery, or its own address (needed for GST invoices).
     let billingAddress = shipping.address

@@ -1,6 +1,9 @@
 "use client"
 
+import { checkDelivery, DeliveryCheck } from "@lib/data/delivery"
+import { deliveryBy } from "@lib/util/delivery-date"
 import { INDIAN_STATES } from "@lib/util/india-address"
+import { useState, useTransition } from "react"
 
 export const field =
   "h-12 w-full rounded-md border border-champagne bg-white px-3 text-base text-ink placeholder:text-ink-muted focus:border-primary focus:outline-none"
@@ -10,7 +13,8 @@ type Values = Record<string, string>
 
 // Name + Indian address. India is the only country (hidden field); the server
 // re-validates everything in setAddresses.
-// TODO(milestone 8): PIN lookup → auto-fill city/state + serviceability.
+// PIN code first: a full PIN looks up city/state (filled only if empty) and
+// shows whether we deliver there. The server re-checks on submit.
 export default function AddressFields({
   prefix,
   values,
@@ -20,7 +24,25 @@ export default function AddressFields({
   values: Values
   onChange: (name: string, value: string) => void
 }) {
+  const [check, setCheck] = useState<DeliveryCheck | null>(null)
+  const [, start] = useTransition()
   const n = (k: string) => `${prefix}.${k}`
+
+  const onPin = (raw: string) => {
+    const pin = raw.replace(/\D/g, "").slice(0, 6)
+    onChange(n("postal_code"), pin)
+    setCheck(null)
+    if (pin.length !== 6) return
+    start(async () => {
+      const r = await checkDelivery(pin)
+      setCheck(r)
+      if (r.status === "serviceable" || r.status === "not_serviceable") {
+        if (r.city && !values[n("city")]) onChange(n("city"), r.city)
+        const state = INDIAN_STATES.find((s) => s.toLowerCase() === r.state?.toLowerCase())
+        if (state && !values[n("province")]) onChange(n("province"), state)
+      }
+    })
+  }
   const id = (k: string) => `${prefix}-${k}`
   const bind = (k: string) => ({
     id: id(k),
@@ -54,7 +76,7 @@ export default function AddressFields({
         <label htmlFor={id("postal_code")} className={labelCls}>PIN code</label>
         <input
           {...bind("postal_code")}
-          onChange={(e) => onChange(n("postal_code"), e.target.value.replace(/\D/g, "").slice(0, 6))}
+          onChange={(e) => onPin(e.target.value)}
           inputMode="numeric"
           autoComplete="postal-code"
           pattern="[1-9][0-9]{5}"
@@ -63,6 +85,14 @@ export default function AddressFields({
           required
           className={field}
         />
+        {prefix === "shipping_address" && check?.status === "serviceable" && (
+          <p className="mt-1 text-xs text-green-700">
+            Delivery by {deliveryBy(check.etaDays.max)}{check.cod ? " · Cash on Delivery available" : ""}
+          </p>
+        )}
+        {prefix === "shipping_address" && check?.status === "not_serviceable" && (
+          <p role="alert" className="mt-1 text-xs text-red-700">Sorry, we don't deliver to this PIN code yet.</p>
+        )}
       </div>
       <div>
         <label htmlFor={id("city")} className={labelCls}>City / town</label>
