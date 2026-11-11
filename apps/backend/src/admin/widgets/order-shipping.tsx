@@ -3,6 +3,7 @@ import type { AdminOrder, DetailWidgetProps } from "@medusajs/framework/types"
 import { Badge, Button, Container, Heading, Select, Text, toast } from "@medusajs/ui"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import { sdk } from "../lib/sdk"
 
 type Overview = {
@@ -61,7 +62,10 @@ const OrderShippingWidget = ({ data: order }: DetailWidgetProps<AdminOrder>) => 
           <Heading level="h2">Shipping &amp; timeline</Heading>
           {data.courier && <Badge size="2xsmall" color={data.courier === "test" ? "orange" : "blue"}>{data.courier === "test" ? "Test courier" : "Shiprocket"}</Badge>}
         </div>
-        <Text size="small" className="text-ui-fg-subtle">{(data.weight_g / 1000).toFixed(2)} kg</Text>
+        <div className="flex items-center gap-x-3">
+          <Link to={`/message-log?order=${order.display_id}`} className="txt-compact-small text-ui-fg-interactive">Messages</Link>
+          <Text size="small" className="text-ui-fg-subtle">{(data.weight_g / 1000).toFixed(2)} kg</Text>
+        </div>
       </div>
 
       <div className="px-6 py-4">

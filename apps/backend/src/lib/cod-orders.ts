@@ -3,8 +3,7 @@ import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/frame
 import { cancelOrderWorkflow } from "@medusajs/medusa/core-flows"
 import { COD_MODULE } from "../modules/cod"
 import type CodModuleService from "../modules/cod/service"
-import { MESSAGING_MODULE } from "../modules/messaging"
-import type MessagingModuleService from "../modules/messaging/service"
+import { notifyOrder } from "./notify"
 import { COD_PROVIDER_ID, createConfirmToken } from "./cod"
 import { recordEvent } from "./shipments"
 
@@ -72,16 +71,10 @@ export async function startCodConfirmation(container: MedusaContainer, orderId: 
     await setOrderCodStatus(container, orderId, "pending_confirmation")
 
     const base = (process.env.STOREFRONT_URL || "http://localhost:8000").replace(/\/$/, "")
-    const hours = settings.cod_confirm_minutes / 60
-    await container.resolve<MessagingModuleService>(MESSAGING_MODULE).send({
-      to: { phone: order.shipping_address?.phone, email: order.email },
-      template: "cod_confirm",
-      data: {
-        order_number: String(order.display_id),
-        total: inr(order.total),
-        link: `${base}/confirm/${createConfirmToken(secret(), orderId, expiresAt)}`,
-        valid_for: hours >= 1 ? `${Math.round(hours)} hours` : `${settings.cod_confirm_minutes} minutes`,
-      },
+    await notifyOrder(container, "cod_confirm_request", orderId, {
+      link: `${base}/confirm/${createConfirmToken(secret(), orderId, expiresAt)}`,
+      // DLT text says "within {hours} hours"; test windows under an hour still read "1".
+      hours: String(Math.max(1, Math.round(settings.cod_confirm_minutes / 60))),
     })
     return confirmation
   })
@@ -100,11 +93,7 @@ export async function confirmCodOrder(container: MedusaContainer, orderId: strin
     await cod(container).updateCodConfirmations({ id: c.id, status: "confirmed", confirmed_at: new Date(), confirmed_by: by })
     await setOrderCodStatus(container, orderId, "confirmed")
     await recordEvent(container, orderId, "confirmed", "cod")
-    await container.resolve<MessagingModuleService>(MESSAGING_MODULE).send({
-      to: { phone: order.shipping_address?.phone, email: order.email },
-      template: "cod_confirmed",
-      data: { order_number: String(order.display_id) },
-    })
+    await notifyOrder(container, "cod_confirmed", orderId)
     return { status: "confirmed", changed: true, order_display_id: order.display_id }
   })
 }
@@ -117,14 +106,12 @@ export async function cancelCodOrder(container: MedusaContainer, orderId: string
     if (!c || !order) throw new MedusaError(MedusaError.Types.NOT_FOUND, "COD order not found")
     if (c.status !== "pending") return { status: c.status as "confirmed" | "cancelled", changed: false, order_display_id: order.display_id }
 
+    // Timeline first, with the reason, so the cancellation message (sent once by
+    // recordEvent) says why; the order.canceled subscriber then finds it recorded.
+    await recordEvent(container, orderId, "cancelled", "cod", { note: reason })
     await cancelOrderWorkflow(container).run({ input: { order_id: orderId } })
     await cod(container).updateCodConfirmations({ id: c.id, status: "cancelled", cancelled_at: new Date(), cancel_reason: reason })
     await setOrderCodStatus(container, orderId, "cancelled")
-    await container.resolve<MessagingModuleService>(MESSAGING_MODULE).send({
-      to: { phone: order.shipping_address?.phone, email: order.email },
-      template: "cod_cancelled",
-      data: { order_number: String(order.display_id), reason },
-    })
     return { status: "cancelled", changed: true, order_display_id: order.display_id }
   })
 }

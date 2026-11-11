@@ -129,3 +129,20 @@ export type SimulateTrackingBody = z.infer<typeof SimulateTrackingSchema>
 export type CreateSacredPlaceBody = z.infer<typeof CreateSacredPlaceSchema>
 export type UpdateSacredPlaceBody = z.infer<typeof UpdateSacredPlaceSchema>
 export type ReorderSacredPlacesBody = z.infer<typeof ReorderSacredPlacesSchema>
+
+// ── Login (OTP) + newsletter + consent (Milestone 9) ─────────────────────
+// Indian mobile → "+91XXXXXXXXXX" (accepts 10 digits, 0-prefixed, 91-prefixed, spaces).
+const indianMobile = z
+  .string()
+  .transform((v) => v.replace(/\D/g, "").replace(/^(91|0)(?=\d{10}$)/, ""))
+  .refine((v) => /^[6-9]\d{9}$/.test(v), "Enter a valid 10-digit Indian mobile number")
+  .transform((v) => `+91${v}`)
+const OtpTarget = z.union([z.object({ phone: indianMobile }), z.object({ email: z.string().trim().toLowerCase().email().max(254) })])
+export const OtpRequestSchema = z.intersection(OtpTarget, z.object({ resend: z.boolean().optional() }))
+export const OtpVerifySchema = z.intersection(OtpTarget, z.object({ code: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit code") }))
+export const NewsletterSchema = z.object({ email: z.string().trim().toLowerCase().email().max(254), consent: z.literal(true) })
+export const MarketingConsentSchema = z.object({ sms: z.boolean().optional(), whatsapp: z.boolean().optional(), email: z.boolean().optional() })
+export type OtpRequestBody = z.infer<typeof OtpRequestSchema>
+export type OtpVerifyBody = z.infer<typeof OtpVerifySchema>
+export type NewsletterBody = z.infer<typeof NewsletterSchema>
+export type MarketingConsentBody = z.infer<typeof MarketingConsentSchema>

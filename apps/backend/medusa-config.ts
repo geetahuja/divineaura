@@ -76,8 +76,20 @@ module.exports = defineConfig({
     { resolve: './src/modules/shipping' },
     // GST: Medusa's rates for goods; the COD fee follows its own setting.
     { resolve: '@medusajs/medusa/tax', options: { providers: [{ resolve: './src/modules/gst-tax', id: 'gst' }] } },
-    // Customer messages (ARCHITECTURE.md §19). Console in development; SMS /
-    // WhatsApp providers arrive in milestone 9 behind the same interface.
-    { resolve: './src/modules/messaging', options: { channel: process.env.MESSAGING_CHANNEL || 'console' } },
+    // Customer messages (ARCHITECTURE.md §19): channel + providers come from .env
+    // (MESSAGING_CHANNEL, OTP_CHANNEL, MSG91_*, WHATSAPP_*, RESEND_API_KEY) — see providers.ts.
+    { resolve: './src/modules/messaging' },
+    // Login: admins keep email + password; customers sign in with a mobile / email OTP (§11).
+    { resolve: './src/modules/otp' },
+    {
+      resolve: '@medusajs/medusa/auth',
+      dependencies: ['cache', 'logger'],
+      options: {
+        providers: [
+          { resolve: '@medusajs/medusa/auth-emailpass', id: 'emailpass' },
+          { resolve: './src/modules/phone-otp-auth', id: 'phone-otp', options: { secret: process.env.OTP_SECRET } },
+        ],
+      },
+    },
   ],
 })

@@ -83,3 +83,14 @@ in `apps/backend/medusa-config.ts` with keys from `.env`, add
 register the webhook URL `https://api.divineaura.com/hooks/payment/<provider>`
 in the gateway dashboard, then run the sync script above. Checkout itself does
 not change.
+
+## Messaging, OTP login and emails (ARCHITECTURE.md §10, §11, §19)
+
+- Features call only `sendMessage(event, recipient, data)` / `sendOtp(target, code)` (messaging module). All texts live in `apps/backend/src/modules/messaging/templates.ts`.
+- `.env` decides delivery — no code change:
+  - `MESSAGING_CHANNEL=console|sms|whatsapp|both`; email is added whenever the customer has an address (console until `RESEND_API_KEY` is set).
+  - `OTP_CHANNEL=sms|whatsapp|sms_then_whatsapp` (resends after 30 s go by WhatsApp).
+  - Fill `MSG91_*`, `SMS_TEMPLATE_IDS`, `WHATSAPP_*`, `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`. The live provider calls are marked **TO VERIFY WITH A REAL ACCOUNT**.
+- Every send is in **Admin → Message log** (filter by order or mobile; recipients masked; OTP codes never stored). Each order page has a "Messages" link. One message per event per order per channel.
+- Customers sign in at `/account` with mobile OTP (or email OTP). In development the code is printed in the backend terminal: `[sms → +91…] 123456 is your DivineAura login code…`. In production it is never printed.
+- Needs `OTP_SECRET` in `apps/backend/.env` (long random string).

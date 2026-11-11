@@ -10,11 +10,11 @@ import { randomUUID } from "node:crypto"
 import { COD_FEE_ITEM_TYPE, COD_PROVIDER_ID } from "./cod"
 import { getCourier, shippingDefaults, TrackingEvent } from "./couriers"
 import { signTestCourier, TEST_COURIER_SIGNATURE_HEADER } from "./couriers/test"
-import { canAdvance, fillGaps, isValidPin, shipmentWeightGrams, TIMELINE, TIMELINE_LABEL, TimelineStatus } from "./shipping"
+import { canAdvance, fillGaps, isValidPin, shipmentWeightGrams, TIMELINE, TimelineStatus } from "./shipping"
 import { COD_MODULE } from "../modules/cod"
 import type CodModuleService from "../modules/cod/service"
-import { MESSAGING_MODULE } from "../modules/messaging"
-import type MessagingModuleService from "../modules/messaging/service"
+import type { MessageEvent } from "../modules/messaging/templates"
+import { notifyOrder } from "./notify"
 import { SHIPPING_MODULE } from "../modules/shipping"
 import type ShippingModuleService from "../modules/shipping/service"
 
@@ -28,8 +28,16 @@ const svc = (c: MedusaContainer) => c.resolve<ShippingModuleService>(SHIPPING_MO
 const query = (c: MedusaContainer) => c.resolve(ContainerRegistrationKeys.QUERY)
 const lock = <T>(c: MedusaContainer, key: string, fn: () => Promise<T>) => c.resolve(Modules.LOCKING).execute(key, fn, { timeout: 30 })
 
-// Statuses customers get a message for (Placed/Confirmed/Cancelled are sent by their own flows).
-const NOTIFY: TimelineStatus[] = ["shipped", "out_for_delivery", "delivered", "rto"]
+// Timeline step → customer message (ARCHITECTURE.md §10). "confirmed" only for paid
+// online orders (COD sends cod_confirmed from confirmCodOrder); "placed" for COD sends
+// the confirm-link request from startCodConfirmation.
+const MESSAGE_FOR: Partial<Record<TimelineStatus, MessageEvent>> = {
+  shipped: "order_shipped",
+  out_for_delivery: "out_for_delivery",
+  delivered: "order_delivered",
+  rto: "order_rto",
+  cancelled: "order_cancelled",
+}
 
 type OrderRow = {
   id: string
@@ -86,14 +94,18 @@ export async function recordEvent(
     }
     if (!canAdvance(recorded, status)) return false
     await svc(c).createOrderEvents({ order_id: orderId, status, occurred_at: opts.at ?? new Date(), source, note: opts.note ?? null })
-    if (opts.notify !== false && NOTIFY.includes(status)) {
-      const o = await loadOrder(c, orderId)
-      const [shipment] = await svc(c).listShipments({ order_id: orderId })
-      await c.resolve<MessagingModuleService>(MESSAGING_MODULE).send({
-        to: { phone: o.shipping_address?.phone, email: o.email },
-        template: "order_status",
-        data: { order_number: String(o.display_id), status: TIMELINE_LABEL[status].toLowerCase(), tracking: shipment?.tracking_url ?? "" },
-      })
+    if (opts.notify !== false) {
+      const event = status === "confirmed" && source === "payment" ? "order_placed" : MESSAGE_FOR[status]
+      if (event) {
+        const [shipment] = await svc(c).listShipments({ order_id: orderId })
+        const extra: Record<string, string> =
+          event === "order_shipped"
+            ? { courier: shipment?.courier_name ?? "our courier", ...(shipment?.tracking_url ? { link: shipment.tracking_url } : {}) }
+            : event === "order_cancelled"
+              ? { reason: opts.note ?? "cancelled by DivineAura" }
+              : {}
+        await notifyOrder(c, event as never, orderId, extra)
+      }
     }
     return true
   })
