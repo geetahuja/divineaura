@@ -8,6 +8,7 @@ import {
   AdminProductSpecsSchema,
   CreateHeroBannerSchema,
   CreateSacredPlaceSchema,
+  SimulateTestPaymentSchema,
   UpdateHeroBannerSchema,
   ReorderSacredPlacesSchema,
   UpdateSacredPlaceSchema,
@@ -58,6 +59,11 @@ export default defineMiddlewares({
       method: ["POST"],
       matcher: "/admin/products/:id/specs",
       middlewares: [validateAndTransformBody(AdminProductSpecsSchema)],
+    },
+    {
+      method: ["POST"],
+      matcher: "/store/test-payment/simulate",
+      middlewares: [validateAndTransformBody(SimulateTestPaymentSchema)],
     },
     {
       method: ["POST"],

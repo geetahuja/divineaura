@@ -90,6 +90,12 @@ export const UpdateHeroBannerSchema = HeroBannerFields.partial().refine(endsAfte
 export type CreateHeroBannerBody = z.infer<typeof CreateHeroBannerSchema>
 export type UpdateHeroBannerBody = z.infer<typeof UpdateHeroBannerSchema>
 
+export const SimulateTestPaymentSchema = z.object({
+  payment_session_id: z.string().startsWith("payses_"),
+  outcome: z.enum(["success", "failure"]),
+})
+export type SimulateTestPaymentBody = z.infer<typeof SimulateTestPaymentSchema>
+
 export type CreateSacredPlaceBody = z.infer<typeof CreateSacredPlaceSchema>
 export type UpdateSacredPlaceBody = z.infer<typeof UpdateSacredPlaceSchema>
 export type ReorderSacredPlacesBody = z.infer<typeof ReorderSacredPlacesSchema>
