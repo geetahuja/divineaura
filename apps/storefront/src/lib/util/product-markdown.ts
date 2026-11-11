@@ -68,10 +68,10 @@ ${variantRows.join("\n")}
 
 ## Policies
 
-- [Shipping information](${base}/shipping)
-- [Return policy](${base}/returns)
-- [Terms of service](${base}/terms)
-- [Privacy policy](${base}/privacy)
+- [Shipping information](${base}/policies/shipping)
+- [Return policy](${base}/policies/returns-refunds)
+- [Terms of service](${base}/policies/terms)
+- [Privacy policy](${base}/policies/privacy)
 - [Contact](${base}/contact)
 `
 }

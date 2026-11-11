@@ -1,6 +1,7 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import type { AdminProduct, DetailWidgetProps } from "@medusajs/framework/types"
 import {
+  Badge,
   Button,
   Container,
   Drawer,
@@ -60,7 +61,7 @@ const FIELDS: Field[] = [
   { key: "care_instructions", label: "Care instructions", kind: "textarea" },
   { key: "mantra", label: "Mantra", kind: "textarea" },
   { key: "certificate_url", label: "Certificate", kind: "file", hint: "Lab certificate (PDF or image) for gemstones." },
-  { key: "country_of_origin", label: "Country of origin", kind: "text", placeholder: "India" },
+  { key: "country_of_origin", label: "Country of origin", kind: "text", placeholder: "India", hint: "Required by law — shown on the product page." },
   { key: "hsn_code", label: "HSN code", kind: "text", placeholder: "4, 6 or 8 digits" },
   { key: "not_returnable", label: "Not returnable", kind: "select", options: YES_NO, hint: "Yes for items that can't be returned once opened (e.g. sacred threads, malas). Shown on the product page." },
 ]
@@ -152,7 +153,12 @@ const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
   return (
     <Container className="divide-y p-0">
       <div className="flex items-center justify-between px-6 py-4">
-        <Heading level="h2">DivineAura details</Heading>
+        <div className="flex items-center gap-x-2">
+          <Heading level="h2">DivineAura details</Heading>
+          {!isLoading && !data?.specs?.country_of_origin && (
+            <Badge size="2xsmall" color="red" title="Required by the Consumer Protection (E-Commerce) Rules 2020">Country of origin missing</Badge>
+          )}
+        </div>
         <Button size="small" variant="secondary" onClick={openEditor} disabled={isLoading}>
           Edit
         </Button>

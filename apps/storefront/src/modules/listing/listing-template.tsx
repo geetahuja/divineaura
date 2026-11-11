@@ -1,6 +1,6 @@
 import { CatalogueProduct, listCategories, listTags } from "@lib/data/catalogue"
 import { hasActiveFilters, parseFilters, runListing } from "@lib/listing"
-import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
+import { DEFAULT_OG_IMAGE, getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import type { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Breadcrumbs, { Crumb } from "./breadcrumbs"
@@ -13,10 +13,10 @@ export type SearchParams = Record<string, string | string[] | undefined>
 export async function listingMetadata(title: string, description: string, path: string): Promise<Metadata> {
   const url = `${await getSiteOrigin()}${path}`
   return {
-    title: `${title} | ${STORE_NAME}`,
+    title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: STORE_NAME, type: "website" },
+    openGraph: { title, description, url, siteName: STORE_NAME, type: "website", images: [DEFAULT_OG_IMAGE] },
   }
 }
 
@@ -54,6 +54,8 @@ export default async function ListingTemplate({
 
   return (
     <div className="content-container py-6 small:py-10">
+      {/* Filtered / sorted / paged URLs: keep out of search results (canonical points to the clean page). */}
+      {Object.values(searchParams).some((v) => v !== undefined && v !== "") && <meta name="robots" content="noindex, follow" />}
       <Breadcrumbs items={crumbs} origin={origin} />
       <h1 className="mt-3 font-serif text-3xl font-semibold text-primary small:text-4xl">{title}</h1>
       {intro && <p className="mt-2 max-w-2xl text-ink-soft">{intro}</p>}
@@ -67,11 +69,14 @@ export default async function ListingTemplate({
           activeCount={activeCount}
         >
           {result.products.length ? (
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-8 xsmall:grid-cols-3 medium:grid-cols-4">
-              {result.products.map((p, i) => (
-                <ProductCard key={p.id} product={p} priority={i < 4} />
-              ))}
-            </ul>
+            <>
+              <h2 className="sr-only">Products</h2>
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-8 xsmall:grid-cols-3 medium:grid-cols-4">
+                {result.products.map((p, i) => (
+                  <ProductCard key={p.id} product={p} priority={i < 4} />
+                ))}
+              </ul>
+            </>
           ) : (
             <div className="rounded-lg border border-dashed border-champagne bg-ivory-deep px-6 py-12 text-center">
               <p className="font-serif text-2xl font-semibold text-primary">No products found</p>

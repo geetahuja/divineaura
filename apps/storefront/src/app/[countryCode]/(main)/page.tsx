@@ -7,6 +7,7 @@ import { BrandStory, PhotoReviews } from "@modules/home/components/story"
 import { DeityTiles, IntentionTiles } from "@modules/home/components/tiles"
 import TrustStrip from "@modules/home/components/trust-strip"
 import { listRegions } from "@lib/data/regions"
+import { getSeller } from "@lib/data/content"
 import { toJsonLd } from "@lib/util/product-structured-data"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import { buildRegionsReturnPolicies } from "@lib/util/store-policies"
@@ -18,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const origin = await getSiteOrigin()
 
   return {
-    title: `${STORE_NAME} | Devotional lockets, bracelets & malas`,
+    title: { absolute: `${STORE_NAME} | Devotional lockets, bracelets & malas` },
     description:
       "Devotional lockets, spiritual and gemstone bracelets, malas and sacred threads. Prices inclusive of all taxes.",
     alternates: { canonical: origin },
@@ -26,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const [origin, regions] = await Promise.all([getSiteOrigin(), listRegions()])
+  const [origin, regions, seller] = await Promise.all([getSiteOrigin(), listRegions(), getSeller()])
   const homeUrl = origin
   const returnPolicies = buildRegionsReturnPolicies(regions)
   const structuredData = [
@@ -35,6 +36,11 @@ export default async function Home() {
       "@type": "Organization",
       name: STORE_NAME,
       url: origin,
+      logo: `${origin}/opengraph-image.jpg`,
+      ...(seller ? { legalName: seller.legal_name } : {}),
+      ...(seller?.email || seller?.phone
+        ? { contactPoint: [{ "@type": "ContactPoint", contactType: "customer service", areaServed: "IN", availableLanguage: ["en"], ...(seller.email ? { email: seller.email } : {}), ...(seller.phone ? { telephone: seller.phone } : {}) }] }
+        : {}),
       ...(returnPolicies.length
         ? { hasMerchantReturnPolicy: returnPolicies }
         : {}),

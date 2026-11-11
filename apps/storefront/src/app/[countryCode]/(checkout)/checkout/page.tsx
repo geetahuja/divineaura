@@ -1,4 +1,6 @@
 import { retrieveCart } from "@lib/data/cart"
+import { itemsFromLines } from "@lib/util/analytics-items"
+import TrackEvent from "@modules/consent/track-event"
 import { retrieveCustomer } from "@lib/data/customer"
 import { unavailableItems } from "@lib/util/cart-availability"
 import UnavailableItems from "@modules/cart/components/unavailable-items"
@@ -8,7 +10,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 export const metadata: Metadata = {
-  title: "Checkout | DivineAura",
+  title: "Checkout",
   robots: { index: false, follow: false },
 }
 
@@ -27,6 +29,7 @@ export default async function Checkout() {
       {/* Medusa refuses cart updates while unavailable items remain, so resolve that first. */}
       {unavailable.length ? <UnavailableItems items={unavailable} /> : <CheckoutForm cart={cart} customer={customer} />}
       <CheckoutSummary cart={cart} />
+      <TrackEvent event={{ name: "begin_checkout", value: Number(cart.total ?? 0), items: itemsFromLines(cart.items) }} />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import Link from "next/link"
 
 export const notFoundMetadata = {
-  title: "Page not found | DivineAura",
+  title: "Page not found",
   description: "The page you were looking for could not be found.",
 }
 

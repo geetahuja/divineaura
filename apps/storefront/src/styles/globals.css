@@ -142,3 +142,20 @@ html[data-mode="light"] {
     @apply font-serif text-primary;
   }
 }
+
+/* Keyboard focus (WCAG 2.4.7): clear maroon ring on light backgrounds, ivory on maroon. */
+@layer base {
+  :focus-visible {
+    outline: 3px solid #762019;
+    outline-offset: 2px;
+  }
+  .bg-primary :focus-visible,
+  .bg-primary-hover :focus-visible {
+    outline-color: #fff5e8;
+  }
+}
+
+/* Consent banner: hidden before paint once a choice exists (see app/layout.tsx). */
+.consent-set #consent-banner {
+  display: none;
+}

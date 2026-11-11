@@ -1,3 +1,5 @@
+import { itemsFromLines } from "@lib/util/analytics-items"
+import TrackEvent from "@modules/consent/track-event"
 import { Heading } from "@modules/common/components/ui"
 import { cookies as nextCookies } from "next/headers"
 
@@ -46,6 +48,8 @@ export default async function OrderCompletedTemplate({
           </Heading>
           <Items order={order} />
           <CartTotals totals={order} />
+          {/* Fired from the server-confirmed order, once per order. */}
+          <TrackEvent event={{ name: "purchase", transaction_id: String(order.display_id), value: Number(order.total ?? 0), shipping: Number(order.shipping_total ?? 0), tax: Number(order.tax_total ?? 0), items: itemsFromLines(order.items) }} />
           <ShippingDetails order={order} />
           <PaymentDetails order={order} cod={cod} />
           <OrderTimeline events={timeline.events} shipment={timeline.shipment} />

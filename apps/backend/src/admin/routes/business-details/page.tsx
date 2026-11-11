@@ -16,6 +16,11 @@ type Settings = {
   invoice_prefix: string
   credit_note_prefix: string
   return_window_days: number
+  grievance_name: string | null
+  grievance_email: string | null
+  grievance_phone: string | null
+  grievance_ack_hours: number
+  grievance_resolve_days: number
 }
 
 const FIELDS: { key: keyof Settings; label: string; hint?: string; textarea?: boolean; type?: string }[] = [
@@ -29,6 +34,11 @@ const FIELDS: { key: keyof Settings; label: string; hint?: string; textarea?: bo
   { key: "invoice_prefix", label: "Invoice prefix", hint: "e.g. DA → DA/26-27/00001 (max 16 characters in total)." },
   { key: "credit_note_prefix", label: "Credit note prefix", hint: "e.g. CN → CN/26-27/00001" },
   { key: "return_window_days", label: "Return window (days after delivery)", type: "number", hint: "0 turns returns off." },
+  { key: "grievance_name", label: "Grievance Officer – name", hint: "Required by the E-Commerce Rules 2020. Shown on the Grievance page, Contact and in the footer." },
+  { key: "grievance_email", label: "Grievance Officer – email", hint: "Blank = support email." },
+  { key: "grievance_phone", label: "Grievance Officer – phone", hint: "Blank = support phone." },
+  { key: "grievance_ack_hours", label: "Acknowledge complaints within (hours)", type: "number", hint: "The Rules require 48 hours." },
+  { key: "grievance_resolve_days", label: "Resolve complaints within (days)", type: "number", hint: "The Rules require one month." },
 ]
 
 // Seller details for GST invoices + the return window (ARCHITECTURE.md §5 rule 11, §12).
@@ -44,7 +54,12 @@ const BusinessDetailsPage = () => {
     mutationFn: () =>
       sdk.client.fetch<{ settings: Settings; state_code: string | null }>("/admin/business-settings", {
         method: "POST",
-        body: { ...form, return_window_days: Number(form.return_window_days || 0) },
+        body: {
+          ...form,
+          return_window_days: Number(form.return_window_days || 0),
+          grievance_ack_hours: Number(form.grievance_ack_hours || 48),
+          grievance_resolve_days: Number(form.grievance_resolve_days || 30),
+        },
       }),
     onSuccess: (r) => {
       qc.setQueryData(["business-settings"], r)

@@ -6,6 +6,7 @@ import VerifyAccount from "@modules/account/components/verify-account"
 export const metadata: Metadata = {
   title: "Verify your email",
   description: "Verify your email address to complete your registration.",
+  robots: { index: false, follow: false },
 }
 
 export default function VerifyAccountPage() {

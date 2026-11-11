@@ -73,7 +73,7 @@ export default function ProductCard({ product, priority }: { product: CatalogueP
           )}
         </div>
       </LocalizedClientLink>
-      <QuickAdd handle={product.handle} variantId={product.single_variant_id} inStock={product.in_stock} />
+      <QuickAdd handle={product.handle} variantId={product.single_variant_id} inStock={product.in_stock} title={product.title} price={product.price} />
     </li>
   )
 }

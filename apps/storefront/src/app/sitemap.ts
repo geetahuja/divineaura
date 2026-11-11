@@ -6,11 +6,16 @@ import type { MetadataRoute } from "next"
 const STATIC_PATHS = [
   "",
   "/shop",
-  "/shipping",
-  "/returns",
-  "/terms",
-  "/privacy",
+  "/about",
+  "/faq",
   "/contact",
+  "/track-order",
+  "/policies/shipping",
+  "/policies/returns-refunds",
+  "/policies/cancellation",
+  "/policies/privacy",
+  "/policies/terms",
+  "/policies/grievance",
 ]
 const PAGE_SIZE = 200
 

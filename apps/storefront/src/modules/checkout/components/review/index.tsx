@@ -33,10 +33,11 @@ export default function Review({ cart }: { cart: HttpTypes.StoreCart }) {
             />
             <span>
               I have read and agree to the{" "}
-              <LocalizedClientLink href="/terms" className={link}>Terms of service</LocalizedClientLink>,{" "}
-              <LocalizedClientLink href="/shipping" className={link}>Shipping</LocalizedClientLink> and{" "}
-              <LocalizedClientLink href="/returns" className={link}>Returns</LocalizedClientLink> policies and the{" "}
-              <LocalizedClientLink href="/privacy" className={link}>Privacy policy</LocalizedClientLink>.
+              <LocalizedClientLink href="/policies/terms" target="_blank" className={link}>Terms of use</LocalizedClientLink>,{" "}
+              <LocalizedClientLink href="/policies/shipping" target="_blank" className={link}>Shipping</LocalizedClientLink>,{" "}
+              <LocalizedClientLink href="/policies/cancellation" target="_blank" className={link}>Cancellation</LocalizedClientLink> and{" "}
+              <LocalizedClientLink href="/policies/returns-refunds" target="_blank" className={link}>Returns</LocalizedClientLink> policies and the{" "}
+              <LocalizedClientLink href="/policies/privacy" target="_blank" className={link}>Privacy policy</LocalizedClientLink>.
             </span>
           </label>
           <adapter.PayButton cart={cart} providerId={session!.provider_id} disabled={!accepted} />

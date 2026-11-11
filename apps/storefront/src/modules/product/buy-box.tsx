@@ -1,6 +1,7 @@
 "use client"
 
 import { addToCart } from "@lib/data/cart"
+import { track } from "@lib/analytics"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { notifyCartUpdated } from "@lib/util/cart-events"
 import { isVariantInStock } from "@lib/util/inventory"
@@ -108,6 +109,7 @@ export default function BuyBox({ product, showSizeGuide }: { product: HttpTypes.
     try {
       await addToCart({ variantId: variant.id, quantity: qty, countryCode })
       notifyCartUpdated()
+      track({ name: "add_to_cart", value: (price ?? 0) * qty, items: [{ item_id: variant.id, item_name: product.title, item_variant: variant.title ?? undefined, price: price ?? 0, quantity: qty }] })
       if (mode === "buy") {
         router.push("/checkout?step=address")
         return

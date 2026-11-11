@@ -1,7 +1,7 @@
 import { getProduct } from "@lib/data/product"
 import { isVariantInStock } from "@lib/util/inventory"
 import { buildProductStructuredData, getPricedVariants, toJsonLd } from "@lib/util/product-structured-data"
-import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
+import { DEFAULT_OG_IMAGE, getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import ProductTemplate from "@modules/product/template"
 import { getProductReviews } from "@lib/data/reviews"
 import { Metadata } from "next"
@@ -35,11 +35,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const image = product.thumbnail || product.images?.[0]?.url
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical: url, types: { "text/markdown": `${url}.md` } },
-    // No product photo yet → leave images out so the site-wide default OG image applies.
-    openGraph: { title, description, url, siteName: STORE_NAME, ...(image ? { images: [image] } : {}) },
+    // No product photo yet → the site-wide share image.
+    openGraph: { title, description, url, siteName: STORE_NAME, images: [image || DEFAULT_OG_IMAGE] },
     twitter: { card: image ? "summary_large_image" : "summary", title, description, ...(image ? { images: [image] } : {}) },
   }
 }

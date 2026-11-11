@@ -5,13 +5,29 @@ import { render } from "./templates"
 // one 560px column that also reads on 375px phones; inline styles only.
 const C = { maroon: "#762019", gold: "#C58A36", ivory: "#FFF5E8", champagne: "#E8CDA9", ink: "#2A1A14", soft: "#5C4A40" }
 
-const stripTags = (html: string) => html.replace(/<[^>]+>/g, "")
+// Policy links in every email (Consumer Protection (E-Commerce) Rules 2020).
+const POLICIES = [
+  ["Returns & refunds", "/policies/returns-refunds"],
+  ["Shipping", "/policies/shipping"],
+  ["Cancellation", "/policies/cancellation"],
+  ["Privacy", "/policies/privacy"],
+  ["Terms", "/policies/terms"],
+  ["Grievance", "/policies/grievance"],
+] as const
+
+const stripTags =(html: string) => html.replace(/<[^>]+>/g, "")
+
+// Values can come from customers (contact form, names, review text): always escape
+// them for HTML. The template's own markup (<strong>, links) stays as written.
+const escapeHtml = (s: string) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")
 
 export function renderEmail(spec: EmailSpec, vars: Record<string, string>, siteUrl: string) {
-  const subject = render(spec.subject, vars)
-  const heading = render(spec.heading, vars)
-  const paragraphs = spec.lines.map((l) => render(l, vars))
-  const cta = spec.cta ? { label: spec.cta.label, url: render(spec.cta.url, vars) } : null
+  const safe = Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, escapeHtml(v ?? "")]))
+  const subject = render(spec.subject, vars).replace(/[\r\n]+/g, " ") // plain text; no header injection
+  const heading = render(spec.heading, safe)
+  const paragraphs = spec.lines.map((l) => render(l, safe))
+  const textParagraphs = spec.lines.map((l) => render(l, vars))
+  const cta = spec.cta ? { label: spec.cta.label, url: render(spec.cta.url, safe) } : null
 
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${subject}</title></head>
 <body style="margin:0;padding:0;background:${C.ivory};font-family:Arial,Helvetica,sans-serif;color:${C.ink}">
@@ -25,9 +41,9 @@ ${paragraphs.map((p) => `<p style="margin:0 0 14px;font-size:16px;line-height:1.
 ${cta ? `<p style="margin:24px 0 0"><a href="${cta.url}" style="display:inline-block;background:${C.maroon};color:#ffffff;text-decoration:none;font-weight:bold;font-size:16px;padding:12px 28px;border-radius:999px">${cta.label}</a></p>` : ""}
 </td></tr>
 <tr><td style="padding:16px 24px;border-top:1px solid ${C.champagne};font-size:12px;line-height:1.5;color:${C.soft};text-align:center">
-Prices inclusive of all taxes · Questions? Just reply to this email.<br><a href="${siteUrl}" style="color:${C.maroon}">${siteUrl.replace(/^https?:\/\//, "")}</a>
+Prices inclusive of all taxes · Questions? Just reply to this email.<br>${POLICIES.map(([label, path]) => `<a href="${siteUrl}${path}" style="color:${C.maroon}">${label}</a>`).join(" · ")}<br><a href="${siteUrl}" style="color:${C.maroon}">${siteUrl.replace(/^https?:\/\//, "")}</a>
 </td></tr></table></td></tr></table></body></html>`
 
-  const text = [heading, ...paragraphs.map(stripTags), cta ? `${cta.label}: ${cta.url}` : ""].filter(Boolean).join("\n\n")
+  const text = [render(spec.heading, vars), ...textParagraphs.map(stripTags), cta ? `${cta.label}: ${render(spec.cta!.url, vars)}` : ""].filter(Boolean).join("\n\n")
   return { subject, html, text }
 }

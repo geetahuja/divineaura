@@ -1,24 +1,24 @@
+import { getPage, getSeller } from "@lib/data/content"
+import { contentMetadata } from "@lib/util/page-meta"
+import ContactForm from "@modules/content/contact-form"
+import ContentPageView from "@modules/content/content-page"
 import { Metadata } from "next"
-
-import { STORE_NAME } from "@lib/util/site"
-import { PlaceholderNotice, PolicyPage } from "@modules/policies/templates"
+import { notFound } from "next/navigation"
 
 export const dynamic = "force-static"
 export const revalidate = 60
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: `How to contact ${STORE_NAME}.`,
+export async function generateMetadata(): Promise<Metadata> {
+  return contentMetadata(await getPage("contact"), "/contact")
 }
 
-export default function ContactPage() {
+// Contact: admin-edited text (with live seller details) + the contact form.
+export default async function ContactPage() {
+  const [page, seller] = await Promise.all([getPage("contact"), getSeller()])
+  if (!page) notFound()
   return (
-    <PolicyPage title="Contact">
-      <PlaceholderNotice />
-      <p>
-        Questions about an order, shipping or returns? Contact {STORE_NAME}{" "}
-        customer service and include your order number.
-      </p>
-    </PolicyPage>
+    <ContentPageView page={page} crumbs={[{ label: page.title, href: "/contact" }]}>
+      <ContactForm supportEmail={seller?.email ?? null} />
+    </ContentPageView>
   )
 }

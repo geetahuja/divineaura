@@ -201,6 +201,44 @@ export const TEMPLATES = {
       lines: ["As promised, here is a <strong>{percent}%</strong> coupon for your next order:", "<strong style=\"font-size:22px;letter-spacing:2px\">{code}</strong>", "It can be used once. Enter it at checkout."],
     },
   },
+  // To the store's support inbox (email only).
+  contact_message: {
+    category: "transactional",
+    vars: ["name", "contact", "order", "topic", "message"],
+    email: {
+      subject: "Contact form: {topic} – {name}",
+      heading: "New message from the website",
+      lines: ["<strong>From:</strong> {name} ({contact})", "<strong>Order:</strong> {order}", "<strong>Topic:</strong> {topic}", "{message}"],
+    },
+  },
+  contact_ack: {
+    category: "transactional",
+    vars: ["name"],
+    email: {
+      subject: "We've received your message",
+      heading: "Thank you, {name}",
+      lines: ["We've received your message and will reply within one working day.", "If it's about an order, please keep your order number handy."],
+    },
+  },
+  privacy_request_admin: {
+    category: "transactional",
+    vars: ["kind", "name", "contact", "details", "link"],
+    email: {
+      subject: "Privacy request: {kind} – {name}",
+      heading: "New privacy request",
+      lines: ["<strong>Request:</strong> {kind}", "<strong>From:</strong> {name} ({contact})", "{details}", "Handle it in Admin → Privacy requests. The law expects a timely response."],
+      cta: { label: "Open Privacy requests", url: "{link}" },
+    },
+  },
+  privacy_request_ack: {
+    category: "transactional",
+    vars: ["name", "kind", "days"],
+    email: {
+      subject: "Your privacy request",
+      heading: "We've received your request",
+      lines: ["Dear {name}, we've received your request to <strong>{kind}</strong>.", "We'll verify it's you and respond within {days} days. Some records, such as GST invoices, must be kept by law; we'll explain anything we can't delete."],
+    },
+  },
   admin_password_reset: {
     category: "transactional",
     vars: ["link"],

@@ -3,7 +3,7 @@ import { Metadata } from "next"
 import LoginTemplate from "@modules/account/templates/login-template"
 
 export const metadata: Metadata = {
-  title: "Sign in",
+  title: { absolute: "Sign in | DivineAura" },
   description: "Sign in to your DivineAura account with your mobile number.",
 }
 

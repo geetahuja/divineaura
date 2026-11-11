@@ -1,5 +1,8 @@
 "use client"
 
+import { track } from "@lib/analytics"
+import { itemsFromLines } from "@lib/util/analytics-items"
+
 import { initiatePaymentSession } from "@lib/data/cart"
 import { PaymentOptions, selectPaymentMethod } from "@lib/data/payment-options"
 import { getPaymentAdapter, supportedProviders } from "@lib/payments"
@@ -66,6 +69,7 @@ export default function Payment({
       // 2) then the payment session is created on the new total.
       await selectPaymentMethod(cart.id, getPaymentAdapter(selected)!.kind)
       await initiatePaymentSession(cart, { provider_id: selected })
+      track({ name: "add_payment_info", value: Number(cart.total ?? 0), payment_type: getPaymentAdapter(selected)!.kind, items: itemsFromLines(cart.items) })
       go("review")
     } catch (e) {
       setError((e as Error).message)
