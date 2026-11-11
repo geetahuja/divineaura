@@ -94,3 +94,12 @@ not change.
 - Every send is in **Admin → Message log** (filter by order or mobile; recipients masked; OTP codes never stored). Each order page has a "Messages" link. One message per event per order per channel.
 - Customers sign in at `/account` with mobile OTP (or email OTP). In development the code is printed in the backend terminal: `[sms → +91…] 123456 is your DivineAura login code…`. In production it is never printed.
 - Needs `OTP_SECRET` in `apps/backend/.env` (long random string).
+
+## Accounts, invoices, cancellations and returns (milestone 10)
+
+- **Account** (`/account`, OTP login): Overview, Orders, Addresses (default is pre-filled at checkout), Wishlist (`/wishlist`; guests keep it in the browser, merged on login), Profile (name, email, marketing consent per channel).
+- **GST invoices**: issued when an online payment is captured or a COD order is confirmed. Numbers `DA/26-27/00001` (consecutive per financial year, never reused); credit notes `CN/26-27/00001` for every refund / cancelled invoiced order. PDFs at signed links (`/documents/<token>`) on the account order page, the admin order page (Invoice & credit notes card) and in the shipped email.
+- **Admin → Business details**: legal name, address, state, GSTIN, invoice prefixes, return window (also written to the region's `return_window_days`).
+- **Cancel**: customers can cancel until the order is packed (stock released; prepaid refunded through the payment provider; COD simply cancelled).
+- **Returns**: after delivery, within the return window; per-product "Not returnable" in the DivineAura details card. **Admin → Returns**: approve (books a reverse pickup) / reject → mark received → refund (prepaid automatically; COD: pay the customer's UPI / bank account, then "Mark refund paid"). Shipping and the COD fee are not refunded on returns.
+- Needs `PAYOUT_ENCRYPTION_KEY` in `apps/backend/.env` (encrypts COD refund details; deleted once paid).

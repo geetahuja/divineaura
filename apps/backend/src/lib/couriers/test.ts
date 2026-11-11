@@ -50,6 +50,11 @@ export class TestCourier implements Courier {
     }
   }
 
+  async createReturnPickup() {
+    const awb = `RTEST${Date.now().toString().slice(-8)}${randomInt(10, 99)}`
+    return { awb, courierName: "Test Reverse Pickup", trackingUrl: null }
+  }
+
   async track() {
     return [] // events come through the (simulated) webhook
   }

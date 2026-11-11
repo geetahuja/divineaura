@@ -30,6 +30,9 @@ export type ShipmentInput = {
 
 export type ShipmentResult = { shipmentId: string; awb: string; courierName: string; labelUrl: string | null; trackingUrl: string | null }
 
+export type ReturnPickupInput = { orderNumber: string; returnId: string; from: Address; to: Address & { nickname?: string | null }; items: { name: string; sku: string; quantity: number; unitPrice: number }[]; weightGrams: number }
+export type ReturnPickupResult = { awb: string; courierName: string; trackingUrl: string | null }
+
 export type TrackingEvent = { awb: string; status: TimelineStatus; at: Date; eventId: string; note?: string }
 
 export interface Courier {
@@ -37,6 +40,8 @@ export interface Courier {
   serviceability(input: { pickupPin: string; deliveryPin: string; weightGrams: number; cod: boolean }): Promise<Serviceability>
   lookupPincode(pin: string): Promise<{ city: string | null; state: string | null } | null>
   createShipment(input: ShipmentInput): Promise<ShipmentResult>
+  /** Reverse pickup from the customer back to the warehouse (approved returns). */
+  createReturnPickup(input: ReturnPickupInput): Promise<ReturnPickupResult>
   track(awb: string): Promise<TrackingEvent[]>
   /** Verifies the tracking webhook (raw body + headers); false = reject. */
   verifyWebhook(headers: Record<string, unknown>, rawBody: string): boolean

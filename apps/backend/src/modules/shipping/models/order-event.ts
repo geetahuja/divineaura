@@ -6,7 +6,7 @@ const OrderEvent = model
   .define("order_event", {
     id: model.id({ prefix: "oev" }).primaryKey(),
     order_id: model.text(),
-    status: model.enum(["placed", "confirmed", "packed", "shipped", "out_for_delivery", "delivered", "rto", "cancelled"]),
+    status: model.enum(["placed", "confirmed", "packed", "shipped", "out_for_delivery", "delivered", "rto", "cancelled", "return_requested", "returned", "refunded"]),
     occurred_at: model.dateTime(),
     source: model.text(), // order | payment | cod | admin | webhook | sync
     note: model.text().nullable(),

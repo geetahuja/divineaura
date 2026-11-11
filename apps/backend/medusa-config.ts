@@ -81,6 +81,9 @@ module.exports = defineConfig({
     { resolve: './src/modules/messaging' },
     // Login: admins keep email + password; customers sign in with a mobile / email OTP (§11).
     { resolve: './src/modules/otp' },
+    // GST invoices + credit notes, and customer returns (milestone 10).
+    { resolve: './src/modules/invoice' },
+    { resolve: './src/modules/returns' },
     {
       resolve: '@medusajs/medusa/auth',
       dependencies: ['cache', 'logger'],

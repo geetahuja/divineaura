@@ -13,6 +13,12 @@ import {
   OtpVerifySchema,
   NewsletterSchema,
   MarketingConsentSchema,
+  ReturnRequestSchema,
+  WishlistSchema,
+  AdminReturnNoteSchema,
+  AdminReturnRejectSchema,
+  AdminRefundPaidSchema,
+  BusinessSettingsSchema,
   AdminProductSpecsSchema,
   CodCancelSchema,
   CodConfirmSchema,
@@ -44,6 +50,7 @@ const SPEC_FIELDS = [
   "certificate_url",
   "country_of_origin",
   "hsn_code",
+  "not_returnable",
 ]
 
 export default defineMiddlewares({
@@ -78,6 +85,17 @@ export default defineMiddlewares({
     { method: ["POST"], matcher: "/store/otp/verify", middlewares: [validateAndTransformBody(OtpVerifySchema)] },
     { method: ["POST"], matcher: "/store/newsletter", middlewares: [validateAndTransformBody(NewsletterSchema)] },
     { method: ["POST"], matcher: "/store/customers/me/marketing-consent", middlewares: [validateAndTransformBody(MarketingConsentSchema)] },
+    {
+      method: ["POST"],
+      matcher: "/store/customers/me/orders/:id/returns",
+      bodyParser: { sizeLimit: "14mb" }, // up to 3 photos, resized in the browser
+      middlewares: [validateAndTransformBody(ReturnRequestSchema)],
+    },
+    { method: ["POST"], matcher: "/store/customers/me/wishlist", middlewares: [validateAndTransformBody(WishlistSchema)] },
+    { method: ["POST"], matcher: "/admin/returns/:id/approve", middlewares: [validateAndTransformBody(AdminReturnNoteSchema)] },
+    { method: ["POST"], matcher: "/admin/returns/:id/reject", middlewares: [validateAndTransformBody(AdminReturnRejectSchema)] },
+    { method: ["POST"], matcher: "/admin/returns/:id/refund", middlewares: [validateAndTransformBody(AdminRefundPaidSchema)] },
+    { method: ["POST"], matcher: "/admin/business-settings", middlewares: [validateAndTransformBody(BusinessSettingsSchema)] },
     { method: ["POST"], matcher: "/store/track", middlewares: [validateAndTransformBody(TrackOrderSchema)] },
     { method: ["POST"], matcher: "/admin/shipping/orders/:id/shipment", middlewares: [validateAndTransformBody(CreateShipmentSchema)] },
     { method: ["POST"], matcher: "/admin/shipping/orders/:id/simulate", middlewares: [validateAndTransformBody(SimulateTrackingSchema)] },

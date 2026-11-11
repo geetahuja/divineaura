@@ -61,7 +61,9 @@ export function stateFromPin(pin: string): string | null {
 
 // ── Order timeline ─────────────────────────────────────────────────────────
 export const TIMELINE = ["placed", "confirmed", "packed", "shipped", "out_for_delivery", "delivered"] as const
-export type TimelineStatus = (typeof TIMELINE)[number] | "rto" | "cancelled"
+// After-sales steps follow a terminal status: returns after delivery, refunds after a cancellation or return.
+export const AFTER_SALES = ["return_requested", "returned", "refunded"] as const
+export type TimelineStatus = (typeof TIMELINE)[number] | "rto" | "cancelled" | (typeof AFTER_SALES)[number]
 export const TERMINAL: TimelineStatus[] = ["delivered", "rto", "cancelled"]
 
 export const TIMELINE_LABEL: Record<TimelineStatus, string> = {
@@ -73,6 +75,9 @@ export const TIMELINE_LABEL: Record<TimelineStatus, string> = {
   delivered: "Delivered",
   rto: "Returned to us (RTO)",
   cancelled: "Cancelled",
+  return_requested: "Return requested",
+  returned: "Returned",
+  refunded: "Refunded",
 }
 
 /**
@@ -84,6 +89,9 @@ export const TIMELINE_LABEL: Record<TimelineStatus, string> = {
  */
 export function canAdvance(recorded: TimelineStatus[], next: TimelineStatus): boolean {
   if (recorded.includes(next)) return false
+  if (next === "return_requested") return recorded.includes("delivered")
+  if (next === "returned") return recorded.includes("return_requested")
+  if (next === "refunded") return recorded.includes("cancelled") || recorded.includes("returned")
   if (recorded.some((s) => TERMINAL.includes(s))) return false
   const furthest = Math.max(-1, ...recorded.map((s) => TIMELINE.indexOf(s as (typeof TIMELINE)[number])))
   const shipped = furthest >= TIMELINE.indexOf("shipped")
