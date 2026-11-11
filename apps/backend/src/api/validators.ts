@@ -195,3 +195,28 @@ export const BusinessSettingsSchema = z.object({
 export type ReturnRequestBody = z.infer<typeof ReturnRequestSchema>
 export type WishlistBody = z.infer<typeof WishlistSchema>
 export type BusinessSettingsBody = z.infer<typeof BusinessSettingsSchema>
+
+// ── Reviews (Milestone 11) ──────────────────────────────────────────────
+const reviewFields = {
+  rating: z.number().int().min(1).max(5),
+  title: z.string().trim().max(120).nullish(),
+  body: z.string().trim().min(1).max(3000),
+  photos: z.array(z.string().max(2_800_000)).max(4).optional(), // data URLs, ≤ 2 MB each after decoding
+  keep_photos: z.array(z.string().url()).max(4).optional(),
+  show_name: z.boolean().default(true),
+}
+export const CreateReviewSchema = z.object({ order_id: z.string(), item_id: z.string(), ...reviewFields })
+export const UpdateReviewSchema = z.object(reviewFields)
+export const ModerateReviewSchema = z.object({ reason: z.string().trim().max(500).nullish() })
+export const ReplyReviewSchema = z.object({ reply: z.string().trim().max(1500).nullish() })
+export const ReviewSettingsSchema = z.object({
+  request_after_days: z.number().int().min(1).max(60),
+  min_body_length: z.number().int().min(0).max(500),
+  blocked_words: z.string().max(5000),
+  incentive_enabled: z.boolean(),
+  incentive_percent: z.number().int().min(1).max(50),
+  incentive_requires_photo: z.boolean(),
+})
+export type CreateReviewBody = z.infer<typeof CreateReviewSchema>
+export type UpdateReviewBody = z.infer<typeof UpdateReviewSchema>
+export type ReviewSettingsBody = z.infer<typeof ReviewSettingsSchema>

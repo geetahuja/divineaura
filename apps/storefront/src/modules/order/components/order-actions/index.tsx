@@ -5,6 +5,7 @@ import { convertToLocale } from "@lib/util/money"
 import { FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { resizeImage } from "@lib/util/resize-image"
 
 const inr = (n: number) => convertToLocale({ amount: n, currency_code: "inr" })
 const field = "h-11 w-full rounded-md border border-champagne bg-white px-3 text-base text-ink focus:border-primary focus:outline-none"
@@ -25,17 +26,6 @@ const STATUS: Record<string, [string, string]> = {
   rejected: ["Not accepted", "bg-red-50 text-red-800"],
   received: ["Received — refund in progress", "bg-purple-50 text-purple-900"],
   refunded: ["Refunded", "bg-green-50 text-green-800"],
-}
-
-/** Phone photos → JPEG at most 1600 px (~0.3 MB) so uploads are quick on mobile data. */
-async function resize(file: File): Promise<string> {
-  const img = await createImageBitmap(file)
-  const scale = Math.min(1, 1600 / Math.max(img.width, img.height))
-  const canvas = document.createElement("canvas")
-  canvas.width = Math.round(img.width * scale)
-  canvas.height = Math.round(img.height * scale)
-  canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height)
-  return canvas.toDataURL("image/jpeg", 0.8)
 }
 
 function ReturnForm({ orderId, data, onDone }: { orderId: string; data: Actions["returns"]; onDone: () => void }) {
@@ -123,7 +113,7 @@ function ReturnForm({ orderId, data, onDone }: { orderId: string; data: Actions[
           accept="image/jpeg,image/png,image/webp"
           multiple
           className="block w-full text-sm text-ink-soft file:mr-3 file:rounded-full file:border-0 file:bg-champagne file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary"
-          onChange={async (e) => setPhotos(await Promise.all(Array.from(e.target.files ?? []).slice(0, 3).map(resize)))}
+          onChange={async (e) => setPhotos(await Promise.all(Array.from(e.target.files ?? []).slice(0, 3).map((f) => resizeImage(f, 1600, 0.8))))}
         />
         {!!photos.length && (
           <div className="mt-2 flex gap-2">

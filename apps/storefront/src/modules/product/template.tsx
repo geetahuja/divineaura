@@ -6,7 +6,9 @@ import Breadcrumbs from "@modules/listing/breadcrumbs"
 import ProductCard from "@modules/listing/product-card"
 import { getPublicPaymentSettings } from "@lib/data/payment-options"
 import { convertToLocale } from "@lib/util/money"
-import { Banknote, MessageSquareHeart, RotateCcw } from "lucide-react"
+import { Banknote, RotateCcw } from "lucide-react"
+import ProductReviews from "@modules/reviews/product-reviews"
+import type { ReviewPage } from "@lib/data/reviews"
 import HeartButton from "@modules/wishlist/heart-button"
 import { getStorePolicies } from "@lib/data/store-policies"
 import { DEFAULT_COUNTRY_CODE } from "@lib/util/site"
@@ -39,7 +41,7 @@ async function related(product: FullProduct, categories: Category[]) {
     .map((x) => x.p)
 }
 
-export default async function ProductTemplate({ product }: { product: FullProduct }) {
+export default async function ProductTemplate({ product, reviews }: { product: FullProduct; reviews: ReviewPage }) {
   const [categories, origin, payments, policies] = await Promise.all([listCategories(), getSiteOrigin(), getPublicPaymentSettings(), getStorePolicies(DEFAULT_COUNTRY_CODE)])
   const returnDays = policies.current?.returnWindowDays ?? 7
   const relatedProducts = await related(product, categories)
@@ -101,13 +103,7 @@ export default async function ProductTemplate({ product }: { product: FullProduc
         </div>
       </div>
 
-      <section aria-labelledby="reviews-heading" className="mt-14">
-        <h2 id="reviews-heading" className="font-serif text-3xl font-semibold text-primary">Reviews</h2>
-        <div className="mt-4 flex flex-col items-center gap-2 rounded-lg border border-dashed border-champagne bg-ivory-deep px-6 py-8 text-center">
-          <MessageSquareHeart className="h-8 w-8 text-accent" strokeWidth={1.5} aria-hidden />
-          <p className="text-sm text-ink-soft">Reviews from verified buyers will appear here soon.</p>
-        </div>
-      </section>
+      <ProductReviews productId={product.id} initial={reviews} />
 
       {relatedProducts.length > 0 && (
         <section aria-labelledby="related-heading" className="mt-14">

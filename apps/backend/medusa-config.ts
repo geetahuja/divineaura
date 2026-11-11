@@ -84,6 +84,8 @@ module.exports = defineConfig({
     // GST invoices + credit notes, and customer returns (milestone 10).
     { resolve: './src/modules/invoice' },
     { resolve: './src/modules/returns' },
+    // Verified-buyer product reviews (milestone 11).
+    { resolve: './src/modules/reviews' },
     {
       resolve: '@medusajs/medusa/auth',
       dependencies: ['cache', 'logger'],

@@ -17,6 +17,7 @@ export const links = {
   track: () => `${site()}/track-order`,
   help: () => `${site()}/contact`,
   shop: () => `${site()}/shop`,
+  account: () => `${site()}/account/orders`,
 }
 
 export async function notifyOrder(

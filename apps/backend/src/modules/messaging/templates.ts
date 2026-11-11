@@ -178,6 +178,29 @@ export const TEMPLATES = {
       cta: { label: "View your order", url: "{link}" },
     },
   },
+  review_request: {
+    category: "transactional",
+    vars: ["order", "link"],
+    sms: "DivineAura: We hope you like your order #{order}. Please share a quick review of what you received - it helps other devotees: {link}",
+    whatsapp: { name: "review_request", params: ["order", "link"] },
+    email: {
+      subject: "How was your order #{order}?",
+      heading: "Tell us what you think",
+      lines: ["We hope your order <strong>#{order}</strong> brings you peace and joy.", "Would you share a short review? Honest reviews — good or bad — help other devotees choose."],
+      cta: { label: "Write a review", url: "{link}" },
+    },
+  },
+  review_coupon: {
+    category: "transactional",
+    vars: ["order", "code", "percent"],
+    sms: "DivineAura: Thank you for your review! Here is your {percent}% coupon for your next order: {code} (single use).",
+    whatsapp: { name: "review_coupon", params: ["code", "percent"] },
+    email: {
+      subject: "Your thank-you coupon",
+      heading: "Thank you for your review",
+      lines: ["As promised, here is a <strong>{percent}%</strong> coupon for your next order:", "<strong style=\"font-size:22px;letter-spacing:2px\">{code}</strong>", "It can be used once. Enter it at checkout."],
+    },
+  },
   admin_password_reset: {
     category: "transactional",
     vars: ["link"],
