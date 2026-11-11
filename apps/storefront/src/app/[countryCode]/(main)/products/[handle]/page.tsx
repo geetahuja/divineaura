@@ -3,6 +3,7 @@ import { isVariantInStock } from "@lib/util/inventory"
 import { buildProductStructuredData, getPricedVariants, toJsonLd } from "@lib/util/product-structured-data"
 import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
 import ProductTemplate from "@modules/product/template"
+import { getProductReviews } from "@lib/data/reviews"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
@@ -53,6 +54,8 @@ export default async function ProductPage(props: Props) {
     undefined
   )
   const amount = cheapest?.calculated_price?.calculated_amount?.toFixed(2)
+  // Approved reviews only (backend rule) — used for the reviews section and JSON-LD.
+  const reviews = await getProductReviews(product.id, "newest", 0, 5)
 
   return (
     <>
@@ -68,11 +71,11 @@ export default async function ProductPage(props: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: toJsonLd(
-            buildProductStructuredData({ product, region, countryCode, productUrl: `${origin}/products/${product.handle}` })
+            buildProductStructuredData({ product, region, countryCode, productUrl: `${origin}/products/${product.handle}`, reviews })
           ),
         }}
       />
-      <ProductTemplate product={product} />
+      <ProductTemplate product={product} reviews={reviews} />
     </>
   )
 }

@@ -1,16 +1,37 @@
-import { Camera } from "lucide-react"
+import { getPhotoReviews } from "@lib/data/reviews"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Stars from "@modules/reviews/stars"
+import { BadgeCheck } from "lucide-react"
 
-// Placeholder until verified-buyer photo reviews arrive (milestone 11). Never sample/fake reviews.
-export function PhotoReviews() {
+// Approved verified-buyer reviews with photos. No such reviews → no section at all
+// (never sample or invented reviews).
+export async function PhotoReviews() {
+  const reviews = await getPhotoReviews(8)
+  if (!reviews.length) return null
   return (
-    <section className="content-container py-10 small:py-14" aria-labelledby="reviews-heading">
-      <h2 id="reviews-heading" className="font-serif text-3xl font-semibold text-primary">From our devotees</h2>
-      <div className="mt-6 flex flex-col items-center gap-3 rounded-lg border border-dashed border-champagne bg-ivory-deep px-6 py-10 text-center">
-        <Camera aria-hidden className="h-8 w-8 text-accent" strokeWidth={1.5} />
-        <p className="max-w-md text-sm text-ink-soft">
-          Photos and reviews from verified buyers will appear here soon.
-        </p>
-      </div>
+    <section className="content-container py-10 small:py-14" aria-labelledby="photo-reviews-heading">
+      <h2 id="photo-reviews-heading" className="font-serif text-3xl font-semibold text-primary">From our devotees</h2>
+      <ul className="no-scrollbar -mx-4 mt-6 flex snap-x gap-4 overflow-x-auto px-4 pb-2 small:mx-0 small:grid small:grid-cols-4 small:overflow-visible small:px-0">
+        {reviews.map((r) => (
+          <li key={r.id} className="w-64 shrink-0 snap-start overflow-hidden rounded-lg border border-champagne bg-white small:w-auto">
+            <LocalizedClientLink href={`/products/${r.product.handle}#reviews`} className="group block">
+              <div className="aspect-square overflow-hidden bg-ivory-deep">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={r.photos[0]} alt={`Photo by ${r.author} of ${r.product.title}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+              </div>
+              <div className="p-3">
+                <Stars value={r.rating} label={`${r.rating} out of 5 stars`} />
+                <p className="mt-1 line-clamp-3 text-sm text-ink">{r.title ? <strong>{r.title}. </strong> : null}{r.body}</p>
+                <p className="mt-2 flex items-center gap-1 text-xs text-ink-muted">
+                  <span className="font-semibold text-ink-soft">{r.author}</span>
+                  <BadgeCheck className="h-3.5 w-3.5 text-green-700" aria-label="Verified buyer" />
+                </p>
+                <p className="mt-0.5 line-clamp-1 text-xs text-primary group-hover:underline">{r.product.title}</p>
+              </div>
+            </LocalizedClientLink>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }

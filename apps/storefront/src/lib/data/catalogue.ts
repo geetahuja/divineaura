@@ -3,6 +3,7 @@ import { sdk } from "@lib/config"
 import { parseTag, TagKind } from "@lib/slug"
 import { HttpTypes } from "@medusajs/types"
 import { getRegion } from "./regions"
+import { getRatingSummaries } from "./reviews"
 import { DEFAULT_COUNTRY_CODE } from "@lib/util/site"
 
 // Admin changes show up within 5 minutes (ISR-style data cache).
@@ -36,6 +37,8 @@ export type CatalogueProduct = {
   in_stock: boolean
   // Set when the product has exactly one variant: quick add can skip the product page.
   single_variant_id: string | null
+  // Approved reviews only; null when the product has none (cards then show no stars).
+  rating: { average: number; count: number } | null
 }
 
 export async function listCategories(): Promise<Category[]> {
@@ -146,6 +149,7 @@ const toCatalogueProduct = (p: RawProduct): CatalogueProduct => {
     mrp: price != null && mrpRaw != null && mrpRaw > price ? mrpRaw : null,
     in_stock: (p.variants ?? []).some(inStock),
     single_variant_id: p.variants?.length === 1 && inStock(p.variants[0]) ? p.variants[0].id : null,
+    rating: null,
   }
 }
 
@@ -178,5 +182,6 @@ export async function listCatalogue(): Promise<CatalogueProduct[]> {
       break
     }
   }
-  return all.map(toCatalogueProduct)
+  const ratings = await getRatingSummaries()
+  return all.map((p) => ({ ...toCatalogueProduct(p), rating: ratings[p.id] ?? null }))
 }

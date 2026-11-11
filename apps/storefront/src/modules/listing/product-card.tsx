@@ -4,6 +4,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Image from "next/image"
 import QuickAdd from "./quick-add"
 import HeartButton from "@modules/wishlist/heart-button"
+import Stars from "@modules/reviews/stars"
 
 export const inr = (amount: number) => convertToLocale({ amount, currency_code: "inr" })
 
@@ -48,6 +49,12 @@ export default function ProductCard({ product, priority }: { product: CatalogueP
         <h3 className="mt-2 line-clamp-2 text-sm font-medium leading-snug text-ink group-hover:text-primary">
           {product.title}
         </h3>
+        {product.rating && (
+          <p className="mt-1 flex items-center gap-1 text-xs text-ink-soft">
+            <Stars value={product.rating.average} size="h-3.5 w-3.5" label={`Rated ${product.rating.average.toFixed(1)} out of 5`} />
+            <span aria-label={`${product.rating.count} reviews`}>({product.rating.count})</span>
+          </p>
+        )}
         <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
           {product.price != null ? (
             <>

@@ -1,5 +1,6 @@
 import { HttpTypes } from "@medusajs/types"
 import { isVariantInStock } from "./inventory"
+import { reviewStructuredData, ReviewsForSeo } from "./review-structured-data"
 import { STORE_NAME } from "./site"
 import {
   buildReturnPolicy,
@@ -20,11 +21,14 @@ export const buildProductStructuredData = ({
   region,
   countryCode,
   productUrl,
+  reviews,
 }: {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   countryCode: string
   productUrl: string
+  /** Approved reviews only (from the public review route). */
+  reviews?: ReviewsForSeo | null
 }) => {
   const currency = region.currency_code.toUpperCase()
   const images = (product.images ?? [])
@@ -71,6 +75,7 @@ export const buildProductStructuredData = ({
       sku: variants[0]?.sku || undefined,
       url: productUrl,
       offers: variants[0] ? buildOffer(variants[0], productUrl) : undefined,
+      ...reviewStructuredData(reviews),
     }
   }
 
@@ -83,6 +88,7 @@ export const buildProductStructuredData = ({
     brand,
     url: productUrl,
     productGroupID: product.id,
+    ...reviewStructuredData(reviews),
     variesBy: (product.options ?? []).map((option) => option.title),
     hasVariant: variants.map((variant) => {
       const variantUrl = `${productUrl}?v_id=${variant.id}`
