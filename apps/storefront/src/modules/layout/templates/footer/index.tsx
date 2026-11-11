@@ -1,6 +1,7 @@
 import { FOOTER_HELP, FOOTER_POLICIES, getMainMenu, NavLink } from "@lib/nav"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Mail } from "lucide-react"
+import NewsletterForm from "@modules/layout/components/newsletter-form"
 
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL
 
@@ -44,6 +45,9 @@ export default async function Footer() {
         <Column title="Shop" links={menu} />
         <Column title="Help" links={FOOTER_HELP} />
         <Column title="Policies" links={FOOTER_POLICIES} />
+      </div>
+      <div className="content-container pb-10">
+        <NewsletterForm />
       </div>
       <div className="border-t border-champagne/30">
         <p className="content-container py-4 text-xs text-ivory/80">

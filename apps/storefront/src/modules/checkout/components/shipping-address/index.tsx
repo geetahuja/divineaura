@@ -5,6 +5,7 @@ import { mapKeys } from "lodash"
 import { useEffect, useState } from "react"
 import AddressFields, { field, labelCls } from "../address-fields"
 import AddressSelect from "../address-select"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const KEYS = ["first_name", "last_name", "address_1", "address_2", "postal_code", "city", "province", "phone"] as const
 
@@ -83,9 +84,18 @@ export default function ShippingAddress({
 
       <fieldset>
         <legend className="mb-3 text-base font-semibold text-ink">Delivery address</legend>
+        {!customer && (
+          <p className="mb-4 text-sm text-ink-soft">
+            Have an account?{" "}
+            <LocalizedClientLink href="/account?next=/checkout" className="font-semibold text-primary underline-offset-2 hover:underline">
+              Log in to use saved addresses
+            </LocalizedClientLink>{" "}
+            — or just continue as a guest.
+          </p>
+        )}
         {customer && saved.length > 0 && (
           <div className="mb-4">
-            <p className="mb-2 text-sm text-ink-soft">Hi {customer.first_name}, use a saved address?</p>
+            <p className="mb-2 text-sm text-ink-soft">Hi{customer.first_name ? ` ${customer.first_name}` : ""}, use a saved address?</p>
             <AddressSelect
               addresses={saved}
               addressInput={mapKeys(values, (_, k) => k.replace("shipping_address.", "")) as unknown as HttpTypes.StoreCartAddress}
