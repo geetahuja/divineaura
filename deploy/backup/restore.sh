@@ -79,7 +79,10 @@ if [ "$what" != db ]; then
     mv "$UPLOADS_DIR" "${UPLOADS_DIR}.before-restore-$now"
     echo "    Old uploads kept at ${UPLOADS_DIR}.before-restore-$now (delete it once the site looks right)."
   fi
-  tar -xzf "$up_file" -C "$(dirname "$UPLOADS_DIR")"
+  # The archive holds one top folder (the uploads folder's name at backup time); strip it so
+  # the restore works into any UPLOADS_DIR (e.g. a new server with another path).
+  mkdir -p "$UPLOADS_DIR"
+  tar -xzf "$up_file" -C "$UPLOADS_DIR" --strip-components=1
   echo "    Uploads restored ($(find "$UPLOADS_DIR" -type f | wc -l | tr -d ' ') files)."
 fi
 
