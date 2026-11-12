@@ -262,3 +262,4 @@ export const UpdatePrivacyRequestSchema = z.object({ status: z.enum(["open", "do
 export type ContactBody = z.infer<typeof ContactSchema>
 export type PrivacyRequestBody = z.infer<typeof PrivacyRequestSchema>
 export type UpdatePageBody = z.infer<typeof UpdatePageSchema>
+export const UndeliveredRefundSchema = z.object({ cause: z.enum(["courier_failed", "customer_refused", "wrong_address"]) })

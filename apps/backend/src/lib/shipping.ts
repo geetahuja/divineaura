@@ -91,7 +91,7 @@ export function canAdvance(recorded: TimelineStatus[], next: TimelineStatus): bo
   if (recorded.includes(next)) return false
   if (next === "return_requested") return recorded.includes("delivered")
   if (next === "returned") return recorded.includes("return_requested")
-  if (next === "refunded") return recorded.includes("cancelled") || recorded.includes("returned")
+  if (next === "refunded") return recorded.includes("cancelled") || recorded.includes("returned") || recorded.includes("rto")
   if (recorded.some((s) => TERMINAL.includes(s))) return false
   const furthest = Math.max(-1, ...recorded.map((s) => TIMELINE.indexOf(s as (typeof TIMELINE)[number])))
   const shipped = furthest >= TIMELINE.indexOf("shipped")

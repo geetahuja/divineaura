@@ -21,6 +21,7 @@ type Overview = {
 const LABEL: Record<string, string> = {
   placed: "Placed", confirmed: "Confirmed", packed: "Packed", shipped: "Shipped",
   out_for_delivery: "Out for delivery", delivered: "Delivered", rto: "RTO (returned)", cancelled: "Cancelled",
+  return_requested: "Return requested", returned: "Returned", refunded: "Refunded",
 }
 const RECOMMENDED = "__recommended"
 
@@ -124,6 +125,25 @@ const OrderShippingWidget = ({ data: order }: DetailWidgetProps<AdminOrder>) => 
           </div>
         )}
       </div>
+
+      {/* Prepaid parcel came back undelivered (RTO): refund by cause (Shipping policy). */}
+      {done.includes("rto") && !data.is_cod && !done.includes("refunded") && (
+        <div className="flex flex-col gap-y-2 px-6 py-4">
+          <Text size="small" weight="plus">Parcel returned undelivered — refund the customer</Text>
+          <div className="flex flex-wrap gap-2">
+            <Button size="small" isLoading={act.isPending} onClick={() => act.mutate({ path: "undelivered-refund", body: { cause: "courier_failed" } })}>
+              Courier failed · full refund
+            </Button>
+            <Button size="small" variant="secondary" isLoading={act.isPending} onClick={() => act.mutate({ path: "undelivered-refund", body: { cause: "customer_refused" } })}>
+              Customer refused · minus shipping
+            </Button>
+            <Button size="small" variant="secondary" isLoading={act.isPending} onClick={() => act.mutate({ path: "undelivered-refund", body: { cause: "wrong_address" } })}>
+              Wrong address · minus shipping
+            </Button>
+          </div>
+          <Text size="xsmall" className="text-ui-fg-subtle">Refunds through the payment provider once; a credit note and the refund message follow automatically.</Text>
+        </div>
+      )}
 
       <ol className="flex flex-col gap-y-2 px-6 py-4">
         {data.events.length === 0 && <Text size="small" className="text-ui-fg-muted">No timeline yet.</Text>}
