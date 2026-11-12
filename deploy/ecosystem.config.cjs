@@ -42,7 +42,9 @@ module.exports = {
     {
       name: "storefront",
       script: `${APP}/apps/storefront/node_modules/next/dist/bin/next`,
-      args: "start -p 3000 -H 127.0.0.1",
+      // No -H: Next must see its own host as "localhost" (it compares that with its rewrite
+      // URLs; 127.0.0.1 makes / → /in a proxied request). Port 3000 is closed by UFW.
+      args: "start -p 3000",
       cwd: `${APP}/apps/storefront`,
       exec_mode: "cluster",
       instances: 2,

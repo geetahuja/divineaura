@@ -83,7 +83,9 @@ fi
 
 if [ ! -f "$REL/.storefront-built" ]; then
   log "Building storefront"
-  (cd "$REL/apps/storefront" && NODE_OPTIONS=--max-old-space-size=3072 pnpm exec next build --webpack)
+  # One retry: the build downloads Google Fonts, which occasionally fails.
+  sf_build() { (cd "$REL/apps/storefront" && NODE_OPTIONS=--max-old-space-size=3072 pnpm exec next build --webpack); }
+  sf_build || { log "Storefront build failed — retrying once"; sleep 15; sf_build; }
   touch "$REL/.storefront-built"
 fi
 touch "$REL/.built"

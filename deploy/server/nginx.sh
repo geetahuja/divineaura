@@ -107,7 +107,8 @@ server {
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-For \$remote_addr;
-    proxy_set_header X-Forwarded-Proto https;
+    # No X-Forwarded-Proto here: Next 16 would build its internal rewrite (/ → /in) as
+    # https://localhost:3000 and try to proxy it over TLS to its own plain-HTTP port.
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection \$da_connection;
     proxy_read_timeout 60s;
