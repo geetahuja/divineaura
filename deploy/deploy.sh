@@ -49,6 +49,29 @@ fi
 log "Migrations (+ first-run seed)"
 (cd "$REL/apps/backend/.medusa/server" && node "$REL/apps/backend/node_modules/@medusajs/cli/cli.js" db:migrate)
 
+switch_to() { ln -sfn "$1" "$ROOT/app.new" && mv -Tf "$ROOT/app.new" "$ROOT/app"; }
+reload() {
+  pm2 startOrReload "$ROOT/app/deploy/ecosystem.config.cjs" --update-env >/dev/null
+  pm2 save >/dev/null
+}
+healthy() {
+  for _ in $(seq 1 45); do
+    if curl -fsS -m 5 http://127.0.0.1:9000/health >/dev/null && curl -fsS -m 5 http://127.0.0.1:3000/api/health >/dev/null \
+       && curl -fsS -m 15 -o /dev/null http://127.0.0.1:3000/; then return 0; fi
+    sleep 2
+  done
+  return 1
+}
+
+# The storefront build reads the catalogue (sitemap, static pages) from the API. On the
+# very first deploy nothing serves it yet: start the new backend before building.
+if ! curl -fsS -m 5 http://127.0.0.1:9000/health >/dev/null; then
+  log "No API running — starting the new backend first"
+  switch_to "$REL"
+  pm2 startOrReload "$ROOT/app/deploy/ecosystem.config.cjs" --only medusa-server,medusa-worker --update-env >/dev/null
+  for _ in $(seq 1 60); do curl -fsS -m 5 http://127.0.0.1:9000/health >/dev/null && break; sleep 2; done
+fi
+
 # The storefront needs the publishable API key at build time; take it from the database once.
 if ! grep -q '^NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_' "$SHARED/storefront.env"; then
   DBURL=$(grep -oP '^DATABASE_URL=\K.*' "$SHARED/backend.env")
@@ -64,20 +87,6 @@ if [ ! -f "$REL/.storefront-built" ]; then
   touch "$REL/.storefront-built"
 fi
 touch "$REL/.built"
-
-switch_to() { ln -sfn "$1" "$ROOT/app.new" && mv -Tf "$ROOT/app.new" "$ROOT/app"; }
-reload() {
-  pm2 startOrReload "$ROOT/app/deploy/ecosystem.config.cjs" --update-env >/dev/null
-  pm2 save >/dev/null
-}
-healthy() {
-  for _ in $(seq 1 45); do
-    if curl -fsS -m 5 http://127.0.0.1:9000/health >/dev/null && curl -fsS -m 5 http://127.0.0.1:3000/api/health >/dev/null \
-       && curl -fsS -m 15 -o /dev/null http://127.0.0.1:3000/; then return 0; fi
-    sleep 2
-  done
-  return 1
-}
 
 log "Switching to ${SHA:0:7} and reloading"
 switch_to "$REL"
