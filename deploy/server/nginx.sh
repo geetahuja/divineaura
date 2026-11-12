@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Nginx + Let's Encrypt for divinesanatani.com (ARCHITECTURE.md §0, §18). Re-runnable:
-#   sudo DOMAIN=divinesanatani.com CERT_EMAIL=you@example.com bash deploy/server/nginx.sh
+#   sudo DOMAIN=divinesanatani.com [CERT_EMAIL=you@example.com] bash deploy/server/nginx.sh
 # 1. HTTP-only config (ACME challenge) → certbot (webroot) for apex, www and api.
 # 2. Full config: www → apex 301, storefront :3000, API :9000, /uploads from disk,
 #    gzip + brotli, cache headers, upload limit, rate limits on OTP / login.
@@ -9,7 +9,7 @@
 set -euo pipefail
 [ "$(id -u)" = 0 ] || { echo "Run with sudo"; exit 1; }
 DOMAIN=${DOMAIN:-divinesanatani.com}
-CERT_EMAIL=${CERT_EMAIL:?set CERT_EMAIL for certificate expiry notices}
+CERT_EMAIL=${CERT_EMAIL:-} # optional: expiry notices (renewal is automatic either way)
 ROOT=/var/www/divineaura
 ACME=/var/www/letsencrypt
 CONF=/etc/nginx/sites-available/divineaura.conf
@@ -35,25 +35,22 @@ server {
 }
 EOF
   ln -sfn "$CONF" /etc/nginx/sites-enabled/divineaura.conf
-  nginx -t -q && systemctl reload nginx
+  { nginx -t -q || exit 1; } && systemctl reload nginx
 }
 
 if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
   http_only
   certbot certonly --webroot -w "$ACME" -d "$DOMAIN" -d "www.$DOMAIN" -d "api.$DOMAIN" \
-    --cert-name "$DOMAIN" --email "$CERT_EMAIL" --agree-tos --no-eff-email --non-interactive \
+    --cert-name "$DOMAIN" $([ -n "$CERT_EMAIL" ] && echo "--email $CERT_EMAIL" || echo --register-unsafely-without-email) --agree-tos --no-eff-email --non-interactive \
     --deploy-hook "systemctl reload nginx"
 fi
 
 cat >/etc/nginx/conf.d/divineaura-http.conf <<'EOF'
 # DivineAura — http-level settings (deploy/server/nginx.sh)
-server_tokens off;
-ssl_protocols TLSv1.2 TLSv1.3;
-ssl_prefer_server_ciphers off;
 ssl_session_cache shared:DA_SSL:10m;
 ssl_session_timeout 1d;
 ssl_session_tickets off;
-gzip on; gzip_vary on; gzip_proxied any; gzip_comp_level 5; gzip_min_length 512;
+gzip_vary on; gzip_proxied any; gzip_comp_level 5; gzip_min_length 512;
 gzip_types text/plain text/css text/xml text/javascript application/javascript application/json application/xml application/rss+xml image/svg+xml application/manifest+json text/x-component;
 brotli on; brotli_comp_level 5; brotli_min_length 512;
 brotli_types text/plain text/css text/xml text/javascript application/javascript application/json application/xml application/rss+xml image/svg+xml application/manifest+json text/x-component;
@@ -170,6 +167,6 @@ proxy_read_timeout 120s;
 EOF
 
 ln -sfn "$CONF" /etc/nginx/sites-enabled/divineaura.conf
-nginx -t -q && systemctl reload nginx
+{ nginx -t -q || exit 1; } && systemctl reload nginx
 echo "Nginx ready for $DOMAIN, www.$DOMAIN, api.$DOMAIN"
-certbot renew --dry-run --cert-name "$DOMAIN" 2>&1 | grep -E "Congratulations|simulated renewal|fail" || true
+certbot renew --dry-run --no-random-sleep-on-renew --cert-name "$DOMAIN" 2>&1 | grep -E "Congratulations|simulated renewal|fail" || true

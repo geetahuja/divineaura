@@ -54,6 +54,6 @@ else
   for f in storefront-server storefront-location api-private; do echo "# live: nothing here (site-mode.sh)" >"$SNIP/$f.conf"; done
 fi
 
-nginx -t -q && systemctl reload nginx
+{ nginx -t -q || exit 1; } && systemctl reload nginx
 sudo -u deploy -H bash -c 'cd ~ && pm2 restart all --update-env >/dev/null && pm2 save >/dev/null' || echo "(apps not running yet)"
 echo "SITE_MODE=$MODE applied."
