@@ -11,7 +11,7 @@ class InvoiceModuleService extends MedusaService({ BusinessSettings, DocCounter,
   }
 
   /** Next consecutive number for a kind + FY. Call inside the "doc-counter" lock. */
-  async nextSequence(kind: "invoice" | "credit_note", fy: string) {
+  async nextSequence(kind: "invoice" | "credit_note" | "bill_of_supply", fy: string) {
     const [c] = await this.listDocCounters({ kind, fy })
     if (!c) {
       await this.createDocCounters({ kind, fy, last: 1 })

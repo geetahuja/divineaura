@@ -8,22 +8,22 @@
 
 ## 0. Domain (fixed)
 
-The production domain is **divineaura.com**. Everything is built around it:
+The production domain is **divinesanatani.com** (the brand name stays **DivineAura**). Everything is built around it:
 
 | Host | Purpose |
 | --- | --- |
-| `https://divineaura.com` | Storefront (canonical URL) |
-| `https://www.divineaura.com` | 301 redirect to `https://divineaura.com` |
-| `https://api.divineaura.com` | Medusa API |
-| `https://api.divineaura.com/app` | Medusa admin panel |
-| `orders@divineaura.com`, `support@divineaura.com`, `noreply@divineaura.com` | Email (order emails sent from `noreply@`, replies to `support@`) |
+| `https://divinesanatani.com` | Storefront (canonical URL) |
+| `https://www.divinesanatani.com` | 301 redirect to `https://divinesanatani.com` |
+| `https://api.divinesanatani.com` | Medusa API |
+| `https://api.divinesanatani.com/app` | Medusa admin panel |
+| `orders@divinesanatani.com`, `support@divinesanatani.com`, `noreply@divinesanatani.com` | Email (order emails sent from `noreply@`, replies to `support@`) |
 
 Rules so the domain never has to be changed in code:
 - The domain appears **only in environment variables** (`NEXT_PUBLIC_SITE_URL`, `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `MEDUSA_BACKEND_URL`, `COOKIE_DOMAIN`), never hard-coded in components, templates or emails. Build all absolute URLs (canonical tags, sitemap, Open Graph, invoice links, SMS/WhatsApp links, email links) from `NEXT_PUBLIC_SITE_URL`.
 - Development uses `http://localhost:8000` (storefront) and `http://localhost:9000` (backend) through the same variables.
-- Webhook URLs to register at go-live: `https://api.divineaura.com/hooks/razorpay`, `https://api.divineaura.com/hooks/shiprocket` (exact paths as implemented).
-- `divineaura.com` must be whitelisted on the DLT portal (for links inside SMS), verified in Meta Business (WhatsApp), set up in the email service with SPF, DKIM and DMARC records, and verified in Google Search Console.
-- Recommended: also register `divineaura.in` and 301-redirect it to `divineaura.com` to protect the brand.
+- Webhook URLs to register at go-live: `https://api.divinesanatani.com/hooks/payment/razorpay_razorpay` and `https://api.divinesanatani.com/hooks/shipping/shiprocket` (see `deploy/GO-LIVE.md`).
+- `divinesanatani.com` must be whitelisted on the DLT portal (for links inside SMS), verified in Meta Business (WhatsApp), set up in the email service with SPF, DKIM and DMARC records, and verified in Google Search Console.
+- Recommended: also register `divinesanatani.in` and 301-redirect it to `divinesanatani.com` to protect the brand.
 
 ---
 
@@ -306,9 +306,9 @@ Custom extensions to build:
 
 ## 15. Environment variables (names only)
 
-Backend: `MEDUSA_BACKEND_URL` (`https://api.divineaura.com`), `COOKIE_DOMAIN`, `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `COOKIE_SECRET`, `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SHIPROCKET_EMAIL`, `SHIPROCKET_PASSWORD`, `SHIPROCKET_PICKUP_LOCATION`, `RESEND_API_KEY`, `MESSAGING_CHANNEL` (`console` | `sms` | `whatsapp` | `both`), `OTP_CHANNEL` (`sms` | `whatsapp` | `sms_then_whatsapp`), `MSG91_AUTH_KEY`, `SMS_SENDER_ID`, `DLT_ENTITY_ID`, `SMS_TEMPLATE_IDS`, `WHATSAPP_PROVIDER` (`meta` | `msg91`), `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_TEMPLATE_NAMES`, `FILE_UPLOAD_DIR` (dev: `apps/backend/static`; prod: `/var/www/divineaura/uploads`), `FILE_BACKEND_URL` (dev: `http://localhost:9000/static`; prod: `https://api.divineaura.com/uploads`), `SELLER_GSTIN`, `SELLER_STATE_CODE`, `SENTRY_DSN`.
+Backend: `MEDUSA_BACKEND_URL` (`https://api.divinesanatani.com`), `COOKIE_DOMAIN`, `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `COOKIE_SECRET`, `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SHIPROCKET_EMAIL`, `SHIPROCKET_PASSWORD`, `SHIPROCKET_PICKUP_LOCATION`, `RESEND_API_KEY`, `MESSAGING_CHANNEL` (`console` | `sms` | `whatsapp` | `both`), `OTP_CHANNEL` (`sms` | `whatsapp` | `sms_then_whatsapp`), `MSG91_AUTH_KEY`, `SMS_SENDER_ID`, `DLT_ENTITY_ID`, `SMS_TEMPLATE_IDS`, `WHATSAPP_PROVIDER` (`meta` | `msg91`), `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_TEMPLATE_NAMES`, `FILE_UPLOAD_DIR` (dev: `apps/backend/static`; prod: `/var/www/divineaura/uploads`), `FILE_BACKEND_URL` (dev: `http://localhost:9000/static`; prod: `https://api.divinesanatani.com/uploads`), `SELLER_GSTIN`, `SELLER_STATE_CODE`, `SENTRY_DSN`.
 
-Storefront: `NEXT_PUBLIC_MEDUSA_BACKEND_URL`, `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`, `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `NEXT_PUBLIC_SITE_URL` (`https://divineaura.com`), `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `REVALIDATE_SECRET`, `SENTRY_DSN`.
+Storefront: `NEXT_PUBLIC_MEDUSA_BACKEND_URL`, `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`, `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `NEXT_PUBLIC_SITE_URL` (`https://divinesanatani.com`), `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `REVALIDATE_SECRET`, `SENTRY_DSN`.
 
 Provide `.env.example` files for both apps.
 
@@ -348,7 +348,7 @@ Marketplace sellers, international shipping, subscriptions, multi-currency, live
 
 ```
 Customer browser
-      │  https://divineaura.com           https://api.divineaura.com
+      │  https://divinesanatani.com           https://api.divinesanatani.com
       ▼                                    ▼
   (DNS at registrar → VPS IP)               │
       ▼                                     ▼
@@ -362,8 +362,8 @@ Customer browser
                                     (localhost)  (localhost)  (background jobs)
 ```
 
-- `divineaura.com` → Next.js storefront.
-- `api.divineaura.com` → Medusa API; admin panel at `api.divineaura.com/app`.
+- `divinesanatani.com` → Next.js storefront.
+- `api.divinesanatani.com` → Medusa API; admin panel at `api.divinesanatani.com/app`.
 - Medusa runs in two modes: `server` (API + admin) and `worker` (scheduled jobs, subscribers). Run both under PM2.
 - PostgreSQL and Redis listen on localhost only; never exposed to the internet.
 - Firewall (UFW): allow only 22 (SSH, key-only login), 80 and 443.
@@ -376,7 +376,7 @@ Customer browser
 - Hostinger weekly VPS backups/snapshots enabled; take a snapshot before every major update.
 - Product images live in `/var/www/divineaura/uploads` and are included in the daily backup (tar, kept 14 days).
 - Off-server copy (so a VPS failure can't lose data): Hostinger's automatic VPS backups enabled, plus a weekly copy of the database dump and uploads folder downloaded to the owner's PC/external drive with a provided `backup-download.ps1` script (scp over SSH). No third-party storage service required.
-- Uptime monitor (e.g. UptimeRobot, free) on the homepage and `api.divineaura.com/health`, alerting by email/SMS.
+- Uptime monitor (e.g. UptimeRobot, free) on the homepage and `api.divinesanatani.com/health`, alerting by email/SMS.
 - Sentry for errors; PM2 log rotation; automatic Ubuntu security updates.
 
 ---

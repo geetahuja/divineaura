@@ -1,7 +1,10 @@
 import type { TimelineStatus } from "../shipping"
 
 // Pluggable couriers (ARCHITECTURE.md §2, §5.9): the rest of the app only uses
-// this interface. "test" in development, "shiprocket" when its credentials are set.
+// this interface: "shiprocket" (API), "manual" (own courier, admin enters the AWB),
+// "test" (staging/dev). Admin → Shipping & couriers picks the default; per-order override.
+
+export type CourierId = "test" | "shiprocket" | "manual"
 
 export type CourierOption = { id: string; name: string; rate: number; etaDays: number; cod: boolean }
 
@@ -26,6 +29,8 @@ export type ShipmentInput = {
   to: Address
   items: { name: string; sku: string; quantity: number; unitPrice: number; hsn?: string | null }[]
   courierId?: string | null
+  /** Manual courier: what the admin typed in (courier, AWB, tracking link). */
+  manual?: { courierName?: string | null; awb: string; trackingUrl?: string | null } | null
 }
 
 export type ShipmentResult = { shipmentId: string; awb: string; courierName: string; labelUrl: string | null; trackingUrl: string | null }
@@ -36,7 +41,7 @@ export type ReturnPickupResult = { awb: string; courierName: string; trackingUrl
 export type TrackingEvent = { awb: string; status: TimelineStatus; at: Date; eventId: string; note?: string }
 
 export interface Courier {
-  id: "test" | "shiprocket"
+  id: CourierId
   serviceability(input: { pickupPin: string; deliveryPin: string; weightGrams: number; cod: boolean }): Promise<Serviceability>
   lookupPincode(pin: string): Promise<{ city: string | null; state: string | null } | null>
   createShipment(input: ShipmentInput): Promise<ShipmentResult>

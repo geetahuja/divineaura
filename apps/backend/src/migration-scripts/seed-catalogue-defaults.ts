@@ -199,7 +199,8 @@ export default async function seedCatalogueDefaults({ container }: { container: 
     sales_channels: [{ id: salesChannel.id }],
   }
 
-  const { result: products } = await createProductsWorkflow(container).run({
+  // SEED_SAMPLE_PRODUCTS=false (production / staging server): no sample products.
+  const { result: products } = process.env.SEED_SAMPLE_PRODUCTS === "false" ? { result: [] } : await createProductsWorkflow(container).run({
     input: {
       products: [
         {

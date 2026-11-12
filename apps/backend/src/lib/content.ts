@@ -14,7 +14,11 @@ import { DEFAULT_REGION_STORE_POLICIES, getRegionPolicies } from "./region-store
  * {{placeholders}} filled from the LIVE settings (COD & payments, region
  * shipping policy, Business details), so fees and days never go stale.
  */
-const rupees = (n: number) => `₹${Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
+const rupees = (n: number) => {
+  const v = Math.round(Number(n) * 100) / 100
+  const d = Number.isInteger(v) ? 0 : 2
+  return `₹${v.toLocaleString("en-IN", { minimumFractionDigits: d, maximumFractionDigits: d })}`
+}
 const notSet = (v: string | null | undefined, what: string) => (v && v.trim() ? v.trim() : `[${what} – set in Admin → Business details]`)
 
 export async function pageVariables(c: MedusaContainer): Promise<Record<string, string>> {

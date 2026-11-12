@@ -97,7 +97,7 @@ export const TEMPLATES = {
       subject: "Order #{order} delivered",
       heading: "Delivered with blessings",
       lines: ["Your order <strong>#{order}</strong> has been delivered. We hope it brings you peace and joy.", "If anything isn't right, just reply to this email."],
-      cta: { label: "View your order", url: "{link}" },
+      cta: { label: "Need help? Contact us", url: "{link}" },
     },
   },
   order_rto: {
@@ -181,7 +181,7 @@ export const TEMPLATES = {
   review_request: {
     category: "transactional",
     vars: ["order", "link"],
-    sms: "DivineAura: We hope you like your order #{order}. Please share a quick review of what you received - it helps other devotees: {link}",
+    sms: "DivineAura: We hope you like your order #{order}. Please share a quick review - it helps other devotees: {link}",
     whatsapp: { name: "review_request", params: ["order", "link"] },
     email: {
       subject: "How was your order #{order}?",

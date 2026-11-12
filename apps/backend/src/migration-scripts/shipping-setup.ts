@@ -53,7 +53,7 @@ export default async function shippingSetup({ container }: ExecArgs) {
   }
 
   const providers = await container.resolve(Modules.TAX).listTaxProviders({})
-  const gst = providers.find((p: { id: string }) => p.id.includes("gst"))
+  const gst = providers.find((p: { id: string }) => p.id === "tp_gst_gst")
   const { data: regions } = await query.graph({ entity: "tax_region", fields: ["id", "provider_id"], filters: { country_code: "in", parent_id: null } })
   if (gst && regions[0] && regions[0].provider_id !== gst.id) {
     await updateTaxRegionsWorkflow(container).run({ input: [{ id: regions[0].id, provider_id: gst.id }] })

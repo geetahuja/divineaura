@@ -4,6 +4,7 @@ import { checkDelivery, DeliveryCheck } from "@lib/data/delivery"
 import { deliveryBy } from "@lib/util/delivery-date"
 import { MapPin } from "lucide-react"
 import { useState, useTransition } from "react"
+import { notServiceableText } from "@lib/util/delivery-text"
 
 function message(r: DeliveryCheck) {
   switch (r.status) {
@@ -12,7 +13,7 @@ function message(r: DeliveryCheck) {
     case "unavailable":
       return { ok: false, text: "Delivery checks are coming soon. We deliver across India." }
     case "not_serviceable":
-      return { ok: false, text: "Sorry, we don't deliver to this PIN code yet." }
+      return { ok: false, text: notServiceableText(r) }
     case "serviceable":
       return {
         ok: true,

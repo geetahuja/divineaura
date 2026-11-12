@@ -4,7 +4,7 @@ import { model } from "@medusajs/framework/utils"
 const DocCounter = model
   .define("doc_counter", {
     id: model.id({ prefix: "dctr" }).primaryKey(),
-    kind: model.enum(["invoice", "credit_note"]),
+    kind: model.enum(["invoice", "credit_note", "bill_of_supply"]),
     fy: model.text(),
     last: model.number().default(0),
   })

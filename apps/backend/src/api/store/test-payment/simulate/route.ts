@@ -3,9 +3,10 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { signTestPayment, TEST_PAYMENT_SIGNATURE_HEADER } from "../../../../modules/test-payment/service"
 import type { SimulateTestPaymentBody } from "../../../validators"
+import { testToolsAllowed } from "../../../../lib/site-mode"
 
 const PROVIDER_ID = "pp_test-payment_test-payment"
-const enabled = () => process.env.TEST_PAYMENT_ENABLED === "true" && process.env.NODE_ENV !== "production"
+const enabled = () => process.env.TEST_PAYMENT_ENABLED === "true" && testToolsAllowed()
 
 /**
  * DEVELOPMENT ONLY. Plays the payment gateway for the storefront's simulator

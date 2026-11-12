@@ -1,3 +1,4 @@
+import { COMPOSITION_DECLARATION } from "./gst-scheme"
 import type { InvoiceData } from "./invoices"
 import { A4, Pdf, wrap } from "./pdf"
 
@@ -13,16 +14,18 @@ const W = A4.w - 2 * M
 const money = (v: number) => v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const date = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })
 
-/** A4 tax invoice / credit note in DivineAura colours. */
+/** A4 tax invoice / bill of supply (GST composition) / credit note in DivineAura colours. */
 export function renderInvoicePdf(d: InvoiceData): Buffer {
   const pdf = new Pdf()
   const credit = d.kind === "credit_note"
+  const bos = !!d.bill_of_supply // composition scheme: no tax columns, declaration instead
+  const docName = bos ? "Bill" : "Invoice"
 
   const header = () => {
     pdf.rect(0, 0, A4.w, 64, MAROON)
     pdf.rect(0, 64, A4.w, 3, GOLD)
     pdf.text(M, 40, d.seller.brand, { font: "serif", size: 24, color: WHITE })
-    pdf.text(A4.w - M, 30, credit ? "CREDIT NOTE" : "TAX INVOICE", { font: "bold", size: 14, color: WHITE, align: "right" })
+    pdf.text(A4.w - M, 30, credit ? "CREDIT NOTE" : bos ? "BILL OF SUPPLY" : "TAX INVOICE", { font: "bold", size: 14, color: WHITE, align: "right" })
     pdf.text(A4.w - M, 48, d.number, { size: 10, color: IVORY, align: "right" })
   }
   header()
@@ -38,9 +41,9 @@ export function renderInvoicePdf(d: InvoiceData): Buffer {
   const sellerBottom = y
 
   const facts: [string, string][] = [
-    [credit ? "Credit note no." : "Invoice no.", d.number],
-    [credit ? "Credit note date" : "Invoice date", date(d.issued_at)],
-    ...(credit ? ([["Against invoice", d.invoice_number ?? ""]] as [string, string][]) : []),
+    [credit ? "Credit note no." : `${docName} no.`, d.number],
+    [credit ? "Credit note date" : `${docName} date`, date(d.issued_at)],
+    ...(credit ? ([[`Against ${docName.toLowerCase()}`, d.invoice_number ?? ""]] as [string, string][]) : []),
     ["Order no.", `#${d.order.number}`],
     ["Order date", date(d.order.date)],
     ["Payment", d.order.payment],
@@ -63,7 +66,9 @@ export function renderInvoicePdf(d: InvoiceData): Buffer {
   if (credit && d.reason) pdf.text(A4.w - M, y, `Reason: ${d.reason}`, { size: 8.5, color: SOFT, align: "right" })
 
   // Items table
-  const cols = d.intra_state
+  const cols = bos
+    ? [{ h: "#", w: 18 }, { h: "Description", w: 285 }, { h: "HSN/SAC", w: 60 }, { h: "Qty", w: 40, r: 1 }, { h: "Amount", w: W - 403, r: 1 }]
+    : d.intra_state
     ? [{ h: "#", w: 18 }, { h: "Description", w: 175 }, { h: "HSN/SAC", w: 50 }, { h: "Qty", w: 28, r: 1 }, { h: "Taxable", w: 60, r: 1 }, { h: "GST %", w: 34, r: 1 }, { h: "CGST", w: 50, r: 1 }, { h: "SGST", w: 50, r: 1 }, { h: "Total", w: W - 465, r: 1 }]
     : [{ h: "#", w: 18 }, { h: "Description", w: 175 }, { h: "HSN/SAC", w: 50 }, { h: "Qty", w: 28, r: 1 }, { h: "Taxable", w: 60, r: 1 }, { h: "GST %", w: 34, r: 1 }, { h: "IGST", w: 100, r: 1 }, { h: "Total", w: W - 465, r: 1 }]
   const xs: number[] = []
@@ -91,6 +96,12 @@ export function renderInvoicePdf(d: InvoiceData): Buffer {
     desc.forEach((t, k) => pdf.text(xs[1] + 4, base + k * 10, t, { size: 8 }))
     cell(2, base, l.hsn ?? "—")
     cell(3, base, String(l.quantity))
+    if (bos) {
+      cell(4, base, money(l.total), true)
+      y += h
+      pdf.line(M, y, A4.w - M, y)
+      return
+    }
     cell(4, base, money(l.taxable))
     cell(5, base, `${l.rate}%`)
     if (d.intra_state) {
@@ -107,7 +118,9 @@ export function renderInvoicePdf(d: InvoiceData): Buffer {
 
   // Totals
   const t = d.totals
-  const rows: [string, number][] = [
+  const rows: [string, number][] = bos
+    ? (t.roundOff ? [["Round off", t.roundOff]] : [])
+    : [
     ["Taxable value", t.taxable],
     ...((d.intra_state ? [["CGST", t.cgst], ["SGST", t.sgst]] : [["IGST", t.igst]]) as [string, number][]),
     ...(t.roundOff ? ([["Round off", t.roundOff]] as [string, number][]) : []),
@@ -124,7 +137,7 @@ export function renderInvoicePdf(d: InvoiceData): Buffer {
   y += 36
   for (const l of wrap(d.words, W, 8.5)) pdf.text(M, (y += 11), l, { size: 8.5, font: "bold" })
   if (d.discount_note) pdf.text(M, (y += 13), d.discount_note, { size: 8, color: SOFT })
-  pdf.text(M, (y += 13), "Prices are inclusive of GST. Tax is not payable on reverse charge.", { size: 8, color: SOFT })
+  pdf.text(M, (y += 13), bos ? COMPOSITION_DECLARATION : "Prices are inclusive of GST. Tax is not payable on reverse charge.", { size: 8, color: bos ? undefined : SOFT, font: bos ? "bold" : "regular" })
 
   // Footer
   pdf.line(M, A4.h - 60, A4.w - M, A4.h - 60, GOLD, 1)

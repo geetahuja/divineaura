@@ -8,7 +8,8 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { randomUUID } from "node:crypto"
 import { COD_FEE_ITEM_TYPE, COD_PROVIDER_ID } from "./cod"
-import { getCourier, shippingDefaults, TrackingEvent } from "./couriers"
+import { availableCourierIds, COURIER_LABEL, courierById, defaultCourierId, getCourier, shippingDefaults, TrackingEvent } from "./couriers"
+import { gstScheme, insideSupplyArea } from "./gst-scheme"
 import { signTestCourier, TEST_COURIER_SIGNATURE_HEADER } from "./couriers/test"
 import { canAdvance, fillGaps, isValidPin, shipmentWeightGrams, TIMELINE, TimelineStatus } from "./shipping"
 import { COD_MODULE } from "../modules/cod"
@@ -21,7 +22,7 @@ import type ShippingModuleService from "../modules/shipping/service"
 
 /**
  * Shipping & order timeline (ARCHITECTURE.md §5.8–9, §10). Couriers come from
- * src/lib/couriers (test now, Shiprocket when configured); this file holds the
+ * src/lib/couriers (Shiprocket, manual, test; default + per-order override); this file holds the
  * business flow so routes, webhooks, jobs and subscribers all share it.
  */
 
@@ -123,14 +124,19 @@ export async function pickupLocation(c: MedusaContainer) {
 }
 
 export async function deliveryCheck(c: MedusaContainer, pincode: string, weightGrams = 500) {
-  const courier = getCourier()
   if (!isValidPin(pincode)) return { status: "invalid" as const }
+  const courier = await getCourier(c)
   const pickup = await pickupLocation(c)
-  if (!courier || !pickup || !isValidPin(pickup.pincode)) return { status: "unavailable" as const }
-  const [s, place] = await Promise.all([
+  if (!pickup || !isValidPin(pickup.pincode)) return { status: "unavailable" as const }
+  const [s, place, gst] = await Promise.all([
     courier.serviceability({ pickupPin: pickup.pincode, deliveryPin: pincode, weightGrams, cod: true }),
     courier.lookupPincode(pincode),
+    gstScheme(c),
   ])
+  // GST composition scheme: deliveries only inside the seller's state.
+  if (!insideSupplyArea(gst.scheme, gst.sellerState, { pincode, pinState: place?.state })) {
+    return { status: "not_serviceable" as const, reason: "outside_state" as const, seller_state: gst.sellerState, city: place?.city ?? null, state: place?.state ?? null }
+  }
   if (!s.serviceable) return { status: "not_serviceable" as const, city: place?.city ?? null, state: place?.state ?? null }
   const cod = c.resolve<CodModuleService>(COD_MODULE)
   const settings = await cod.getSettings()
@@ -140,9 +146,9 @@ export async function deliveryCheck(c: MedusaContainer, pincode: string, weightG
 
 /** Does the courier collect cash at this PIN? undefined = unknown (no courier / no pickup PIN). */
 export async function courierCodAvailable(c: MedusaContainer, pincode: string | null | undefined) {
-  const courier = getCourier()
+  const courier = await getCourier(c)
   const pickup = await pickupLocation(c)
-  if (!courier || !pickup || !isValidPin(pickup.pincode) || !pincode || !isValidPin(pincode)) return undefined
+  if (!pickup || !isValidPin(pickup.pincode) || !pincode || !isValidPin(pincode)) return undefined
   const s = await courier.serviceability({ pickupPin: pickup.pincode, deliveryPin: pincode, weightGrams: 500, cod: true })
   return s.serviceable && s.cod
 }
@@ -156,11 +162,14 @@ async function codGate(c: MedusaContainer, o: OrderRow) {
   }
 }
 
-export async function shippingOverview(c: MedusaContainer, orderId: string) {
+export async function shippingOverview(c: MedusaContainer, orderId: string, courierOverride?: string | null) {
   const o = await loadOrder(c, orderId)
   const [shipment] = await svc(c).listShipments({ order_id: orderId })
   const pickup = await pickupLocation(c)
-  const courier = getCourier()
+  const available = availableCourierIds()
+  const defaultId = await defaultCourierId(c)
+  const selected = courierOverride && available.includes(courierOverride as never) ? courierOverride : defaultId
+  const courier = courierById(c, selected)
   const weight = await orderWeight(c, o)
   let options = null as Awaited<ReturnType<NonNullable<typeof courier>["serviceability"]>> | null
   if (!shipment && courier && pickup && isValidPin(pickup.pincode) && o.shipping_address?.postal_code) {
@@ -172,8 +181,12 @@ export async function shippingOverview(c: MedusaContainer, orderId: string) {
   } catch {
     codReady = false
   }
+  const cs = await svc(c).getCourierSettings()
   return {
     courier: courier?.id ?? null,
+    default_courier: defaultId,
+    couriers: available.map((id) => ({ id, label: COURIER_LABEL[id] })),
+    manual_defaults: { courier_name: cs.manual_courier_name, tracking_url_template: cs.manual_tracking_url },
     pickup_ready: !!pickup && isValidPin(pickup.pincode),
     weight_g: weight,
     is_cod: isCod(o),
@@ -203,15 +216,22 @@ export async function markPacked(c: MedusaContainer, orderId: string) {
 }
 
 /** Books the courier, stores AWB + label, creates Medusa's fulfillment, and moves the timeline to Shipped. */
-export async function createShipment(c: MedusaContainer, orderId: string, courierId?: string | null) {
+export async function createShipment(
+  c: MedusaContainer,
+  orderId: string,
+  courierId?: string | null,
+  opts: { provider?: string | null; manual?: { courierName?: string | null; awb: string; trackingUrl?: string | null } | null } = {}
+) {
   return lock(c, `shipment:${orderId}`, async () => {
     const [existing] = await svc(c).listShipments({ order_id: orderId })
     if (existing) return existing
     const o = await loadOrder(c, orderId)
     if (o.status === "canceled") throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Order is cancelled")
     await codGate(c, o)
-    const courier = getCourier()
-    if (!courier) throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "No courier configured (set Shiprocket credentials in .env)")
+    const providerId = opts.provider ?? (await defaultCourierId(c))
+    if (!availableCourierIds().includes(providerId as never)) throw new MedusaError(MedusaError.Types.NOT_ALLOWED, `Courier "${providerId}" is not configured`)
+    const courier = courierById(c, providerId)!
+    if (courier.id === "manual" && !opts.manual?.awb?.trim()) throw new MedusaError(MedusaError.Types.INVALID_DATA, "Enter the courier's AWB / tracking number")
     const pickup = await pickupLocation(c)
     if (!pickup || !isValidPin(pickup.pincode)) {
       throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Set the warehouse PIN code and address in Settings → Locations first.")
@@ -239,6 +259,9 @@ export async function createShipment(c: MedusaContainer, orderId: string, courie
       },
       items: goods.map((i) => ({ name: i.product_title ?? i.title, sku: i.variant_sku ?? i.id, quantity: i.quantity, unitPrice: Number(i.unit_price) })),
       courierId,
+      manual: opts.manual ?? null,
+    }).catch((e: Error) => {
+      throw e instanceof MedusaError ? e : new MedusaError(MedusaError.Types.INVALID_DATA, e.message)
     })
 
     // Medusa's own fulfillment, so the native order page shows it as shipped with the label.
@@ -281,7 +304,7 @@ export async function createShipment(c: MedusaContainer, orderId: string, courie
  * events are ignored by the timeline rules. Delivered also completes Medusa's
  * fulfillment and, for COD, records the cash as collected (payment captured).
  */
-export async function applyTrackingEvent(c: MedusaContainer, ev: TrackingEvent, source: "webhook" | "sync") {
+export async function applyTrackingEvent(c: MedusaContainer, ev: TrackingEvent, source: "webhook" | "sync" | "admin") {
   const [shipment] = await svc(c).listShipments({ awb: ev.awb })
   if (!shipment) return { applied: [] as TimelineStatus[], reason: "unknown_awb" }
   const recorded = (await listEvents(c, shipment.order_id)).map((e) => e.status as TimelineStatus)
@@ -317,3 +340,15 @@ export async function simulateNextTrackingEvent(c: MedusaContainer, orderId: str
   if (!r.ok) throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `Tracking webhook rejected (${r.status})`)
   return { sent: next }
 }
+
+/** Manual courier: admin moves the shipment along (shipped → out for delivery → delivered / RTO). */
+export async function updateManualStatus(c: MedusaContainer, orderId: string, status: TimelineStatus, trackingUrl?: string | null) {
+  const [shipment] = await svc(c).listShipments({ order_id: orderId })
+  if (!shipment || shipment.courier !== "manual") throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Only manual-courier shipments are updated by hand")
+  if (trackingUrl !== undefined && trackingUrl !== shipment.tracking_url) {
+    if (trackingUrl && !/^https?:\/\//.test(trackingUrl)) throw new MedusaError(MedusaError.Types.INVALID_DATA, "The tracking link must start with https://")
+    await svc(c).updateShipments({ id: shipment.id, tracking_url: trackingUrl || null })
+  }
+  return applyTrackingEvent(c, { awb: shipment.awb, status, at: new Date(), eventId: `admin_${randomUUID()}` }, "admin")
+}
+

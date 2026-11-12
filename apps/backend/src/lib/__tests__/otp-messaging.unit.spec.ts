@@ -78,7 +78,7 @@ describe("messaging channels", () => {
 })
 
 describe("templates", () => {
-  const sample: Record<string, string> = { otp: "123456", domain: "divineaura.com", order: "10245", amount: "1,299", link: "https://divineaura.com/track-order", hours: "24", courier: "Delhivery Surface", reason: "not confirmed in time", awb: "RTEST1234567890", invoice: "https://api.divineaura.com/documents/i_inv_01ABC~sig", code: "REVIEW-A961DC05", percent: "10" }
+  const sample: Record<string, string> = { otp: "123456", domain: "divinesanatani.com", order: "10245", amount: "1,299", link: "https://divinesanatani.com/track-order", hours: "24", courier: "Delhivery Surface", reason: "not confirmed in time", awb: "RTEST1234567890", invoice: "https://api.divinesanatani.com/documents/i_inv_01ABC~sig", code: "REVIEW-A961DC05", percent: "10" }
   it("fills every variable and throws on a missing one", () => {
     expect(render("Order #{order}", { order: "1" })).toBe("Order #1")
     expect(() => render("Order #{order}", {})).toThrow(/order/)

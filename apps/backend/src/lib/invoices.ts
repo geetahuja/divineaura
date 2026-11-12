@@ -4,6 +4,7 @@ import { createHmac, timingSafeEqual } from "node:crypto"
 import { INVOICE_MODULE } from "../modules/invoice"
 import type InvoiceModuleService from "../modules/invoice/service"
 import { COD_PROVIDER_ID } from "./cod"
+import { testToolsAllowed } from "./site-mode"
 import { amountInWords, documentNumber, financialYear, InvoiceLine, InvoiceTotals, round2, SourceLine, splitTax, stateCode } from "./gst-invoice"
 
 /**
@@ -36,6 +37,8 @@ export type InvoiceData = {
   totals: InvoiceTotals
   words: string
   discount_note?: string
+  /** GST composition scheme: "Bill of Supply" (no tax), own number series. Credit notes inherit it. */
+  bill_of_supply?: boolean
 }
 
 const svc = (c: MedusaContainer) => c.resolve<InvoiceModuleService>(INVOICE_MODULE)
@@ -123,7 +126,7 @@ function parties(settings: Awaited<ReturnType<InvoiceModuleService["getSettings"
   const buyerState = a.province ?? ""
   const sellerCode = stateCode(settings.state)
   const buyerCode = stateCode(buyerState)
-  const devGstin = process.env.NODE_ENV === "production" ? null : "NOT SET (development)"
+  const devGstin = testToolsAllowed() ? "NOT SET (staging)" : null
   return {
     seller: {
       legal_name: settings.legal_name,
@@ -152,7 +155,7 @@ function parties(settings: Awaited<ReturnType<InvoiceModuleService["getSettings"
 const inr = (v: number) => `Rs.${v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
 /** Allocates the next number for a kind under a global lock (consecutive, never reused). */
-async function allocate(c: MedusaContainer, kind: "invoice" | "credit_note", prefix: string, at: Date) {
+async function allocate(c: MedusaContainer, kind: "invoice" | "credit_note" | "bill_of_supply", prefix: string, at: Date) {
   const fy = financialYear(at)
   const seq = await c.resolve(Modules.LOCKING).execute(`doc-counter:${kind}`, () => svc(c).nextSequence(kind, fy), { timeout: 10 })
   return documentNumber(prefix, fy, seq)
@@ -171,9 +174,15 @@ export async function getOrIssueInvoice(c: MedusaContainer, orderId: string) {
     if (again) return again
     const settings = await svc(c).getSettings()
     const p = parties(settings, o)
-    const { lines, totals } = splitTax(await sourceLines(c, o), p.intra, n(o.total))
+    // Composition scheme: Bill of Supply — no tax collected, so no tax on any line;
+    // its own consecutive series per financial year (BOS/26-27/00001).
+    // ponytail: the scheme in force when the document is issued decides; switch schemes
+    // only once every open order is invoiced (deploy/GO-LIVE.md).
+    const bos = settings.gst_scheme === "composition"
+    const src = await sourceLines(c, o)
+    const { lines, totals } = splitTax(bos ? src.map((l) => ({ ...l, tax: 0, rate: 0 })) : src, p.intra, n(o.total))
     const at = new Date()
-    const number = await allocate(c, "invoice", settings.invoice_prefix, at)
+    const number = bos ? await allocate(c, "bill_of_supply", settings.bill_of_supply_prefix, at) : await allocate(c, "invoice", settings.invoice_prefix, at)
     const data: InvoiceData = {
       kind: "invoice",
       number,
@@ -187,6 +196,7 @@ export async function getOrIssueInvoice(c: MedusaContainer, orderId: string) {
       totals,
       words: amountInWords(totals.grandTotal),
       discount_note: n(o.discount_total) > 0 ? `Item values are after a discount of ${inr(n(o.discount_total))}.` : undefined,
+      ...(bos ? { bill_of_supply: true } : {}),
     }
     return svc(c).createInvoices({ order_id: orderId, number, issued_at: at, data: data as unknown as Record<string, unknown> })
   })

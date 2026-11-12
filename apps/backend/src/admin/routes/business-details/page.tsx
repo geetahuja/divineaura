@@ -15,6 +15,8 @@ type Settings = {
   phone: string | null
   invoice_prefix: string
   credit_note_prefix: string
+  gst_scheme: "regular" | "composition"
+  bill_of_supply_prefix: string
   return_window_days: number
   grievance_name: string | null
   grievance_email: string | null
@@ -23,7 +25,7 @@ type Settings = {
   grievance_resolve_days: number
 }
 
-const FIELDS: { key: keyof Settings; label: string; hint?: string; textarea?: boolean; type?: string }[] = [
+const FIELDS: { key: keyof Settings; label: string; hint?: string; textarea?: boolean; type?: string; options?: [string, string][] }[] = [
   { key: "legal_name", label: "Legal name", hint: "Printed as the seller on invoices." },
   { key: "brand_name", label: "Brand name" },
   { key: "address", label: "Registered address", textarea: true, hint: "One line per row, including PIN code." },
@@ -33,6 +35,13 @@ const FIELDS: { key: keyof Settings; label: string; hint?: string; textarea?: bo
   { key: "phone", label: "Support phone" },
   { key: "invoice_prefix", label: "Invoice prefix", hint: "e.g. DA → DA/26-27/00001 (max 16 characters in total)." },
   { key: "credit_note_prefix", label: "Credit note prefix", hint: "e.g. CN → CN/26-27/00001" },
+  {
+    key: "gst_scheme",
+    label: "GST scheme",
+    options: [["regular", "Regular (tax invoices, delivery all over India)"], ["composition", "Composition (Bill of Supply, delivery in your state only)"]],
+    hint: "Composition: no GST is charged or shown, documents become a Bill of Supply, and checkout accepts only PIN codes in the State above. Switch only when every open order has its invoice.",
+  },
+  { key: "bill_of_supply_prefix", label: "Bill of Supply prefix", hint: "Composition only, own series, e.g. BOS → BOS/26-27/00001" },
   { key: "return_window_days", label: "Return window (days after delivery)", type: "number", hint: "0 turns returns off." },
   { key: "grievance_name", label: "Grievance Officer – name", hint: "Required by the E-Commerce Rules 2020. Shown on the Grievance page, Contact and in the footer." },
   { key: "grievance_email", label: "Grievance Officer – email", hint: "Blank = support email." },
@@ -52,7 +61,10 @@ const BusinessDetailsPage = () => {
 
   const save = useMutation({
     mutationFn: () =>
-      sdk.client.fetch<{ settings: Settings; state_code: string | null }>("/admin/business-settings", {
+      (form.gst_scheme !== data?.settings.gst_scheme &&
+      !window.confirm(form.gst_scheme === "composition" ? "Switch to the Composition scheme? New orders get no GST, a Bill of Supply, and delivery only within your state." : "Switch back to Regular GST? New orders get tax invoices and delivery all over India.")
+        ? Promise.reject(new Error("Not saved"))
+        : sdk.client.fetch<{ settings: Settings; state_code: string | null }>("/admin/business-settings", {
         method: "POST",
         body: {
           ...form,
@@ -60,7 +72,7 @@ const BusinessDetailsPage = () => {
           grievance_ack_hours: Number(form.grievance_ack_hours || 48),
           grievance_resolve_days: Number(form.grievance_resolve_days || 30),
         },
-      }),
+      })),
     onSuccess: (r) => {
       qc.setQueryData(["business-settings"], r)
       toast.success("Business details saved")
@@ -73,7 +85,7 @@ const BusinessDetailsPage = () => {
       <div className="px-6 py-4">
         <Heading level="h1">Business details</Heading>
         <Text size="small" className="text-ui-fg-subtle">
-          Used on GST invoices and credit notes. Invoices already issued keep the details they were issued with.
+          Used on GST invoices, Bills of Supply and credit notes. Invoices already issued keep the details they were issued with.
           {data?.state_code ? ` GST state code: ${data.state_code}.` : ""}
         </Text>
       </div>
@@ -87,7 +99,16 @@ const BusinessDetailsPage = () => {
         {FIELDS.map((f) => (
           <div key={f.key} className={f.textarea ? "md:col-span-2" : ""}>
             <Label size="small" htmlFor={`bd-${f.key}`}>{f.label}</Label>
-            {f.textarea ? (
+            {f.options ? (
+              <select
+                id={`bd-${f.key}`}
+                className="bg-ui-bg-field shadow-borders-base txt-compact-small h-8 w-full rounded-md px-2"
+                value={form[f.key] ?? ""}
+                onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+              >
+                {f.options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            ) : f.textarea ? (
               <Textarea id={`bd-${f.key}`} rows={3} value={form[f.key] ?? ""} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })} />
             ) : (
               <Input id={`bd-${f.key}`} type={f.type ?? "text"} value={form[f.key] ?? ""} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })} />

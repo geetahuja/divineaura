@@ -1,6 +1,7 @@
 import { retrieveCart } from "@lib/data/cart"
 import { simulateTestPayment } from "@lib/data/test-payment"
 import { convertToLocale } from "@lib/util/money"
+import { siteMode } from "@lib/util/site-mode"
 import { FlaskConical } from "lucide-react"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
@@ -10,11 +11,11 @@ export const metadata: Metadata = { title: "Test payment", robots: { index: fals
 type Props = { searchParams: Promise<{ session?: string }> }
 
 /**
- * DEVELOPMENT ONLY: stands in for the gateway's payment page (Razorpay
- * Checkout / Cashfree). Not available in production builds.
+ * STAGING / DEVELOPMENT ONLY: stands in for the gateway's payment page
+ * (Razorpay Checkout / Cashfree). Not available when SITE_MODE=live.
  */
 export default async function TestPaymentPage(props: Props) {
-  if (process.env.NODE_ENV === "production") {
+  if (siteMode() === "live") {
     notFound()
   }
   const sessionId = (await props.searchParams).session ?? ""

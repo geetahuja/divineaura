@@ -1,15 +1,17 @@
 import type { HttpTypes } from "@medusajs/types"
 import type { ComponentType, ReactNode } from "react"
 import { cod } from "./cod"
+import { razorpay } from "./razorpay"
 import { testPayment } from "./test-payment"
 
 /**
  * Pluggable payment methods (ARCHITECTURE.md §5.7, §9).
  *
  * Every payment method is a Medusa payment provider on the backend plus one
- * adapter here. Checkout only talks to this registry, so adding Razorpay or
- * Cashfree = backend provider module + `./razorpay.tsx` adapter added to
- * ADAPTERS. No checkout changes.
+ * adapter here. Checkout only talks to this registry, so adding Cashfree, PayU,
+ * PhonePe PG or Paytm PG = backend provider module + an adapter like
+ * `./razorpay.tsx` added to ADAPTERS (deploy/GO-LIVE.md). No checkout changes.
+ * Several online gateways may be enabled at once; customers see each one.
  *
  * kind decides server-side pricing: "online" gets the prepaid discount,
  * "cod" gets the COD fee and is only offered when the cart is eligible.
@@ -34,7 +36,7 @@ export type PaymentAdapter = {
   PayButton: ComponentType<PayButtonProps>
 }
 
-const ADAPTERS: PaymentAdapter[] = [testPayment, cod]
+const ADAPTERS: PaymentAdapter[] = [razorpay, testPayment, cod]
 
 export const getPaymentAdapter = (providerId?: string | null) =>
   providerId ? ADAPTERS.find((a) => a.match(providerId)) : undefined

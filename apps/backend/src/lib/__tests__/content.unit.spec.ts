@@ -12,7 +12,7 @@ describe("content markdown", () => {
   })
   it("allows only safe links", () => {
     expect(markdownToHtml("[Shipping](/policies/shipping)")).toBe('<p><a href="/policies/shipping">Shipping</a></p>')
-    expect(markdownToHtml("[Mail](mailto:support@divineaura.com)")).toContain('href="mailto:support@divineaura.com"')
+    expect(markdownToHtml("[Mail](mailto:support@divinesanatani.com)")).toContain('href="mailto:support@divinesanatani.com"')
     expect(markdownToHtml("[Site](https://example.com)")).toContain('rel="noopener" target="_blank"')
     expect(markdownToHtml("[x](javascript:alert%281%29)")).toBe("<p>x</p>")
     expect(markdownToHtml("[x](//evil.com)")).toBe("<p>x</p>")
@@ -28,7 +28,7 @@ describe("email safety", () => {
     const e = renderEmail(
       { subject: "Contact: {name}", heading: "From {name}", lines: ["<strong>Message:</strong> {message}"] },
       { name: "Eve\nBcc: x@y.z", message: '<img src=x onerror="alert(1)"> & hi' },
-      "https://divineaura.com"
+      "https://divinesanatani.com"
     )
     expect(e.html).toContain("<strong>Message:</strong> &lt;img src=x onerror=&quot;alert(1)&quot;&gt; &amp; hi")
     expect(e.html).not.toContain("<img src=x")

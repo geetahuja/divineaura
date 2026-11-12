@@ -11,7 +11,12 @@ import type { MessageEvent } from "../modules/messaging/templates"
  * STOREFRONT_URL (= NEXT_PUBLIC_SITE_URL) so SMS stays under 160 characters.
  */
 const site = () => (process.env.STOREFRONT_URL || "http://localhost:8000").replace(/\/$/, "")
-const rupees = (n: number) => Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2 })
+// 1299 → "1,299"; 948.1 → "948.10" (never one decimal)
+const rupees = (n: number) => {
+  const v = Math.round(Number(n) * 100) / 100
+  const d = Number.isInteger(v) ? 0 : 2
+  return v.toLocaleString("en-IN", { minimumFractionDigits: d, maximumFractionDigits: d })
+}
 
 export const links = {
   track: () => `${site()}/track-order`,

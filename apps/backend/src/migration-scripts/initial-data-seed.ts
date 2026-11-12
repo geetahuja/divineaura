@@ -46,7 +46,7 @@ export default async function initial_data_seed({
     result: [defaultSalesChannel],
   } = await createSalesChannelsWorkflow(container).run({
     input: {
-      salesChannelsData: [{ name: "DivineAura Web", description: "divineaura.com storefront" }],
+      salesChannelsData: [{ name: "DivineAura Web", description: "divinesanatani.com storefront" }],
     },
   });
 

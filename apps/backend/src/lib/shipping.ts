@@ -113,3 +113,12 @@ export function fillGaps(recorded: TimelineStatus[], target: TimelineStatus): Ti
   }
   return steps
 }
+
+/** Bulk-pasted PIN codes (any separators: lines, commas, spaces, tabs) → unique valid list + rejects. */
+export function parsePinList(text: string): { valid: string[]; invalid: string[] } {
+  const tokens = text.split(/[\s,;]+/).map((t) => t.trim()).filter(Boolean)
+  const valid = new Set<string>()
+  const invalid = new Set<string>()
+  for (const t of tokens) (isValidPin(t) ? valid : invalid).add(t)
+  return { valid: [...valid].sort(), invalid: [...invalid] }
+}

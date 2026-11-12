@@ -1,6 +1,8 @@
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 import { COD_FEE_ITEM_TYPE, COD_PROVIDER_ID, codEligibility, PREPAID_PROMO_CODE } from "../../lib/cod"
+import { getCourier } from "../../lib/couriers"
+import { gstScheme, insideSupplyArea } from "../../lib/gst-scheme"
 import { courierCodAvailable } from "../../lib/shipments"
 import { COD_MODULE } from "../../modules/cod"
 import type CodModuleService from "../../modules/cod/service"
@@ -8,11 +10,21 @@ import type CodModuleService from "../../modules/cod/service"
 type Item = { unit_price: number; quantity: number; metadata?: Record<string, unknown> | null }
 
 /**
- * Last line of defence when an order is placed (ARCHITECTURE.md §5): the COD
- * fee, COD eligibility and the prepaid discount are re-checked on the server,
- * whatever the browser sent.
+ * Last line of defence when an order is placed (ARCHITECTURE.md §5): the GST
+ * composition delivery area, the COD fee, COD eligibility and the prepaid
+ * discount are re-checked on the server, whatever the browser sent.
  */
 completeCartWorkflow.hooks.validate(async ({ cart }, { container }) => {
+  const gst = await gstScheme(container)
+  if (gst.scheme === "composition") {
+    const a = (cart.shipping_address ?? {}) as { postal_code?: string | null; province?: string | null }
+    const pin = a.postal_code ?? null
+    const looked = pin ? await (await getCourier(container)).lookupPincode(pin).catch(() => null) : null
+    if (!insideSupplyArea(gst.scheme, gst.sellerState, { pincode: pin, pinState: looked?.state, addressState: a.province })) {
+      throw new MedusaError(MedusaError.Types.NOT_ALLOWED, `Sorry, we currently deliver only within ${gst.sellerState}.`)
+    }
+  }
+
   const sessions = (cart.payment_collection?.payment_sessions ?? []) as { provider_id: string }[]
   const isCod = sessions.some((s) => s.provider_id === COD_PROVIDER_ID)
   const items = (cart.items ?? []) as Item[]

@@ -28,6 +28,7 @@ import type {
   UpdatePaymentOutput,
   WebhookActionResult,
 } from "@medusajs/framework/types"
+import { testToolsAllowed } from "../../lib/site-mode"
 
 export const TEST_PAYMENT_SIGNATURE_HEADER = "x-test-payment-signature"
 
@@ -41,10 +42,10 @@ export const signTestPayment = (secret: string, rawBody: string) =>
   createHmac("sha256", secret).update(rawBody).digest("hex")
 
 /**
- * DEVELOPMENT-ONLY payment provider that stands in for Razorpay/Cashfree.
+ * STAGING / DEVELOPMENT payment provider that stands in for Razorpay/Cashfree.
  * Same lifecycle as a real gateway: the customer "pays" on a simulator page,
  * the gateway sends an HMAC-signed webhook, and Medusa's webhook workflow
- * captures the payment (= order Paid). Never registered in production.
+ * captures the payment (= order Paid). Never registered when SITE_MODE=live.
  */
 class TestPaymentProviderService extends AbstractPaymentProvider<Options> {
   static identifier = "test-payment"
@@ -60,8 +61,8 @@ class TestPaymentProviderService extends AbstractPaymentProvider<Options> {
   }
 
   static validateOptions(options: Record<string, unknown>) {
-    if (process.env.NODE_ENV === "production") {
-      throw new MedusaError(MedusaError.Types.INVALID_DATA, "The test payment provider must not run in production")
+    if (!testToolsAllowed()) {
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, "The test payment provider must not run when SITE_MODE=live")
     }
     if (!options?.webhook_secret) {
       throw new MedusaError(MedusaError.Types.INVALID_DATA, "test-payment: webhook_secret is required")
