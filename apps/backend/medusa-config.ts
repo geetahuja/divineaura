@@ -54,6 +54,8 @@ module.exports = defineConfig({
     redisUrl: process.env.REDIS_URL,
     // PM2 runs two processes on the VPS: "server" (API + admin) and "worker" (jobs, subscribers).
     workerMode: (env.MEDUSA_WORKER_MODE as 'shared' | 'worker' | 'server') || 'shared',
+    // Admin session cookie; blank = the API host only (ARCHITECTURE.md §0).
+    ...(env.COOKIE_DOMAIN ? { cookieOptions: { domain: env.COOKIE_DOMAIN } } : {}),
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
