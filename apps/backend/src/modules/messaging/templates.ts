@@ -249,6 +249,17 @@ export const TEMPLATES = {
       cta: { label: "Reset password", url: "{link}" },
     },
   },
+  // To the store owner (BACKUP_ALERT_EMAIL), from the backup-alerts job. Email only.
+  backup_alert: {
+    category: "transactional",
+    vars: ["problem", "details", "link"],
+    email: {
+      subject: "DivineAura backup problem: {problem}",
+      heading: "Backup needs attention",
+      lines: ["{problem}.", "{details}", "Check the backup log on the server (LOG_FILE in /etc/divineaura/backup.conf); steps are in deploy/backup/RESTORE.md."],
+      cta: { label: "Open admin", url: "{link}" },
+    },
+  },
 } satisfies Record<string, TemplateSpec>
 
 export type MessageEvent = keyof typeof TEMPLATES

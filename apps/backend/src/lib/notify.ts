@@ -22,7 +22,7 @@ export const links = {
 
 export async function notifyOrder(
   container: MedusaContainer,
-  event: Exclude<MessageEvent, "otp_login" | "admin_password_reset">,
+  event: Exclude<MessageEvent, "otp_login" | "admin_password_reset" | "backup_alert">,
   orderId: string,
   extra: Record<string, string> = {},
   opts: { dedupeKey?: string } = {}

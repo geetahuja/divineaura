@@ -371,6 +371,7 @@ Customer browser
 - After changing products in admin, the backend calls the storefront's revalidate endpoint (`REVALIDATE_SECRET`) so product pages update without a full rebuild.
 
 **Backups & monitoring (required, since there is no managed host):**
+- Implemented in `deploy/backup/` (one config file `backup.conf`; setup, restore and PC copy in `deploy/backup/RESTORE.md`). Failures and stale backups email `BACKUP_ALERT_EMAIL` through the messaging layer; Admin → Orders shows the last backup.
 - Daily `pg_dump` of the database, compressed, kept on the VPS for 14 days (`/var/backups/divineaura`). Test a restore once before launch.
 - Hostinger weekly VPS backups/snapshots enabled; take a snapshot before every major update.
 - Product images live in `/var/www/divineaura/uploads` and are included in the daily backup (tar, kept 14 days).
