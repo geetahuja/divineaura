@@ -212,7 +212,9 @@ export async function issueCreditNote(
   let src: SourceLine[]
   if (input.items?.length) {
     src = input.items.map((r) => {
-      const l = inv.lines.find((x) => x.item_id === r.item_id)!
+      // Fee lines on returns: the COD fee is an order item; shipping is matched by kind.
+      const l = inv.lines.find((x) => x.item_id === r.item_id) ?? (r.item_id === "shipping" ? inv.lines.find((x) => x.kind === "shipping") : undefined)
+      if (!l) return { kind: "goods" as const, description: "Refund", hsn: null, quantity: r.quantity, total: r.amount, tax: 0, rate: 0 }
       const ratio = l.total ? l.tax / l.total : 0
       return { ...l, quantity: r.quantity, total: r.amount, tax: r.amount * ratio }
     })

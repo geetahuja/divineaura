@@ -12,7 +12,7 @@ import { cancelCodOrder } from "./cod-orders"
 import { getCourier } from "./couriers"
 import { capturedAmount, isCod, issueCreditNote, loadDocOrder, payments, refundedAmount } from "./invoices"
 import { links, notifyOrder } from "./notify"
-import { canCustomerCancel, PaidLine, planReturn, refundable, returnWindow, ReturnPick } from "./order-rules"
+import { canCustomerCancel, FeeLine, PaidLine, planReturn, refundable, returnWindow, ReturnPick, undeliveredRefund, UndeliveredCause } from "./order-rules"
 import { listEvents, pickupLocation, recordEvent } from "./shipments"
 
 /**
@@ -87,7 +87,15 @@ export async function returnContext(c: MedusaContainer, orderId: string, custome
       alreadyReturned: used(i.id, "quantity"),
       alreadyRefunded: used(i.id, "amount"),
     }))
-  return { order: o, window, windowDays, lines, requests: existing, refundMethod: isCod(o) ? ("manual" as const) : ("original" as const) }
+  // Shipping + COD fee: refunded only for damaged / wrong items, once per order.
+  const shippingPaid = (o.shipping_methods ?? []).reduce((n, s) => n + Number(s.total ?? 0), 0)
+  const fees: FeeLine[] = [
+    ...(shippingPaid > 0 ? [{ id: "shipping", title: "Shipping", total: shippingPaid, alreadyRefunded: used("shipping", "amount") }] : []),
+    ...o.items
+      .filter((i) => i.metadata?.type === "cod_fee")
+      .map((i) => ({ id: i.id, title: "Cash on Delivery fee", total: Number(i.total), alreadyRefunded: used(i.id, "amount") })),
+  ]
+  return { order: o, window, windowDays, lines, fees, requests: existing, refundMethod: isCod(o) ? ("manual" as const) : ("original" as const) }
 }
 
 // ── Payout details for COD refunds (encrypted at rest) ────────────────────
@@ -123,7 +131,7 @@ export async function createReturnRequest(
   return lock(c, `order-action:${input.orderId}`, async () => {
     const ctx = await returnContext(c, input.orderId, input.customerId)
     if (!ctx.window.open) throw notAllowed(ctx.window.reason ?? "Returns are closed for this order.")
-    const plan = planReturn(ctx.lines, input.items)
+    const plan = planReturn(ctx.lines, input.items, { reason: input.reason, fees: ctx.fees })
     if (!plan.ok) throw notAllowed(plan.errors.join(". "))
     if (ctx.refundMethod === "manual" && !input.payout) throw notAllowed("Please add your UPI ID or bank details for the refund.")
 
@@ -137,7 +145,7 @@ export async function createReturnRequest(
       photos.push(result[0].url)
     }
 
-    const titles = new Map(ctx.lines.map((l) => [l.id, l.title]))
+    const titles = new Map([...ctx.lines.map((l) => [l.id, l.title] as const), ...ctx.fees.map((f) => [f.id, f.title] as const)])
     const req = await returns(c).createReturnRequests({
       order_id: input.orderId,
       order_number: ctx.order.display_id,
@@ -246,5 +254,35 @@ export async function refundReturn(c: MedusaContainer, id: string, reference?: s
     await recordEvent(c, r.order_id, "refunded", "admin", { notify: false })
     await notifyOrder(c, "refund_processed", r.order_id, { amount: amount.toLocaleString("en-IN") }, { dedupeKey: `refund_processed:return:${id}` })
     return updated
+  })
+}
+
+// ── Undelivered prepaid parcels (RTO) ────────────────────────────────────
+const CAUSE_TEXT: Record<UndeliveredCause, string> = {
+  courier_failed: "Undelivered – courier could not deliver",
+  customer_refused: "Undelivered – refused at delivery",
+  wrong_address: "Undelivered – incorrect address",
+}
+
+/**
+ * Prepaid order returned to us undelivered: full refund if the courier failed;
+ * refund minus the shipping charge if the customer refused it or the address
+ * was wrong. Through the payment provider, once per order (idempotency key);
+ * credit note + message follow from the payment.refunded event.
+ */
+export async function refundUndelivered(c: MedusaContainer, orderId: string, cause: UndeliveredCause) {
+  return lock(c, `order-action:${orderId}`, async () => {
+    const o = await loadDocOrder(c, orderId)
+    if (!o) throw new MedusaError(MedusaError.Types.NOT_FOUND, "Order not found")
+    if (isCod(o)) throw notAllowed("Cash on Delivery orders weren't paid, so there's nothing to refund.")
+    const timeline = (await listEvents(c, orderId)).map((e) => e.status as string)
+    if (!timeline.includes("rto")) throw notAllowed("Only for parcels returned to us undelivered (RTO).")
+    const payment = payments(o).find((p) => p.captured_at)
+    if (!payment) throw notAllowed("No captured payment to refund.")
+    const shipping = (o.shipping_methods ?? []).reduce((n, s) => n + Number(s.total ?? 0), 0)
+    const { amount, deduction } = undeliveredRefund(cause, { captured: capturedAmount(o), refunded: refundedAmount(o), shipping })
+    if (amount <= 0) return { refunded: 0, deduction, already: true }
+    await refundPaymentWorkflow(c).run({ input: { payment_id: payment.id, amount, idempotency_key: `rto:${orderId}`, note: CAUSE_TEXT[cause] } })
+    return { refunded: amount, deduction, already: false }
   })
 }

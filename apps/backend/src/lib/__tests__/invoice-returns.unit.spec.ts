@@ -1,6 +1,6 @@
 import { amountInWords, documentNumber, financialYear, splitTax, stateCode } from "../gst-invoice"
 import { mergeWishlist } from "../wishlist"
-import { canCustomerCancel, planReturn, refundable, returnWindow } from "../order-rules"
+import { canCustomerCancel, planReturn, refundable, returnWindow, undeliveredRefund } from "../order-rules"
 
 describe("GST split", () => {
   const lines = [
@@ -69,6 +69,27 @@ describe("cancel and return rules", () => {
   it("refuses not-returnable items and over-returns", () => {
     expect(planReturn(lines, [{ item_id: "b", quantity: 1 }]).errors).toContain("This item is not returnable")
     expect(planReturn([{ ...lines[0], alreadyReturned: 2 }], [{ item_id: "a", quantity: 1 }]).ok).toBe(false)
+  })
+  it("damaged / wrong item: accepted even if not returnable, with shipping + COD fee refunded once", () => {
+    const fees = [
+      { id: "shipping", title: "Shipping", total: 49, alreadyRefunded: 0 },
+      { id: "fee1", title: "Cash on Delivery fee", total: 49, alreadyRefunded: 0 },
+    ]
+    const r = planReturn(lines, [{ item_id: "b", quantity: 1 }], { reason: "damaged", fees })
+    expect(r).toMatchObject({ ok: true, refund: 397 }) // 299 + 49 + 49
+    expect(r.items.map((i) => i.item_id)).toEqual(["b", "shipping", "fee1"])
+    // a second damaged return on the same order doesn't refund the fees again
+    const again = planReturn(lines, [{ item_id: "a", quantity: 1 }], { reason: "wrong_item", fees: fees.map((f) => ({ ...f, alreadyRefunded: f.total })) })
+    expect(again.refund).toBe(569.05)
+    // changed mind: fees not refunded, not-returnable still refused
+    expect(planReturn(lines, [{ item_id: "a", quantity: 1 }], { reason: "changed_mind", fees }).refund).toBe(569.05)
+    expect(planReturn(lines, [{ item_id: "b", quantity: 1 }], { reason: "quality", fees }).ok).toBe(false)
+  })
+  it("undelivered prepaid parcel: full refund if courier failed, minus shipping if refused / wrong address", () => {
+    const p = { captured: 618, refunded: 0, shipping: 49 }
+    expect(undeliveredRefund("courier_failed", p)).toEqual({ deduction: 0, amount: 618 })
+    expect(undeliveredRefund("customer_refused", p)).toEqual({ deduction: 49, amount: 569 })
+    expect(undeliveredRefund("wrong_address", { ...p, refunded: 600 })).toEqual({ deduction: 49, amount: 0 })
   })
   it("never refunds twice", () => {
     expect(planReturn([{ ...lines[0], alreadyReturned: 1, alreadyRefunded: 1138.1 }], [{ item_id: "a", quantity: 1 }]).refund).toBe(0)
