@@ -1,6 +1,6 @@
 # DivineAura
 
-**https://divineaura.com** — devotional e-commerce store for India — lockets, spiritual and gemstone bracelets, hand ties, malas and gift sets.
+**https://divinesanatani.com** — devotional e-commerce store for India — lockets, spiritual and gemstone bracelets, hand ties, malas and gift sets.
 
 - **Storefront:** Next.js (App Router) + Tailwind — `apps/storefront`
 - **Backend + admin:** Medusa v2 + PostgreSQL + Redis — `apps/backend`
@@ -80,7 +80,7 @@ the online-payment discount don't count).
 **Adding Razorpay (or Cashfree) later:** add its provider to `paymentProviders`
 in `apps/backend/medusa-config.ts` with keys from `.env`, add
 `razorpay.tsx` to `ADAPTERS` in `apps/storefront/src/lib/payments/index.tsx`,
-register the webhook URL `https://api.divineaura.com/hooks/payment/<provider>`
+register the webhook URL `https://api.divinesanatani.com/hooks/payment/<provider>`
 in the gateway dashboard, then run the sync script above. Checkout itself does
 not change.
 

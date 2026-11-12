@@ -3,7 +3,7 @@ const checkEnvVariables = require("./check-env-variables")
 checkEnvVariables()
 
 // Product and Sacred Places images are uploaded to the Medusa backend and served
-// from its host (dev: localhost:9000/static, prod: api.divineaura.com/uploads).
+// from its host (dev: localhost:9000/static, prod: api.divinesanatani.com/uploads).
 const backend = new URL(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000")
 
 /**

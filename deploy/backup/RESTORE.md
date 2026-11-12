@@ -52,7 +52,9 @@ name and user), run `install.sh`, copy the two backup files from your PC into
 
 ## 3. Copy to your PC (weekly)
 
-One time, in PowerShell on your PC:
+Already set up: `VPS_HOST="divineaura"` uses the `Host divineaura` entry in `~/.ssh/config`
+(dedicated `divineaura_ed25519` key, user `deploy`). Optional: a separate restricted key just for
+downloads — one time, in PowerShell on your PC:
 
 ```powershell
 ssh-keygen -t ed25519 -f $HOME\.ssh\divineaura_backup -N '""'     # key without password, used only for this
@@ -64,11 +66,14 @@ starting with `restrict ` (so the key cannot open a shell window or forwarding).
 Then on the PC add to `$HOME\.ssh\config`:
 
 ```
-Host your-vps-ip-or-api.divineaura.com
+Host divineaura-backup
+  HostName 189.72.151.83
+  User deploy
   IdentityFile ~/.ssh/divineaura_backup
+  IdentitiesOnly yes
 ```
 
-Set `VPS_HOST` (and `LOCAL_BACKUP_DIR` if not `D:\DivineAura-Backups`) in `deploy\backup\backup.conf`,
+Then set `VPS_HOST="divineaura-backup"` (and `LOCAL_BACKUP_DIR` if not `D:\DivineAura-Backups`) in `deploy\backup\backup.conf`,
 then run it once by hand (this also accepts the server's key):
 
 ```powershell
