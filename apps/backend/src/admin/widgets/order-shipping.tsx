@@ -1,19 +1,22 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import type { AdminOrder, DetailWidgetProps } from "@medusajs/framework/types"
-import { Badge, Button, Container, Heading, Select, Text, toast } from "@medusajs/ui"
+import { Badge, Button, Container, Heading, Input, Select, Text, toast } from "@medusajs/ui"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { sdk } from "../lib/sdk"
 
 type Overview = {
-  courier: "test" | "shiprocket" | null
+  courier: "test" | "shiprocket" | "manual" | null
+  default_courier: string
+  couriers: { id: string; label: string }[]
+  manual_defaults: { courier_name: string | null; tracking_url_template: string | null }
   pickup_ready: boolean
   weight_g: number
   is_cod: boolean
   cod_ready: boolean
   cancelled: boolean
-  shipment: { awb: string; courier_name: string | null; label_url: string | null; tracking_url: string | null } | null
+  shipment: { awb: string; courier: string; courier_name: string | null; label_url: string | null; tracking_url: string | null } | null
   options: { serviceable: boolean; options: { id: string; name: string; rate: number; etaDays: number; cod: boolean }[]; recommendedId: string | null } | null
   events: { status: string; occurred_at: string; source: string; note: string | null }[]
 }
@@ -30,7 +33,12 @@ const OrderShippingWidget = ({ data: order }: DetailWidgetProps<AdminOrder>) => 
   const qc = useQueryClient()
   const key = ["order-shipping", order.id]
   const [courierId, setCourierId] = useState(RECOMMENDED)
-  const { data } = useQuery({ queryKey: key, queryFn: () => sdk.client.fetch<Overview>(`/admin/shipping/orders/${order.id}`) })
+  const [provider, setProvider] = useState<string | null>(null) // null = default courier
+  const [manual, setManual] = useState({ courier_name: "", awb: "", tracking_url: "" })
+  const { data } = useQuery({
+    queryKey: [...key, provider],
+    queryFn: () => sdk.client.fetch<Overview>(`/admin/shipping/orders/${order.id}`, { query: provider ? { courier: provider } : {} }),
+  })
 
   const act = useMutation({
     mutationFn: ({ path, body }: { path: string; body?: Record<string, unknown> }) =>
@@ -50,9 +58,7 @@ const OrderShippingWidget = ({ data: order }: DetailWidgetProps<AdminOrder>) => 
     ? "Order is cancelled."
     : !data.cod_ready
       ? "Cash on Delivery order — confirm it first (COD queue or customer link)."
-      : !data.courier
-        ? "No courier configured. Add Shiprocket credentials to .env."
-        : !data.pickup_ready
+      : !data.pickup_ready
           ? "Set the warehouse PIN code and address in Settings → Locations."
           : null
 
@@ -61,7 +67,11 @@ const OrderShippingWidget = ({ data: order }: DetailWidgetProps<AdminOrder>) => 
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-x-2">
           <Heading level="h2">Shipping &amp; timeline</Heading>
-          {data.courier && <Badge size="2xsmall" color={data.courier === "test" ? "orange" : "blue"}>{data.courier === "test" ? "Test courier" : "Shiprocket"}</Badge>}
+          {(() => {
+            const id = data.shipment?.courier ?? data.courier
+            const name = data.couriers.find((c) => c.id === id)?.label ?? id
+            return id ? <Badge size="2xsmall" color={id === "test" ? "orange" : id === "manual" ? "purple" : "blue"}>{name}</Badge> : null
+          })()}
         </div>
         <div className="flex items-center gap-x-3">
           <Link to={`/message-log?order=${order.display_id}`} className="txt-compact-small text-ui-fg-interactive">Messages</Link>
@@ -82,7 +92,18 @@ const OrderShippingWidget = ({ data: order }: DetailWidgetProps<AdminOrder>) => 
               {data.shipment.tracking_url && (
                 <Button size="small" variant="transparent" onClick={() => window.open(data.shipment!.tracking_url!, "_blank")}>Track</Button>
               )}
-              {data.courier === "test" && !terminal && (
+              {data.shipment.courier === "manual" && !terminal && (
+                <>
+                  {(["out_for_delivery", "delivered", "rto"] as const)
+                    .filter((s) => !done.includes(s))
+                    .map((s) => (
+                      <Button key={s} size="small" variant="secondary" isLoading={act.isPending} onClick={() => act.mutate({ path: "status", body: { status: s } })}>
+                        Mark {LABEL[s].toLowerCase()}
+                      </Button>
+                    ))}
+                </>
+              )}
+              {data.shipment.courier === "test" && !terminal && (
                 <Button size="small" variant="secondary" isLoading={act.isPending} onClick={() => act.mutate({ path: "simulate", body: {} })}>
                   Simulate next tracking event
                 </Button>
@@ -93,7 +114,37 @@ const OrderShippingWidget = ({ data: order }: DetailWidgetProps<AdminOrder>) => 
           <Text size="small" className="text-ui-fg-subtle">{blockedReason}</Text>
         ) : (
           <div className="flex flex-wrap items-end gap-2">
-            {data.options?.serviceable === false ? (
+            {data.couriers.length > 1 && (
+              <div className="min-w-[200px]">
+                <Select value={provider ?? data.default_courier} onValueChange={(v) => { setProvider(v === data.default_courier ? null : v); setCourierId(RECOMMENDED) }}>
+                  <Select.Trigger><Select.Value /></Select.Trigger>
+                  <Select.Content>
+                    {data.couriers.map((c) => (
+                      <Select.Item key={c.id} value={c.id}>{c.label}{c.id === data.default_courier ? " (default)" : ""}</Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select>
+              </div>
+            )}
+            {data.courier === "manual" ? (
+              <>
+                <Input size="small" className="w-36" placeholder={data.manual_defaults.courier_name ?? "Courier name"} value={manual.courier_name} onChange={(e) => setManual({ ...manual, courier_name: e.target.value })} />
+                <Input size="small" className="w-40" placeholder="AWB / tracking no." value={manual.awb} onChange={(e) => setManual({ ...manual, awb: e.target.value })} />
+                <Input size="small" className="w-64" placeholder={data.manual_defaults.tracking_url_template ? "Tracking link (default from settings)" : "Tracking link https://…"} value={manual.tracking_url} onChange={(e) => setManual({ ...manual, tracking_url: e.target.value })} />
+                {!done.includes("packed") && (
+                  <Button size="small" variant="secondary" isLoading={act.isPending} onClick={() => act.mutate({ path: "packed" })}>Mark packed</Button>
+                )}
+                <Button
+                  size="small"
+                  isLoading={act.isPending}
+                  disabled={!manual.awb.trim()}
+                  onClick={() => act.mutate({ path: "shipment", body: { provider: "manual", manual: { courier_name: manual.courier_name || null, awb: manual.awb, tracking_url: manual.tracking_url || null } } })}
+                >
+                  Mark shipped
+                </Button>
+                {data.options?.serviceable === false && <Text size="xsmall" className="text-ui-fg-subtle w-full">This PIN code isn't in the manual courier's list — shipping anyway is allowed.</Text>}
+              </>
+            ) : data.options?.serviceable === false ? (
               <Text size="small" className="text-ui-fg-error">The courier does not deliver to this PIN code.</Text>
             ) : (
               <>
@@ -116,7 +167,7 @@ const OrderShippingWidget = ({ data: order }: DetailWidgetProps<AdminOrder>) => 
                 <Button
                   size="small"
                   isLoading={act.isPending}
-                  onClick={() => act.mutate({ path: "shipment", body: { courier_id: courierId === RECOMMENDED ? null : courierId } })}
+                  onClick={() => act.mutate({ path: "shipment", body: { provider: data.courier, courier_id: courierId === RECOMMENDED ? null : courierId } })}
                 >
                   Create shipment
                 </Button>

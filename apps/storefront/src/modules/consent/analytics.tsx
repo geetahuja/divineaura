@@ -4,22 +4,28 @@ import { Consent, readConsentCookie } from "@lib/consent"
 import Script from "next/script"
 import { useEffect, useState } from "react"
 
-const GA4 = process.env.NEXT_PUBLIC_GA4_ID
-const PIXEL = process.env.NEXT_PUBLIC_META_PIXEL_ID
-const safeId = (id?: string) => (id && /^[A-Za-z0-9-]+$/.test(id) ? id : null)
+const safeId = (id?: string | null) => (id && /^[A-Za-z0-9-]+$/.test(id) ? id : null)
 
-// Loads GA4 / Meta Pixel ONLY when their IDs are set in .env AND the visitor
-// accepted that category. Page views are tracked; e-commerce events come from lib/analytics.
+// Loads GA4 / Meta Pixel ONLY when the server reports their IDs (set in .env,
+// SITE_MODE=live — /api/site-config, read at runtime) AND the visitor accepted
+// that category. Page views are tracked; e-commerce events come from lib/analytics.
 export default function Analytics() {
   const [c, setC] = useState<Consent | null>(null)
+  const [ids, setIds] = useState<{ ga4: string | null; pixel: string | null }>({ ga4: null, pixel: null })
+  useEffect(() => {
+    fetch("/api/site-config")
+      .then((r) => r.json())
+      .then((j) => setIds({ ga4: j.ga4 ?? null, pixel: j.pixel ?? null }))
+      .catch(() => undefined)
+  }, [])
   useEffect(() => {
     setC(readConsentCookie())
     const on = (e: Event) => setC((e as CustomEvent<Consent>).detail)
     window.addEventListener("da:consent", on)
     return () => window.removeEventListener("da:consent", on)
   }, [])
-  const ga = safeId(GA4)
-  const px = safeId(PIXEL)
+  const ga = safeId(ids.ga4)
+  const px = safeId(ids.pixel)
 
   return (
     <>

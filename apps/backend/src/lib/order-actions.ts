@@ -179,8 +179,7 @@ export async function approveReturn(c: MedusaContainer, id: string, note?: strin
     const r = await loadRequest(c, id)
     if (r.status !== "requested") throw notAllowed(`This return is already ${r.status}.`)
     const o = (await loadDocOrder(c, r.order_id))!
-    const courier = getCourier()
-    if (!courier) throw notAllowed("No courier configured for the reverse pickup.")
+    const courier = await getCourier(c)
     const pickup = await pickupLocation(c)
     if (!pickup) throw notAllowed("Set the warehouse address in Settings → Locations first.")
     const a = o.shipping_address ?? {}

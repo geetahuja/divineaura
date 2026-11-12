@@ -121,7 +121,24 @@ export type CodCancelBody = z.infer<typeof CodCancelSchema>
 
 // Shipping (milestone 8)
 export const TrackOrderSchema = z.object({ order_number: z.coerce.number().int().positive(), phone: z.string().trim().min(10).max(15) })
-export const CreateShipmentSchema = z.object({ courier_id: z.string().max(50).nullish() })
+export const CreateShipmentSchema = z.object({
+  courier_id: z.string().max(50).nullish(),
+  provider: z.enum(["shiprocket", "manual", "test"]).nullish(),
+  manual: z.object({ courier_name: z.string().trim().max(80).nullish(), awb: z.string().trim().min(3).max(40), tracking_url: z.string().trim().max(500).nullish() }).transform((m) => ({ courierName: m.courier_name ?? null, awb: m.awb, trackingUrl: m.tracking_url ?? null })).nullish(),
+})
+export const ManualStatusSchema = z.object({ status: z.enum(["shipped", "out_for_delivery", "delivered", "rto"]), tracking_url: z.string().trim().max(500).nullish() })
+export type ManualStatusBody = z.infer<typeof ManualStatusSchema>
+export const CourierSettingsSchema = z.object({
+  default_courier: z.enum(["auto", "shiprocket", "manual", "test"]).optional(),
+  manual_courier_name: z.string().trim().max(80).nullish(),
+  manual_tracking_url: z.string().trim().max(500).refine((v) => !v || /^https:\/\//.test(v), "Must start with https://").nullish(),
+  manual_eta_min: z.number().int().min(1).max(30).optional(),
+  manual_eta_max: z.number().int().min(1).max(30).optional(),
+})
+export type CourierSettingsBody = z.infer<typeof CourierSettingsSchema>
+// Bulk paste: any separators; COD list must be a subset of the serviceable list.
+export const ManualPincodesSchema = z.object({ serviceable: z.string().max(400_000), cod: z.string().max(400_000) })
+export type ManualPincodesBody = z.infer<typeof ManualPincodesSchema>
 export const SimulateTrackingSchema = z.object({ status: z.enum(["shipped", "out_for_delivery", "delivered", "rto"]).optional() })
 export type TrackOrderBody = z.infer<typeof TrackOrderSchema>
 export type CreateShipmentBody = z.infer<typeof CreateShipmentSchema>
@@ -190,6 +207,8 @@ export const BusinessSettingsSchema = z.object({
   phone: z.string().trim().max(20).nullish(),
   invoice_prefix: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,4}$/, "1–4 letters or digits"),
   credit_note_prefix: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,4}$/, "1–4 letters or digits"),
+  gst_scheme: z.enum(["regular", "composition"]).default("regular"),
+  bill_of_supply_prefix: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,4}$/, "1–4 letters or digits").default("BOS"),
   return_window_days: z.number().int().min(0).max(60),
   grievance_name: z.string().trim().max(100).nullish().transform((v) => v || null),
   grievance_email: z.string().trim().email().nullish().or(z.literal("").transform(() => null)),

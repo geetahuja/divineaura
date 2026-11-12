@@ -6,7 +6,7 @@ const Shipment = model.define("shipment", {
   id: model.id({ prefix: "shp" }).primaryKey(),
   order_id: model.text().unique(),
   fulfillment_id: model.text().nullable(),
-  courier: model.text(), // "test" | "shiprocket"
+  courier: model.text(), // "test" | "shiprocket" | "manual"
   courier_name: model.text().nullable(),
   external_id: model.text().nullable(), // courier's shipment id
   awb: model.text().unique(),

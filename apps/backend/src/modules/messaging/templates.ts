@@ -181,7 +181,7 @@ export const TEMPLATES = {
   review_request: {
     category: "transactional",
     vars: ["order", "link"],
-    sms: "DivineAura: We hope you like your order #{order}. Please share a quick review of what you received - it helps other devotees: {link}",
+    sms: "DivineAura: We hope you like your order #{order}. Please share a quick review - it helps other devotees: {link}",
     whatsapp: { name: "review_request", params: ["order", "link"] },
     email: {
       subject: "How was your order #{order}?",

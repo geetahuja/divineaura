@@ -18,6 +18,7 @@ import {
 } from "./cookies"
 import { getRegion } from "./regions"
 import { getLocale } from "./locale-actions"
+import { notServiceableText } from "@lib/util/delivery-text"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -369,8 +370,9 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     const shipping = validateIndianAddress(read("shipping_address"))
     if (!shipping.ok) return shipping.error
     // Don't take orders we can't deliver (unknown = allowed; checked again at shipment).
-    if ((await checkDelivery(shipping.address.postal_code)).status === "not_serviceable") {
-      return "Sorry, we don't deliver to this PIN code yet."
+    const delivery = await checkDelivery(shipping.address.postal_code)
+    if (delivery.status === "not_serviceable") {
+      return notServiceableText(delivery)
     }
 
     // Billing: same as delivery, or its own address (needed for GST invoices).

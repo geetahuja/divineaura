@@ -12,7 +12,8 @@ const MESSAGES: Record<string, string> = {
 // POST /store/otp/request { phone | email, resend? } → sends a 6-digit code.
 export async function POST(req: MedusaRequest<OtpRequestBody>, res: MedusaResponse) {
   const body = req.validatedBody as { phone?: string; email?: string; resend?: boolean }
-  // ponytail: req.ip is the proxy's address unless Express "trust proxy" is set behind Nginx (ARCHITECTURE.md §18).
+  // Medusa sets Express "trust proxy" = 1, so behind Nginx (which sets X-Forwarded-For to the
+  // client address, deploy/server/nginx) req.ip is the visitor, not 127.0.0.1.
   const r = await requestOtp(req.scope, { phone: body.phone, email: body.email }, req.ip ?? null, !!body.resend)
   if (!r.ok) return res.status(429).json({ reason: r.reason, message: MESSAGES[r.reason], retry_after_seconds: r.retryAfterMs ? Math.ceil(r.retryAfterMs / 1000) : undefined })
   res.json({ sent: true, channel: r.channel, resend_after_seconds: r.resendAfterSeconds, expires_in_seconds: r.expiresInSeconds })

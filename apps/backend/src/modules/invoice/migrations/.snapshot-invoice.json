@@ -166,6 +166,41 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "gst_scheme": {
+          "name": "gst_scheme",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'regular'",
+          "comment": null,
+          "enumItems": [
+            "regular",
+            "composition"
+          ],
+          "mappedType": "enum"
+        },
+        "bill_of_supply_prefix": {
+          "name": "bill_of_supply_prefix",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'BOS'",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "return_window_days": {
           "name": "return_window_days",
           "type": "integer",
@@ -620,7 +655,8 @@
           "comment": null,
           "enumItems": [
             "invoice",
-            "credit_note"
+            "credit_note",
+            "bill_of_supply"
           ],
           "mappedType": "enum"
         },

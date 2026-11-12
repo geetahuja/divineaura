@@ -4,6 +4,7 @@ import { stateCode } from "../../../lib/gst-invoice"
 import { INVOICE_MODULE } from "../../../modules/invoice"
 import type InvoiceModuleService from "../../../modules/invoice/service"
 import type { BusinessSettingsBody } from "../../validators"
+import { syncTaxProvider } from "../../../lib/gst-scheme"
 
 // Admin → Business details: seller block on invoices + return window.
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
@@ -18,7 +19,13 @@ export async function POST(req: MedusaRequest<BusinessSettingsBody>, res: Medusa
   if (b.gstin && b.gstin.slice(0, 2) !== stateCode(b.state)) {
     return res.status(400).json({ message: `The GSTIN starts with ${b.gstin.slice(0, 2)}, but ${b.state}'s GST state code is ${stateCode(b.state)}.` })
   }
+  if (b.gst_scheme === "composition" && b.bill_of_supply_prefix === b.invoice_prefix) {
+    return res.status(400).json({ message: "Use a different prefix for Bills of Supply than for tax invoices." })
+  }
   const current = await svc.getSettings()
+  // GST scheme: switch the India tax region's provider first (composition = no tax lines),
+  // so a failure leaves the setting unchanged.
+  if (b.gst_scheme !== current.gst_scheme) await syncTaxProvider(req.scope, b.gst_scheme)
   const s = await svc.updateBusinessSettings({ id: current.id, ...b })
   // One return window everywhere: the storefront's returns policy page and
   // product pages read it from region metadata (region-store-policies.ts).

@@ -4,6 +4,7 @@ import { checkDelivery, DeliveryCheck } from "@lib/data/delivery"
 import { deliveryBy } from "@lib/util/delivery-date"
 import { INDIAN_STATES } from "@lib/util/india-address"
 import { useState, useTransition } from "react"
+import { notServiceableText } from "@lib/util/delivery-text"
 
 export const field =
   "h-12 w-full rounded-md border border-champagne bg-white px-3 text-base text-ink placeholder:text-ink-muted focus:border-primary focus:outline-none"
@@ -91,7 +92,7 @@ export default function AddressFields({
           </p>
         )}
         {prefix === "shipping_address" && check?.status === "not_serviceable" && (
-          <p role="alert" className="mt-1 text-xs text-red-700">Sorry, we don't deliver to this PIN code yet.</p>
+          <p role="alert" className="mt-1 text-xs text-red-700">{notServiceableText(check)}</p>
         )}
       </div>
       <div>
