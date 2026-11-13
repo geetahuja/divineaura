@@ -271,5 +271,10 @@ Then:
 - [ ] Open https://divinesanatani.com in a private window — no password, no banner.
 - [ ] `https://divinesanatani.com/robots.txt` lists the sitemap; Search Console → submit the sitemap.
 - [ ] Place one real order (small amount), pay with Razorpay live, ship it, mark delivered → milestone 13 done.
+- [ ] **Post-launch: Run PageSpeed Insights (mobile) on home, a product page and Goda Jal; fix LCP if above 2.5 s.**
+      https://pagespeed.web.dev → `https://divinesanatani.com/`, one product page and a Goda Jal product page.
+      (Staging is password-protected, so this can only run after the switch. LCP work done so far:
+      640 px mobile hero art, carousel slides 2+ after load, system Devanagari font, no font
+      preloads, `content-visibility` below the fold, Next image optimization on.)
 
 Back to staging at any time: `… site-mode.sh staging` (a new password is not created; the old one stays).
