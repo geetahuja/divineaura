@@ -1,5 +1,6 @@
 import { sdk } from "@lib/config"
 import { getBrand } from "@lib/data/content"
+import type { Brand } from "@modules/layout/components/brand-logo"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ArrowRight, MapPin } from "lucide-react"
 import Image from "next/image"
@@ -52,10 +53,12 @@ function Ornament({ src, w, className }: { src: string; w: number; className: st
  * transparent header, centred italic heading between Om and lotus ornaments,
  * place caption bottom-left and an outline button bottom-right. Phones stack it.
  */
-function Slide({ s, first, brandName }: { s: HeroSlide; first: boolean; brandName: string }) {
+function Slide({ s, first, brand }: { s: HeroSlide; first: boolean; brand: Brand }) {
   const art = artFor(s.button_link)
   const Heading = first ? "h1" : "h2"
-  const t = (v?: string | null) => v?.replaceAll("{{brand}}", brandName) ?? null
+  // {{brand}}, {{tagline_en}}, {{tagline_hi}} in slide text = Business details.
+  const t = (v?: string | null) =>
+    v?.replaceAll("{{brand}}", brand.name).replaceAll("{{tagline_en}}", brand.tagline_en).replaceAll("{{tagline_hi}}", brand.tagline_hi) ?? null
   return (
     <div className="relative isolate flex min-h-[calc(100svh-6rem)] w-full flex-col pt-16 small:h-[calc(100svh-2rem)] small:max-h-[941px] small:min-h-[600px] small:pt-0">
       <div aria-hidden className="absolute inset-0 -z-20 bg-[linear-gradient(180deg,#F6C98B_0%,#FBE3BE_38%,#FFF1DD_58%,#F3D3A6_100%)]" />
@@ -122,7 +125,7 @@ export default async function Hero() {
   return (
     <HeroCarousel count={list.length}>
       {list.map((s, i) => (
-        <Slide key={i} s={s} first={i === 0} brandName={brand.name} />
+        <Slide key={i} s={s} first={i === 0} brand={brand} />
       ))}
     </HeroCarousel>
   )

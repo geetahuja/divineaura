@@ -232,8 +232,8 @@ const HeroBannersPage = () => {
           <Drawer.Body className="flex flex-col gap-y-4 overflow-y-auto">
             {textField("title", "Internal name", "Only shown here, e.g. \"Diwali 2026\".")}
             {textField("heading", "Heading")}
-            {textField("subheading", "Subheading (optional)", "Write {{brand}} for the brand name from Business details.")}
-            {textField("subheading_hi", "Hindi line (optional)", "Shown under the subheading in Devanagari, e.g. समय से पहले, समय के बाद भी।")}
+            {textField("subheading", "Subheading (optional)", "{{brand}}, {{tagline_en}} and {{tagline_hi}} show the name and taglines from Business details.")}
+            {textField("subheading_hi", "Hindi line (optional)", "Shown under the subheading in Devanagari, e.g. {{tagline_hi}} for the Hindi tagline.")}
             <div className="grid grid-cols-2 gap-3">
               {textField("button_text", "Button text")}
               {textField("button_link", "Button link", "Site path, e.g. /collections/diwali")}
