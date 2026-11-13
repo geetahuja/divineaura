@@ -1,3 +1,4 @@
+import { MedusaError } from "@medusajs/framework/utils"
 // GST invoice maths (ARCHITECTURE.md §5 rule 11). Pure and unit-tested.
 // Prices are GST-inclusive: each line's total already contains its tax.
 
@@ -32,7 +33,7 @@ export function financialYear(d: Date): string {
 /** "DA/26-27/00001" — GST allows at most 16 characters. */
 export function documentNumber(prefix: string, fy: string, seq: number): string {
   const n = `${prefix}/${fy}/${String(seq).padStart(5, "0")}`
-  if (n.length > 16) throw new Error(`Document number ${n} is longer than 16 characters`)
+  if (n.length > 16) throw new MedusaError(MedusaError.Types.INVALID_DATA, `Document number ${n} is longer than 16 characters`)
   return n
 }
 

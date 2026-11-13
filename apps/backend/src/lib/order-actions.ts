@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { MedusaError, Modules } from "@medusajs/framework/utils"
+import { MedusaError, Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { cancelOrderWorkflow, refundPaymentWorkflow, uploadFilesWorkflow } from "@medusajs/medusa/core-flows"
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto"
 import { INVOICE_MODULE } from "../modules/invoice"
@@ -67,7 +67,7 @@ export async function returnContext(c: MedusaContainer, orderId: string, custome
   const windowDays = await returnWindowDays(c)
   const window = returnWindow(await orderState(c, orderId, o.status), windowDays)
   const existing = (await returns(c).listReturnRequests({ order_id: orderId })).filter((r) => r.status !== "rejected")
-  const { data: products } = await c.resolve("query").graph({
+  const { data: products } = await c.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product",
     fields: ["id", "product_specs.not_returnable"],
     filters: { id: [...new Set(o.items.map((i) => i.product_id).filter(Boolean) as string[])] },

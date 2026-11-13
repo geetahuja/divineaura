@@ -6,7 +6,7 @@ const svc = (c: { resolve: <T>(k: string) => T }) => c.resolve<MessagingModuleSe
 type Previous = { created?: string; resubscribed?: { id: string; unsubscribed_at: Date | null; consent_text: string; consented_at: Date } }
 
 // New email → subscribe; unsubscribed email → resubscribe with fresh consent; subscribed → nothing.
-const subscribeStep = createStep(
+const subscribeNewsletterStep = createStep(
   "subscribe-newsletter",
   async ({ email, consent_text }: { email: string; consent_text: string }, { container }) => {
     const [existing] = await svc(container).listNewsletterSubscribers({ email })
@@ -27,5 +27,5 @@ const subscribeStep = createStep(
 
 export const subscribeNewsletterWorkflow = createWorkflow(
   "subscribe-newsletter",
-  (input: { email: string; consent_text: string }) => new WorkflowResponse(subscribeStep(input))
+  (input: { email: string; consent_text: string }) => new WorkflowResponse(subscribeNewsletterStep(input))
 )

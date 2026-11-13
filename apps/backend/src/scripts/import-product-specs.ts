@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs"
 import { ExecArgs } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { parse } from "csv-parse/sync"
 import { csvRowToSpecs } from "../lib/specs-csv"
 import { upsertProductSpecsWorkflow } from "../workflows/upsert-product-specs"
@@ -20,7 +20,7 @@ export default async function importProductSpecs({ container, args }: ExecArgs) 
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const file = args?.[0]
   if (!file) {
-    throw new Error("Usage: medusa exec ./src/scripts/import-product-specs.ts <file.csv>")
+    throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, "Usage: medusa exec ./src/scripts/import-product-specs.ts <file.csv>")
   }
 
   const rows: Record<string, string>[] = parse(readFileSync(file), {

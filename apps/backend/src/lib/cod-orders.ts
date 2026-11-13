@@ -96,7 +96,7 @@ export async function confirmCodOrder(container: MedusaContainer, orderId: strin
     await recordEvent(container, orderId, "confirmed", "cod")
     await notifyOrder(container, "cod_confirmed", orderId)
     // GST invoice on confirmation; never block the confirmation on it (downloads retry).
-    await getOrIssueInvoice(container, orderId).catch((e) => container.resolve("logger").error(`invoice for ${orderId}: ${(e as Error).message}`))
+    await getOrIssueInvoice(container, orderId).catch((e) => container.resolve(ContainerRegistrationKeys.LOGGER).error(`invoice for ${orderId}: ${(e as Error).message}`))
     return { status: "confirmed", changed: true, order_display_id: order.display_id }
   })
 }

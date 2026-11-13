@@ -1,3 +1,4 @@
+import { MedusaError } from "@medusajs/framework/utils"
 /**
  * One catalogue for every customer message (ARCHITECTURE.md §10, §19).
  *
@@ -267,7 +268,7 @@ export type MessageEvent = keyof typeof TEMPLATES
 /** Fills `{name}` placeholders; a missing variable is a bug, so it throws. */
 export function render(text: string, vars: Record<string, string>) {
   return text.replace(/\{(\w+)\}/g, (_, k: string) => {
-    if (vars[k] === undefined || vars[k] === null) throw new Error(`Template variable "${k}" is missing`)
+    if (vars[k] === undefined || vars[k] === null) throw new MedusaError(MedusaError.Types.INVALID_DATA, `Template variable "${k}" is missing`)
     return String(vars[k])
   })
 }

@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules, MedusaError } from "@medusajs/framework/utils"
 import { updateTaxRegionsWorkflow } from "@medusajs/medusa/core-flows"
 import { INVOICE_MODULE } from "../modules/invoice"
 import type InvoiceModuleService from "../modules/invoice/service"
@@ -52,6 +52,6 @@ export async function syncTaxProvider(c: MedusaContainer, scheme: GstScheme) {
   const region = data[0]
   if (!region || region.provider_id === want) return
   const known = (await c.resolve(Modules.TAX).listTaxProviders({})).some((p: { id: string }) => p.id === want)
-  if (!known) throw new Error(`Tax provider ${want} is not registered — restart the backend after updating`)
+  if (!known) throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `Tax provider ${want} is not registered — restart the backend after updating`)
   await updateTaxRegionsWorkflow(c).run({ input: [{ id: region.id, provider_id: want }] })
 }

@@ -1,5 +1,5 @@
 import { ExecArgs } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules, MedusaError } from "@medusajs/framework/utils"
 
 /**
  * Reset an admin user's password (email/password login).
@@ -16,22 +16,22 @@ export default async function resetAdminPassword({ container, args }: ExecArgs) 
   const password = process.env.NEW_ADMIN_PASSWORD
 
   if (!email) {
-    throw new Error("Usage: medusa exec ./src/scripts/reset-admin-password.ts <email>")
+    throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, "Usage: medusa exec ./src/scripts/reset-admin-password.ts <email>")
   }
   if (!password || password.length < 8) {
-    throw new Error("Set NEW_ADMIN_PASSWORD to the new password (at least 8 characters)")
+    throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, "Set NEW_ADMIN_PASSWORD to the new password (at least 8 characters)")
   }
 
   const users = await container.resolve(Modules.USER).listUsers({ email })
   if (!users.length) {
-    throw new Error(`No admin user with email ${email}`)
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, `No admin user with email ${email}`)
   }
 
   const { success, error } = await container
     .resolve(Modules.AUTH)
     .updateProvider("emailpass", { entity_id: email, password })
   if (!success) {
-    throw new Error(`Password not changed: ${error}`)
+    throw new MedusaError(MedusaError.Types.INVALID_DATA, `Password not changed: ${error}`)
   }
 
   logger.info(`Password updated for ${email}`)
