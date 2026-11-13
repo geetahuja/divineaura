@@ -1,0 +1,134 @@
+# CI — type-check, tests and production builds (no deployment; deploy stays manual: deploy/deploy.sh).
+# Only dummy values below — no real secrets are used or needed.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# A newer push to the same branch / PR cancels the run still in progress.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 24 # same major as the VPS and dev (package.json engines >= 22)
+  NEXT_TELEMETRY_DISABLED: 1
+  MEDUSA_DISABLE_TELEMETRY: true
+
+jobs:
+  typecheck:
+    name: Type-check (backend, admin, storefront)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4 # version from package.json "packageManager"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Backend
+        run: pnpm exec tsc --noEmit -p .
+        working-directory: apps/backend
+      - name: Admin extensions
+        run: pnpm exec tsc --noEmit -p src/admin
+        working-directory: apps/backend
+      - name: Storefront
+        run: pnpm exec tsc --noEmit -p .
+        working-directory: apps/storefront
+
+  test:
+    name: Tests (backend + storefront)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Backend unit tests
+        run: pnpm run test:unit
+        working-directory: apps/backend
+      - name: Storefront tests
+        run: pnpm test
+        working-directory: apps/storefront
+
+  build:
+    name: Production build (backend + storefront)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # The storefront build reads the catalogue from the API (sitemap, static pages), so the
+    # backend is built, migrated + seeded into a throwaway Postgres, and started first.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci-dummy-password
+          POSTGRES_DB: divineaura_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ci" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # Backend (dummy values only)
+      NODE_ENV: production
+      DATABASE_URL: postgres://ci:ci-dummy-password@localhost:5432/divineaura_ci
+      MEDUSA_BACKEND_URL: http://localhost:9000
+      STOREFRONT_URL: http://localhost:8000
+      STORE_CORS: http://localhost:8000
+      ADMIN_CORS: http://localhost:9000
+      AUTH_CORS: http://localhost:8000,http://localhost:9000
+      JWT_SECRET: ci-dummy-jwt-secret
+      COOKIE_SECRET: ci-dummy-cookie-secret
+      AUTH_MFA_ENCRYPTION_KEY: ci-dummy-mfa-key-0123456789abcdef0123456789abcdef
+      OTP_SECRET: ci-dummy-otp-secret
+      COD_CONFIRM_SECRET: ci-dummy-cod-secret
+      PAYOUT_ENCRYPTION_KEY: ci-dummy-payout-key
+      MESSAGING_CHANNEL: console
+      SITE_MODE: staging
+      SEED_SAMPLE_PRODUCTS: "true" # sample catalogue so product pages get built too
+      # Storefront
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://localhost:9000
+      NEXT_PUBLIC_SITE_URL: http://localhost:8000
+      NEXT_PUBLIC_DEFAULT_REGION: in
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build backend + admin
+        run: pnpm exec medusa build
+        working-directory: apps/backend
+      - name: Migrate + seed the CI database
+        run: node ../../node_modules/@medusajs/cli/cli.js db:migrate
+        working-directory: apps/backend/.medusa/server
+      - name: Start the API for the storefront build
+        working-directory: apps/backend/.medusa/server
+        run: |
+          nohup node ../../node_modules/@medusajs/cli/cli.js start > "$RUNNER_TEMP/medusa.log" 2>&1 &
+          for i in $(seq 1 60); do curl -fsS http://localhost:9000/health >/dev/null && exit 0; sleep 2; done
+          cat "$RUNNER_TEMP/medusa.log"; exit 1
+      - name: Publishable API key from the seed
+        run: |
+          KEY=$(psql "$DATABASE_URL" -tAc "select token from api_key where type = 'publishable' and revoked_at is null order by created_at limit 1")
+          test -n "$KEY"
+          echo "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=$KEY" >> "$GITHUB_ENV"
+      - name: Build storefront
+        run: pnpm exec next build --webpack
+        working-directory: apps/storefront
+      - name: API log (on failure)
+        if: failure()
+        run: tail -n 100 "$RUNNER_TEMP/medusa.log" || true

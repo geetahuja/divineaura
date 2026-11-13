@@ -200,6 +200,24 @@ UptimeRobot (free) → HTTP(s) monitors, 5-minute interval:
 - after go-live also `https://divinesanatani.com/`
 Alert contacts: your email + mobile.
 
+## 8a. CI and (later) automatic deploys
+
+Every push and pull request to `main` runs **GitHub Actions CI** (`.github/workflows/ci.yml`):
+type-check, backend + storefront tests, production builds. It never deploys — deploying stays
+manual: `ssh divineaura "bash /var/www/divineaura/app/deploy/deploy.sh"`. Deploy only when CI is green.
+
+To add automatic deploys later (after go-live has settled):
+1. On the PC, make a **separate** key just for GitHub: `ssh-keygen -t ed25519 -f $HOME\.ssh\divineaura_ci_deploy -N '""'`.
+2. On the VPS, add its public key to `/home/deploy/.ssh/authorized_keys` prefixed with
+   `command="bash /var/www/divineaura/app/deploy/deploy.sh",no-pty,no-port-forwarding,no-agent-forwarding `
+   so the key can only run the deploy script.
+3. GitHub → repo Settings → **Environments** → `production` (add yourself as a required reviewer, so each
+   deploy waits for your click) → secrets `VPS_SSH_KEY` (the private key) and `VPS_KNOWN_HOSTS`
+   (output of `ssh-keyscan 189.72.151.83`).
+4. Add a `deploy` job to `ci.yml`: `needs: [typecheck, test, build]`, `if: github.ref == 'refs/heads/main'`,
+   `environment: production`; it writes the key + known_hosts to `~/.ssh` and runs `ssh deploy@189.72.151.83`.
+   deploy.sh already rolls back on a failed health check.
+
 ## 9. Before the switch
 
 - [ ] Real products with photos, prices, stock, HSN/GST rates; delete anything marked "Sample".

@@ -1,5 +1,7 @@
 # DivineAura
 
+[![CI](https://github.com/geetahuja/divineaura/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/geetahuja/divineaura/actions/workflows/ci.yml)
+
 **https://divinesanatani.com** — devotional e-commerce store for India — lockets, spiritual and gemstone bracelets, hand ties, malas and gift sets.
 
 - **Storefront:** Next.js (App Router) + Tailwind — `apps/storefront`
