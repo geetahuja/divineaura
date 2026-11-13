@@ -1,5 +1,5 @@
 import type { Logger } from "@medusajs/framework/types"
-import { MedusaService } from "@medusajs/framework/utils"
+import { MedusaService, MedusaError } from "@medusajs/framework/utils"
 import { Channel, channelsFor, Consent, otpChannel, parseMap, parseMessaging, parseOtp } from "./channels"
 import { renderEmail } from "./email-layout"
 import { testToolsAllowed } from "../../lib/site-mode"
@@ -112,7 +112,7 @@ export default class MessagingModuleService extends MedusaService({ MessageLog, 
     let provider = this.providerFor(channel)
     if (provider.name === "console" && !testToolsAllowed()) {
       this.logger_.warn(`messaging: no ${channel} provider configured — login code NOT delivered (code hidden)`)
-      provider = { name: "none", send: async () => { throw new Error(`no ${channel} provider configured`) } }
+      provider = { name: "none", send: async () => { throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `no ${channel} provider configured`) } }
     }
     return this.deliver("otp_login", channel, recipient, this.build("otp_login", tpl, channel, recipient, data), { dedupe: false }, provider)
   }

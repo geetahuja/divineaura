@@ -1,3 +1,4 @@
+import { MedusaError } from "@medusajs/framework/utils"
 import { createHmac, timingSafeEqual } from "node:crypto"
 
 /**
@@ -61,7 +62,7 @@ export class RazorpayClient {
       body: body ? JSON.stringify(body) : undefined,
     })
     const json = (await r.json().catch(() => ({}))) as T & { error?: { description?: string } }
-    if (!r.ok) throw new Error(`Razorpay ${method} ${path} failed (${r.status}): ${json?.error?.description ?? "unknown error"}`)
+    if (!r.ok) throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `Razorpay ${method} ${path} failed (${r.status}): ${json?.error?.description ?? "unknown error"}`)
     return json
   }
 

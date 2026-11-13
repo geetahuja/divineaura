@@ -1,5 +1,5 @@
 import { ExecArgs } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules, MedusaError } from "@medusajs/framework/utils"
 import { updateRegionsWorkflow } from "@medusajs/medusa/core-flows"
 
 /**
@@ -19,7 +19,7 @@ export default async function syncRegionPaymentProviders({ container }: ExecArgs
   // ponytail: single-region store (India); loop over regions if more are added.
   const [region] = await container.resolve(Modules.REGION).listRegions({ currency_code: "inr" })
   if (!region) {
-    throw new Error("India (INR) region not found")
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "India (INR) region not found")
   }
   await updateRegionsWorkflow(container).run({
     input: { selector: { id: region.id }, update: { payment_providers: providers } },

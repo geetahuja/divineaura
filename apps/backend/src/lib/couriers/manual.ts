@@ -1,3 +1,4 @@
+import { MedusaError } from "@medusajs/framework/utils"
 import { randomInt } from "node:crypto"
 import { isValidPin, stateFromPin } from "../shipping"
 import type { Courier, Serviceability } from "./types"
@@ -41,11 +42,11 @@ export class ManualCourier implements Courier {
 
   async createShipment(input: Parameters<Courier["createShipment"]>[0]) {
     const m = input.manual
-    if (!m?.awb?.trim()) throw new Error("Enter the courier's AWB / tracking number")
+    if (!m?.awb?.trim()) throw new MedusaError(MedusaError.Types.INVALID_DATA, "Enter the courier's AWB / tracking number")
     const s = await this.store.settings()
     const courierName = m.courierName?.trim() || s.manual_courier_name || "Our courier"
     const trackingUrl = m.trackingUrl?.trim() || trackingUrlFor(s.manual_tracking_url, m.awb.trim())
-    if (trackingUrl && !/^https?:\/\//.test(trackingUrl)) throw new Error("The tracking link must start with https://")
+    if (trackingUrl && !/^https?:\/\//.test(trackingUrl)) throw new MedusaError(MedusaError.Types.INVALID_DATA, "The tracking link must start with https://")
     return { shipmentId: `manual_${m.awb.trim()}`, awb: m.awb.trim(), courierName, labelUrl: null, trackingUrl }
   }
 

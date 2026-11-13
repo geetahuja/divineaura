@@ -6,7 +6,7 @@ type Input = { session: PaymentSessionDTO; gateway_status: "paid" | "failed" }
 const update = (s: PaymentSessionDTO, data: Record<string, unknown>) => ({ id: s.id, amount: s.amount, currency_code: s.currency_code, data })
 
 // DEVELOPMENT ONLY (test gateway): records the simulated gateway outcome on the payment session.
-const recordStep = createStep(
+const recordTestPaymentOutcomeStep = createStep(
   "record-test-payment-outcome",
   async ({ session, gateway_status }: Input, { container }) => {
     await container.resolve(Modules.PAYMENT).updatePaymentSession(update(session, { ...session.data, gateway_status }))
@@ -19,5 +19,5 @@ const recordStep = createStep(
 
 export const recordTestPaymentOutcomeWorkflow = createWorkflow(
   "record-test-payment-outcome",
-  (input: Input) => new WorkflowResponse(recordStep(input))
+  (input: Input) => new WorkflowResponse(recordTestPaymentOutcomeStep(input))
 )

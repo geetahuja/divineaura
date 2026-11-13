@@ -1,3 +1,4 @@
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { issueCreditNote, loadDocOrder, payments } from "./invoices"
 import { notifyOrder } from "./notify"
@@ -19,7 +20,7 @@ export async function settleRefunds(c: MedusaContainer, orderId: string) {
   for (const r of refunds) {
     const amount = Number(r.amount)
     await issueCreditNote(c, { orderId, sourceKey: `refund:${r.id}`, amount, reason: o.status === "canceled" ? "Order cancelled – refund" : "Refund" }).catch((e) =>
-      c.resolve("logger").error(`credit note for refund ${r.id}: ${(e as Error).message}`)
+      c.resolve(ContainerRegistrationKeys.LOGGER).error(`credit note for refund ${r.id}: ${(e as Error).message}`)
     )
     await recordEvent(c, orderId, "refunded", "payment", { notify: false })
     await notifyOrder(c, "refund_processed", orderId, { amount: amount.toLocaleString("en-IN") }, { dedupeKey: `refund_processed:${r.id}` })

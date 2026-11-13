@@ -21,7 +21,7 @@ const createStep_ = createStep(
   }
 )
 
-const updateStep = createStep(
+const updateHeroBannerStep = createStep(
   "update-hero-banner",
   async ({ id, ...data }: { id: string } & Data, { container }) => {
     const previous = await service(container).retrieveHeroBanner(id)
@@ -36,7 +36,7 @@ const updateStep = createStep(
   }
 )
 
-const deleteStep = createStep(
+const deleteHeroBannerStep = createStep(
   "delete-hero-banner",
   async (id: string, { container }) => {
     await service(container).softDeleteHeroBanners(id)
@@ -53,9 +53,9 @@ export const createHeroBannerWorkflow = createWorkflow(
 )
 export const updateHeroBannerWorkflow = createWorkflow(
   "update-hero-banner",
-  (input: { id: string } & Data) => new WorkflowResponse(updateStep(input))
+  (input: { id: string } & Data) => new WorkflowResponse(updateHeroBannerStep(input))
 )
 export const deleteHeroBannerWorkflow = createWorkflow(
   "delete-hero-banner",
-  (id: string) => new WorkflowResponse(deleteStep(id))
+  (id: string) => new WorkflowResponse(deleteHeroBannerStep(id))
 )

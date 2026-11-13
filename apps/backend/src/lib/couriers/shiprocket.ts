@@ -1,3 +1,4 @@
+import { MedusaError } from "@medusajs/framework/utils"
 import { timingSafeEqual } from "node:crypto"
 import type { TimelineStatus } from "../shipping"
 import type { Courier, Serviceability, TrackingEvent } from "./types"
@@ -39,7 +40,7 @@ export class ShiprocketCourier implements Courier {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ email: this.cfg.email, password: this.cfg.password }),
     })
-    if (!r.ok) throw new Error(`Shiprocket login failed (${r.status})`)
+    if (!r.ok) throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `Shiprocket login failed (${r.status})`)
     const { token } = (await r.json()) as { token: string }
     this.token = { value: token, expires: Date.now() + 8 * 24 * 3600_000 } // tokens last 10 days
     return token
@@ -52,7 +53,7 @@ export class ShiprocketCourier implements Courier {
       body: init.body ? JSON.stringify(init.body) : undefined,
     })
     const json = (await r.json().catch(() => ({}))) as T
-    if (!r.ok) throw new Error(`Shiprocket ${path} failed (${r.status}): ${JSON.stringify(json).slice(0, 300)}`)
+    if (!r.ok) throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `Shiprocket ${path} failed (${r.status}): ${JSON.stringify(json).slice(0, 300)}`)
     return json
   }
 
@@ -111,7 +112,7 @@ export class ShiprocketCourier implements Courier {
       body: { shipment_id: order.shipment_id, ...(i.courierId ? { courier_id: Number(i.courierId) } : {}) },
     })
     const code = awb.response?.data?.awb_code
-    if (!code) throw new Error("Shiprocket did not assign an AWB")
+    if (!code) throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "Shiprocket did not assign an AWB")
     const label = await this.call<{ label_url?: string }>("/courier/generate/label", { method: "POST", body: { shipment_id: [order.shipment_id] } }).catch(() => ({}) as { label_url?: string })
     await this.call("/courier/generate/pickup", { method: "POST", body: { shipment_id: [order.shipment_id] } }).catch(() => null)
     return {
@@ -159,7 +160,7 @@ export class ShiprocketCourier implements Courier {
       body: { shipment_id: order.shipment_id, is_return: 1 },
     })
     const code = awb.response?.data?.awb_code
-    if (!code) throw new Error("Shiprocket did not assign a return AWB")
+    if (!code) throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "Shiprocket did not assign a return AWB")
     return { awb: code, courierName: awb.response?.data?.courier_name ?? "Courier", trackingUrl: `https://shiprocket.co/tracking/${code}` }
   }
 

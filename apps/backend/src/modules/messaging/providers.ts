@@ -1,3 +1,4 @@
+import { MedusaError } from "@medusajs/framework/utils"
 import type { Logger } from "@medusajs/framework/types"
 import type { Channel } from "./channels"
 
@@ -37,7 +38,7 @@ export class ConsoleProvider implements DeliveryProvider {
 
 const json = async (r: Response) => {
   const body = await r.json().catch(() => ({}))
-  if (!r.ok) throw new Error(`HTTP ${r.status}: ${JSON.stringify(body).slice(0, 300)}`)
+  if (!r.ok) throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `HTTP ${r.status}: ${JSON.stringify(body).slice(0, 300)}`)
   return body as Record<string, unknown>
 }
 
@@ -46,8 +47,8 @@ export class Msg91Sms implements DeliveryProvider {
   name = "msg91"
   constructor(private cfg: { authKey: string; sender: string; dltEntityId: string }) {}
   async send(m: Outgoing) {
-    if (m.channel !== "sms") throw new Error("msg91 sms: wrong channel")
-    if (!m.templateId) throw new Error("No DLT template id for this message (SMS_TEMPLATE_IDS)")
+    if (m.channel !== "sms") throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, "msg91 sms: wrong channel")
+    if (!m.templateId) throw new MedusaError(MedusaError.Types.INVALID_DATA, "No DLT template id for this message (SMS_TEMPLATE_IDS)")
     const r = await json(
       await fetch("https://control.msg91.com/api/v5/flow", {
         method: "POST",
@@ -70,7 +71,7 @@ export class MetaWhatsApp implements DeliveryProvider {
   name = "meta"
   constructor(private cfg: { phoneNumberId: string; token: string }) {}
   async send(m: Outgoing) {
-    if (m.channel !== "whatsapp") throw new Error("whatsapp: wrong channel")
+    if (m.channel !== "whatsapp") throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, "whatsapp: wrong channel")
     const r = await json(
       await fetch(`https://graph.facebook.com/v20.0/${this.cfg.phoneNumberId}/messages`, {
         method: "POST",
@@ -96,7 +97,7 @@ export class Msg91WhatsApp implements DeliveryProvider {
   name = "msg91-whatsapp"
   constructor(private cfg: { authKey: string; integratedNumber: string }) {}
   async send(m: Outgoing) {
-    if (m.channel !== "whatsapp") throw new Error("whatsapp: wrong channel")
+    if (m.channel !== "whatsapp") throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, "whatsapp: wrong channel")
     const r = await json(
       await fetch("https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/", {
         method: "POST",
@@ -127,7 +128,7 @@ export class ResendEmail implements DeliveryProvider {
   name = "resend"
   constructor(private cfg: { apiKey: string; from: string; replyTo: string }) {}
   async send(m: Outgoing) {
-    if (m.channel !== "email") throw new Error("resend: wrong channel")
+    if (m.channel !== "email") throw new MedusaError(MedusaError.Types.INVALID_ARGUMENT, "resend: wrong channel")
     const r = await json(
       await fetch("https://api.resend.com/emails", {
         method: "POST",

@@ -32,7 +32,7 @@ export const updateBusinessSettingsWorkflow = settingsWorkflow("update-business-
 
 const cod = (c: { resolve: <T>(k: string) => T }) => c.resolve<CodModuleService>(COD_MODULE)
 
-const addBlockedStep = createStep(
+const addCodBlockedPincodesStep = createStep(
   "add-cod-blocked-pincodes",
   async (pincodes: string[], { container }) => {
     const rows = await cod(container).createCodBlockedPincodes(pincodes.map((pincode) => ({ pincode })))
@@ -43,7 +43,7 @@ const addBlockedStep = createStep(
   }
 )
 
-const removeBlockedStep = createStep(
+const removeCodBlockedPincodeStep = createStep(
   "remove-cod-blocked-pincode",
   async (pincode: string, { container }) => {
     const rows = await cod(container).listCodBlockedPincodes({ pincode }, { select: ["id"] })
@@ -57,9 +57,9 @@ const removeBlockedStep = createStep(
 
 export const addCodBlockedPincodesWorkflow = createWorkflow(
   "add-cod-blocked-pincodes",
-  (pincodes: string[]) => new WorkflowResponse(addBlockedStep(pincodes))
+  (pincodes: string[]) => new WorkflowResponse(addCodBlockedPincodesStep(pincodes))
 )
 export const removeCodBlockedPincodeWorkflow = createWorkflow(
   "remove-cod-blocked-pincode",
-  (pincode: string) => new WorkflowResponse(removeBlockedStep(pincode))
+  (pincode: string) => new WorkflowResponse(removeCodBlockedPincodeStep(pincode))
 )
