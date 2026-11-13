@@ -11,8 +11,11 @@ const serif = Cormorant_Garamond({
   weight: ["500", "600", "700"],
   variable: "--font-serif",
   display: "swap",
+  // Not preloaded: on slow 4G the preloads competed with the CSS and the hero image
+  // (mobile LCP). Text paints at once in the metric-matched fallback, then swaps.
+  preload: false,
 })
-const sans = Mulish({ subsets: ["latin"], variable: "--font-sans", display: "swap" })
+const sans = Mulish({ subsets: ["latin"], variable: "--font-sans", display: "swap", preload: false })
 
 export async function generateMetadata(): Promise<Metadata> {
   const brand = await getBrand()
