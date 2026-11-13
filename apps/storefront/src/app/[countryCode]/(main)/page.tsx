@@ -37,7 +37,7 @@ export default async function Home() {
       "@type": "Organization",
       name: STORE_NAME,
       url: origin,
-      logo: `${origin}/opengraph-image.jpg`,
+      logo: `${origin}/icon.png`,
       ...(seller ? { legalName: seller.legal_name } : {}),
       ...(seller?.email || seller?.phone
         ? { contactPoint: [{ "@type": "ContactPoint", contactType: "customer service", areaServed: "IN", availableLanguage: ["en"], ...(seller.email ? { email: seller.email } : {}), ...(seller.phone ? { telephone: seller.phone } : {}) }] }
