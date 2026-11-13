@@ -13,6 +13,9 @@ const ROWS: { key: Key; label: string; unit?: string }[] = [
   { key: "chain_included", label: "Chain included" },
   { key: "colour", label: "Colour" },
   { key: "pack_quantity", label: "Pack of" },
+  { key: "net_quantity", label: "Net quantity" },
+  { key: "packed_on", label: "Month & year of packing" },
+  { key: "liquid_fragile", label: "Liquid / fragile" },
   { key: "country_of_origin", label: "Country of origin" },
 ]
 

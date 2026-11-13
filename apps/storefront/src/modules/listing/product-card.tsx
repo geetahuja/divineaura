@@ -20,13 +20,16 @@ const LotusPlaceholder = () => (
   </div>
 )
 
-export default function ProductCard({ product, priority }: { product: CatalogueProduct; priority?: boolean }) {
+// Demo products (staging) carry AI placeholder images; say so on every card.
+export const isDemo = (p: { tags: string[] }) => p.tags.includes("demo")
+
+export default function ProductCard({ product, priority, featured }: { product: CatalogueProduct; priority?: boolean; featured?: boolean }) {
   const discount = product.mrp && product.price ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0
 
   return (
-    <li className="flex flex-col">
+    <li className={`flex flex-col ${featured ? "rounded-xl border border-champagne bg-white p-3 text-center shadow-sm small:p-4" : ""}`}>
       <LocalizedClientLink href={`/products/${product.handle}`} className="group flex flex-1 flex-col">
-        <div className="relative aspect-square overflow-hidden rounded-lg border border-champagne bg-ivory-deep">
+        <div className={`relative aspect-square overflow-hidden rounded-lg bg-ivory-deep ${featured ? "" : "border border-champagne"}`}>
           {product.thumbnail ? (
             <Image
               src={product.thumbnail}
@@ -40,13 +43,16 @@ export default function ProductCard({ product, priority }: { product: CatalogueP
             <LotusPlaceholder />
           )}
           <HeartButton productId={product.id} title={product.title} />
+          {isDemo(product) && (
+            <span className="absolute bottom-1.5 left-1.5 rounded bg-white/85 px-1.5 py-0.5 text-[10px] text-ink-soft">Representative image</span>
+          )}
           {!product.in_stock && (
             <span className="absolute left-2 top-2 rounded-full bg-ink/80 px-2 py-0.5 text-[11px] font-semibold text-white">
               Out of stock
             </span>
           )}
         </div>
-        <h3 className="mt-2 line-clamp-2 text-sm font-medium leading-snug text-ink group-hover:text-primary">
+        <h3 className={`mt-2 line-clamp-2 leading-snug text-ink group-hover:text-primary ${featured ? "font-serif text-base font-semibold small:text-lg" : "text-sm font-medium"}`}>
           {product.title}
         </h3>
         {product.rating && (
@@ -55,7 +61,7 @@ export default function ProductCard({ product, priority }: { product: CatalogueP
             <span aria-label={`${product.rating.count} reviews`}>({product.rating.count})</span>
           </p>
         )}
-        <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+        <div className={`mt-1 flex flex-wrap items-baseline gap-x-2 ${featured ? "justify-center" : ""}`}>
           {product.price != null ? (
             <>
               <span className="font-semibold text-ink">{inr(product.price)}</span>

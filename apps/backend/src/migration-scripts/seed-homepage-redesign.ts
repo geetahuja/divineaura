@@ -164,7 +164,7 @@ export default async function seedHomepageRedesign({ container }: ExecArgs) {
   const existingCats = await products.listProductCategories({ handle: ["goda-jal", "puja-essentials"] }, { select: ["handle"] })
   const has = new Set(existingCats.map((c) => c.handle))
   const newCats = [
-    { name: "Goda Jal (Godavari Water)", handle: "goda-jal", description: "Water of the Godavari from Nashik, for puja and snan at home. For religious/puja use only.", rank: 10 },
+    { name: "Goda Jal (Godavari Water)", handle: "goda-jal", description: "Water of the Godavari from Nashik, for puja and snan at home. For religious/puja use only. Not for drinking or internal consumption.", rank: 10 },
     { name: "Puja Essentials", handle: "puja-essentials", description: "Thalis, diyas and other essentials for puja at home.", rank: 11 },
   ].filter((c) => !has.has(c.handle))
   if (newCats.length) await createProductCategoriesWorkflow(container).run({ input: { product_categories: newCats.map((c) => ({ ...c, is_active: true })) } })

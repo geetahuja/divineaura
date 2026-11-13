@@ -1,4 +1,4 @@
-# DivineAura — go-live checklist (divinesanatani.com)
+# Anant Sanatan — go-live checklist (divinesanatani.com)
 
 Staging runs the full shop privately. Every item below is **a settings change** —
 an `.env` value and/or an admin setting — never a rebuild. Do them in any order,
@@ -34,7 +34,7 @@ Never paste keys into chat or commit them. Values with a `$` in them must be wra
      series (`BOS/26-27/00001`), and checkout/PIN checks accept **only PIN codes in your State**.
    - Switch only when every open order already has its invoice (the scheme in force when a
      document is issued decides its type). Switching back restores tax invoices and nationwide delivery.
-3. Set the HSN code and GST rate on each product (DivineAura details panel). Ask your CA to
+3. Set the HSN code and GST rate on each product ("Product details & specs" panel). Ask your CA to
    confirm the SAC codes used for shipping (996812) and the COD fee (999799).
 
 **Test:** place a test order → Admin → order → download the invoice. Composition: check the
@@ -130,7 +130,7 @@ watch the timeline update from the webhook; for manual, move it through the stat
 
 1. **DLT** (any operator portal, e.g. Jio TrueConnect / Vi / Airtel):
    - Register the business (Principal Entity) → **Entity ID**.
-   - Register a 6-letter **header** (sender ID), e.g. `DVNAUR`.
+   - Register a 6-letter **header** (sender ID), e.g. `ANTSAN`. Brand on the DLT entity: **Anant Sanatan** (a brand of Jayshankar Enterprises).
    - Register each **content template** exactly as the SMS text in
      `apps/backend/src/modules/messaging/templates.ts`, with every `{variable}` replaced by `{#var#}`
      (e.g. `Order #{order}` → `Order #{#var#}`; `dltText()` in that file does the conversion). Category: Service-Implicit for
@@ -141,7 +141,7 @@ watch the timeline update from the webhook; for manual, move it through the stat
 3. `backend.env`:
    ```
    MSG91_AUTH_KEY=…
-   SMS_SENDER_ID=DVNAUR
+   SMS_SENDER_ID=ANTSAN
    DLT_ENTITY_ID=…
    SMS_TEMPLATE_IDS=otp_login=…,order_placed=…,order_shipped=…   (event=MSG91 template id, all events)
    MESSAGING_CHANNEL=sms        # or both, once WhatsApp is ready
@@ -173,7 +173,7 @@ watch the timeline update from the webhook; for manual, move it through the stat
    `TXT  _dmarc  v=DMARC1; p=none; rua=mailto:support@divinesanatani.com; adkim=r; aspf=r`
    After 2–4 weeks of clean reports change `p=none` → `p=quarantine`.
 4. Resend → Verify. Then `backend.env`: `RESEND_API_KEY=re_…`
-   (`EMAIL_FROM` = `DivineAura <noreply@divinesanatani.com>`, `EMAIL_REPLY_TO` = support@ are preset).
+   (`EMAIL_FROM` = `Anant Sanatan <noreply@divinesanatani.com>`, `EMAIL_REPLY_TO` = support@ are preset).
 5. Mailboxes for `support@` and `orders@` (Google Workspace / Zoho / GoDaddy email): add **their**
    MX records on the root domain, and add their SPF include to a root `v=spf1 … ~all` record (only ONE
    SPF TXT on the root).
@@ -221,6 +221,25 @@ To add automatic deploys later (after go-live has settled):
 ## 9. Before the switch
 
 - [ ] Real products with photos, prices, stock, HSN/GST rates; delete anything marked "Sample".
+- [ ] **REQUIRED — remove the demo catalogue** (16 products tagged `demo`, "Representative image"):
+      ```powershell
+      ssh divineaura "bash /var/www/divineaura/app/deploy/server/remove-demo-products.sh"
+      ```
+      It also clears the AI placeholder photos on Sacred Places (credit "Representative AI illustration").
+- [ ] **REQUIRED — replace every AI placeholder image** with real photos (they are AI mockups, not
+      verified photos of real products, temples or licensed Godavari water). Files in
+      `apps/storefront/public/placeholders/` (WebP + JPG pairs, keep the same names and sizes):
+      - Homepage hero art (used when a hero slide has no uploaded image): `temple-ghats`, `kumbh-ghat-pilgrims`,
+        `diya-rudraksha` — or simply upload real images on each slide in Admin → Hero banners.
+      - Category cards: `category-gemstone-bracelets`, `category-hand-ties`, `category-lockets`, `category-puja-essentials`.
+      - Kumbh band / pages: `kumbh-ghat-pilgrims`, `goda-jal-bottle` (illustration).
+      - Demo-only (gone after remove-demo-products.sh): `bracelet-*`, `locket-*`, `hand-tie-*`, `place-*`,
+        `goda-jal-gift-box`, `product-placeholder`.
+      Then delete the files you no longer use and redeploy.
+- [ ] Goda Jal: Admin → Business details → **"Goda Jal – packed by"** (licensed packer name, address,
+      licence no.); each Goda Jal product's net quantity and month/year of packing; GST rate for Goda Jal
+      confirmed with your CA (Settings → Tax Regions → India, product type "Goda Jal").
+- [ ] Journal drafts and the "Our story" page reviewed (they start with "DRAFT – owner to review").
 - [ ] Business details complete (GSTIN, grievance officer); policies reviewed (Admin → Pages).
 - [ ] Payment, courier, messaging and email tested above on staging.
 - [ ] Admin → Settings → Regions → India: **untick test-payment**.
@@ -229,14 +248,14 @@ To add automatic deploys later (after go-live has settled):
 - [ ] Hostinger → take a **snapshot**.
 - [ ] **REQUIRED — last step before the switch: delete all test orders and reset the numbering.**
       GST invoice numbers must be consecutive with no gaps, and staging test orders have already used
-      numbers (e.g. DA/26-27/00001). Run, still in staging mode:
+      numbers (e.g. AS/26-27/00001; before the rebrand DA/…). Run, still in staging mode:
       ```powershell
       ssh -t divineaura "bash /var/www/divineaura/app/deploy/server/reset-test-orders.sh"
       ```
       Type `DELETE TEST ORDERS` when asked. It takes a backup first, then in one all-or-nothing step
       deletes every order, cart, payment, shipment, invoice, credit note, return, review and message
       and resets the counters. It keeps products, stock, customers, pages, settings and admin users.
-      Afterwards the first real order is **#1**, the first invoice **DA/26-27/00001** (credit notes
+      Afterwards the first real order is **#1**, the first invoice **AS/26-27/00001** (credit notes
       **CN/26-27/00001**, Bills of Supply **BOS/26-27/00001**). It refuses to run once SITE_MODE is live.
       - Then check stock in Admin → Inventory (shipped test orders reduced it).
       - Place **no more test orders** before §10 — any order now takes a real invoice number.
