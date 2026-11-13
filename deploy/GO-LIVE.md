@@ -231,6 +231,8 @@ To add automatic deploys later (after go-live has settled):
       `apps/storefront/public/placeholders/` (WebP + JPG pairs, keep the same names and sizes):
       - Homepage hero art (used when a hero slide has no uploaded image): `temple-ghats`, `kumbh-ghat-pilgrims`,
         `diya-rudraksha` — or simply upload real images on each slide in Admin → Hero banners.
+      - Hero slides "Awaken the eternity within" and "Kumbh Special – Goda Jal" have AI images uploaded
+        (2026-11-13, from `apps/backend/assets/hero/`): replace both in Admin → Hero banners.
       - Category cards: `category-gemstone-bracelets`, `category-hand-ties`, `category-lockets`, `category-puja-essentials`.
       - Kumbh band / pages: `kumbh-ghat-pilgrims`, `goda-jal-bottle` (illustration).
       - Demo-only (gone after remove-demo-products.sh): `bracelet-*`, `locket-*`, `hand-tie-*`, `place-*`,
