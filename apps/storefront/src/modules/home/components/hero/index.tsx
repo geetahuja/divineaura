@@ -30,6 +30,11 @@ const getSlides = () =>
 const artFor = (link: string) =>
   /kumbh|goda-jal/.test(link) ? { src: "/placeholders/kumbh-ghat-pilgrims", pos: "object-left" } : /bracelet/.test(link) ? { src: "/placeholders/diya-rudraksha", pos: "object-center" } : { src: "/placeholders/temple-ghats", pos: "object-right" }
 
+const PHOTO_GLOW =
+  "bg-[radial-gradient(ellipse_at_50%_45%,rgba(255,245,232,0.8),rgba(255,245,232,0.35)_55%,transparent_75%),linear-gradient(to_bottom,transparent_70%,rgba(30,12,4,0.55))] small:bg-[radial-gradient(ellipse_at_54.5%_50%,rgba(255,245,232,0.3),transparent_40%),linear-gradient(to_bottom,transparent_80%,rgba(30,12,4,0.3))]"
+const ART_GLOW =
+  "bg-[radial-gradient(ellipse_at_50%_48%,rgba(255,245,232,0.94),rgba(255,245,232,0.7)_45%,transparent_78%),linear-gradient(to_bottom,transparent_70%,rgba(30,12,4,0.55))] small:bg-[radial-gradient(ellipse_at_54.5%_50%,rgba(255,245,232,0.92),rgba(255,245,232,0.6)_30%,transparent_55%),linear-gradient(to_bottom,transparent_75%,rgba(30,12,4,0.45))]"
+
 /** Line – ornament – line, as in the design (maroon hairlines with a diamond tip). */
 function Ornament({ src, w, className }: { src: string; w: number; className: string }) {
   const line = "relative h-px w-[70px] bg-primary/80 small:w-[9.7vw] after:absolute after:top-1/2 after:size-1.5 after:-translate-y-1/2 after:rotate-45 after:bg-primary/80"
@@ -67,8 +72,8 @@ function Slide({ s, first, brandName }: { s: HeroSlide; first: boolean; brandNam
           <img src={`${art.src}.jpg`} alt={s.image_alt ?? ""} fetchPriority={first ? "high" : "auto"} loading={first ? "eager" : "lazy"} className={`absolute inset-0 -z-10 h-full w-full object-cover ${art.pos}`} />
         </picture>
       )}
-      {/* Soft ivory glow behind the words, dark fade at the bottom for the white caption and button. */}
-      <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,rgba(255,245,232,0.8),rgba(255,245,232,0.35)_55%,transparent_75%),linear-gradient(to_bottom,transparent_70%,rgba(30,12,4,0.55))] small:bg-[radial-gradient(ellipse_at_54.5%_50%,rgba(255,245,232,0.3),transparent_40%),linear-gradient(to_bottom,transparent_80%,rgba(30,12,4,0.3))]" />
+      {/* Ivory glow behind the words (stronger over the busy built-in artwork), dark fade at the bottom for the white caption and button. */}
+      <div aria-hidden className={`absolute inset-0 -z-10 ${s.image_desktop_url ? PHOTO_GLOW : ART_GLOW}`} />
 
       <div className="flex flex-1 flex-col items-center justify-center px-5 py-8 text-center text-primary small:py-0 small:pl-[9%]">
         <Ornament src="/brand/om.png" w={136} className="h-12 small:h-[3.8vw] small:max-h-16" />
