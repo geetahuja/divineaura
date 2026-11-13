@@ -207,8 +207,21 @@ Alert contacts: your email + mobile.
 - [ ] Payment, courier, messaging and email tested above on staging.
 - [ ] Admin → Settings → Regions → India: **untick test-payment**.
 - [ ] Admin → Shipping & couriers: default courier is not "Test courier".
-- [ ] Delete test orders/customers if you want a clean start (or keep them; they are labelled test).
-- [ ] Hostinger → take a **snapshot**; run `sudo systemctl start divineaura-backup.service`.
+- [ ] Optional: delete test customer accounts (Admin → Customers).
+- [ ] Hostinger → take a **snapshot**.
+- [ ] **REQUIRED — last step before the switch: delete all test orders and reset the numbering.**
+      GST invoice numbers must be consecutive with no gaps, and staging test orders have already used
+      numbers (e.g. DA/26-27/00001). Run, still in staging mode:
+      ```powershell
+      ssh -t divineaura "bash /var/www/divineaura/app/deploy/server/reset-test-orders.sh"
+      ```
+      Type `DELETE TEST ORDERS` when asked. It takes a backup first, then in one all-or-nothing step
+      deletes every order, cart, payment, shipment, invoice, credit note, return, review and message
+      and resets the counters. It keeps products, stock, customers, pages, settings and admin users.
+      Afterwards the first real order is **#1**, the first invoice **DA/26-27/00001** (credit notes
+      **CN/26-27/00001**, Bills of Supply **BOS/26-27/00001**). It refuses to run once SITE_MODE is live.
+      - Then check stock in Admin → Inventory (shipped test orders reduced it).
+      - Place **no more test orders** before §10 — any order now takes a real invoice number.
 
 ## 10. Final switch — go live
 
