@@ -69,7 +69,10 @@ function Slide({ s, first, brandName }: { s: HeroSlide; first: boolean; brandNam
           {/* Phones get a 640 px copy (~25 KB): it's a soft background behind the heading. */}
           <source media="(max-width: 639px)" type="image/webp" srcSet={`${art.src}-640.webp`} />
           <source type="image/webp" srcSet={`${art.src}.webp`} />
-          <img src={`${art.src}.jpg`} alt={s.image_alt ?? ""} fetchPriority={first ? "high" : "auto"} loading={first ? "eager" : "lazy"} className={`absolute inset-0 -z-10 h-full w-full object-cover ${art.pos}`} />
+          {/* Built-in artwork is ~900 px wide: right half on desktop (not stretched full width), fading into the sky. */}
+          <img
+            src={`${art.src}.jpg`} alt={s.image_alt ?? ""} fetchPriority={first ? "high" : "auto"} loading={first ? "eager" : "lazy"} className={`absolute inset-y-0 right-0 -z-10 h-full w-full object-cover ${art.pos} small:w-[55%] small:[mask-image:linear-gradient(to_right,transparent,black_35%)]`}
+          />
         </picture>
       )}
       {/* Ivory glow behind the words (stronger over the busy built-in artwork, plus a light top under the header), dark fade at the bottom for the white caption and button. */}
