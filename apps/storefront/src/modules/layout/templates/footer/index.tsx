@@ -36,7 +36,7 @@ export default async function Footer() {
   const [menu, seller, brand] = await Promise.all([getMainMenu(), getSeller(), getBrand()])
   const g = seller?.grievance
   return (
-    <footer className="bg-primary-hover text-ivory">
+    <footer className="bg-primary-hover text-ivory [contain-intrinsic-size:auto_1200px] [content-visibility:auto]">
       {/* Option A row: logo + taglines · quick links · social */}
       <div className="content-container flex flex-col items-center gap-6 border-b border-champagne/25 py-10 text-center small:flex-row small:justify-between small:text-left">
         <BrandLogo brand={brand} tone="dark" />

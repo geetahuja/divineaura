@@ -148,7 +148,7 @@ export async function NashikSkyline({ compact = false }: { compact?: boolean }) 
 /** Homepage section: lotus-flanked heading + skyline. */
 export default async function SacredNashikStrip() {
   return (
-    <section aria-labelledby="nashik-heading" className="bg-[linear-gradient(180deg,#FFF5E8,#FBEBD6)] py-10 small:py-14">
+    <section aria-labelledby="nashik-heading" className="[contain-intrinsic-size:auto_420px] [content-visibility:auto] bg-[linear-gradient(180deg,#FFF5E8,#FBEBD6)] py-10 small:py-14">
       <div className="content-container">
         <div className="flex items-center justify-center gap-3 text-accent">
           <span aria-hidden className="hidden h-px w-24 bg-current xsmall:block" />

@@ -43,6 +43,8 @@ function Slide({ s, first }: { s: HeroSlide; first: boolean }) {
         </picture>
       ) : (
         <picture>
+          {/* Phones get a 640 px copy (~25 KB): it's a soft background behind the heading. */}
+          <source media="(max-width: 639px)" type="image/webp" srcSet={`${art.src}-640.webp`} />
           <source type="image/webp" srcSet={`${art.src}.webp`} />
           <img
             src={`${art.src}.jpg`}

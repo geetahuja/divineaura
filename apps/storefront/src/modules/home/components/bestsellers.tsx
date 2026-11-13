@@ -17,7 +17,7 @@ export default async function Bestsellers() {
   if (!products.length) return null
 
   return (
-    <section className="content-container py-10 small:py-14" aria-labelledby="bestsellers-heading">
+    <section className="content-container py-10 [contain-intrinsic-size:auto_900px] [content-visibility:auto] small:py-14" aria-labelledby="bestsellers-heading">
       <div className="flex items-center justify-center gap-3 text-accent">
         <span aria-hidden className="hidden h-px w-24 bg-current xsmall:block" />
         <span aria-hidden className="text-xl">❁</span>

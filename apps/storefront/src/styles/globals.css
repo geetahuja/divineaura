@@ -159,3 +159,10 @@ html[data-mode="light"] {
 .consent-set #consent-banner {
   display: none;
 }
+
+/* Hindi taglines + ॐ: the phone's own Devanagari serif (Android: Noto Serif
+   Devanagari, iOS/macOS: Kohinoor / Devanagari Sangam, Windows: Nirmala UI).
+   No webfont download, so it never delays the mobile LCP (was 125 KB). */
+:root {
+  --font-deva: "Noto Serif Devanagari", "Tiro Devanagari Hindi", "Kohinoor Devanagari", "Devanagari Sangam MN", "Noto Sans Devanagari", "Nirmala UI", "Mangal";
+}

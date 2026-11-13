@@ -14,7 +14,7 @@ export default async function TrustStrip() {
   ].filter((i): i is { icon: typeof Truck; title: string; sub: string } => !!i)
 
   return (
-    <section aria-label="Why shop with us" className="border-y border-champagne bg-[#F7E6CC]">
+    <section aria-label="Why shop with us" className="[contain-intrinsic-size:auto_200px] [content-visibility:auto] border-y border-champagne bg-[#F7E6CC]">
       <ul className="content-container grid grid-cols-2 gap-x-4 gap-y-5 py-6 small:flex small:justify-between small:py-7">
         {items.map(({ icon: Icon, title, sub }, i) => (
           <li key={title} className={`flex items-center gap-3 small:flex-1 small:justify-center ${i ? "small:border-l small:border-accent/40" : ""}`}>
