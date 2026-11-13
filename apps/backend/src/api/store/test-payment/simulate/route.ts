@@ -4,6 +4,7 @@ import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { signTestPayment, TEST_PAYMENT_SIGNATURE_HEADER } from "../../../../modules/test-payment/service"
 import type { SimulateTestPaymentBody } from "../../../validators"
 import { testToolsAllowed } from "../../../../lib/site-mode"
+import { recordTestPaymentOutcomeWorkflow } from "../../../../workflows/test-payment"
 
 const PROVIDER_ID = "pp_test-payment_test-payment"
 const enabled = () => process.env.TEST_PAYMENT_ENABLED === "true" && testToolsAllowed()
@@ -29,11 +30,8 @@ export async function POST(req: MedusaRequest<SimulateTestPaymentBody>, res: Med
     throw new MedusaError(MedusaError.Types.NOT_ALLOWED, `Payment session is already ${session.status}`)
   }
 
-  await payments.updatePaymentSession({
-    id: session.id,
-    amount: session.amount,
-    currency_code: session.currency_code,
-    data: { ...session.data, gateway_status: outcome === "success" ? "paid" : "failed" },
+  await recordTestPaymentOutcomeWorkflow(req.scope).run({
+    input: { session, gateway_status: outcome === "success" ? "paid" : "failed" },
   })
 
   const body = JSON.stringify({
