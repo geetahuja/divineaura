@@ -47,7 +47,7 @@ export default async function KumbhSpecialPage() {
           <img src="/placeholders/kumbh-ghat-pilgrims.jpg" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-25" />
         </picture>
         <div className="content-container flex flex-col items-center py-12 text-center small:py-16">
-          <p className="bg-primary px-6 py-1.5 font-serif text-sm font-semibold uppercase tracking-[0.2em] text-champagne [clip-path:polygon(0_0,100%_0,95%_50%,100%_100%,0_100%,5%_50%)]">
+          <p className="whitespace-nowrap bg-primary px-6 py-1.5 font-serif text-sm font-semibold uppercase tracking-[0.2em] text-champagne [clip-path:polygon(0_0,100%_0,95%_50%,100%_100%,0_100%,5%_50%)]">
             Kumbh Special
           </p>
           <h1 className="mt-3 font-serif text-5xl font-semibold text-primary small:text-6xl">Goda Jal</h1>

@@ -41,7 +41,7 @@ export default function KumbhBand() {
       <div className="content-container grid grid-cols-[1fr_auto] items-center gap-4 py-10 small:grid-cols-[38%_1fr_26%] small:py-12">
         <div className="hidden small:block" />
         <div className="flex flex-col items-start text-left small:items-center small:text-center">
-          <p className="relative bg-primary px-6 py-1.5 font-serif text-sm font-semibold uppercase tracking-[0.2em] text-champagne shadow [clip-path:polygon(0_0,100%_0,95%_50%,100%_100%,0_100%,5%_50%)] small:text-lg">
+          <p className="relative whitespace-nowrap bg-primary px-6 py-1.5 font-serif text-sm font-semibold uppercase tracking-[0.2em] text-champagne shadow [clip-path:polygon(0_0,100%_0,95%_50%,100%_100%,0_100%,5%_50%)] small:text-lg">
             Kumbh Special
           </p>
           <h2 id="kumbh-heading" className="mt-3 font-serif text-5xl font-semibold leading-none text-primary small:text-6xl">
@@ -62,7 +62,7 @@ export default function KumbhBand() {
           <img src="/placeholders/goda-jal-bottle.jpg" alt="Goda Jal bottle (illustration)" loading="lazy" width={800} height={800} className="h-36 w-36 rounded-full object-cover mix-blend-multiply small:h-64 small:w-64" />
         </picture>
       </div>
-      <ul className="content-container grid grid-cols-3 gap-2 border-t border-champagne/70 py-4 text-center text-xs text-ink small:text-sm">
+      <ul className="relative grid grid-cols-3 gap-2 border-t border-champagne/70 bg-[#FFF1DD] px-4 py-4 text-center text-xs text-ink small:px-[max(1.5rem,calc((100vw-1440px)/2))] small:text-sm">
         {NOTES.map(({ icon: Icon, text }) => (
           <li key={text} className="flex flex-col items-center gap-1 small:flex-row small:justify-center small:gap-2">
             <Icon className="h-5 w-5 text-accent" aria-hidden strokeWidth={1.6} />
