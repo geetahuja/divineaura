@@ -30,6 +30,7 @@ export default function KumbhBand() {
   return (
     <section aria-labelledby="kumbh-heading" className="[contain-intrinsic-size:auto_520px] [content-visibility:auto] relative isolate overflow-hidden border-y border-champagne bg-[linear-gradient(180deg,#FBE3BE_0%,#FFF1DD_55%,#F6D9AE_100%)]">
       <picture>
+        <source media="(max-width: 639px)" type="image/webp" srcSet="/placeholders/kumbh-ghat-pilgrims-640.webp" />
         <source type="image/webp" srcSet="/placeholders/kumbh-ghat-pilgrims.webp" />
         <img
           src="/placeholders/kumbh-ghat-pilgrims.jpg"

@@ -43,6 +43,7 @@ export default async function KumbhSpecialPage() {
       </div>
       <header className="relative isolate overflow-hidden border-b border-champagne">
         <picture>
+          <source media="(max-width: 639px)" type="image/webp" srcSet="/placeholders/kumbh-ghat-pilgrims-640.webp" />
           <source type="image/webp" srcSet="/placeholders/kumbh-ghat-pilgrims.webp" />
           <img src="/placeholders/kumbh-ghat-pilgrims.jpg" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-25" />
         </picture>
