@@ -4,7 +4,8 @@ import { validateSettings } from "../../../lib/cod"
 import { syncPrepaidPromotion } from "../../../lib/payment-choice"
 import { syncCodFeeTax } from "../../../lib/cod-fee-tax"
 import { COD_MODULE } from "../../../modules/cod"
-import CodModuleService, { SETTINGS_ID } from "../../../modules/cod/service"
+import type CodModuleService from "../../../modules/cod/service"
+import { updatePaymentSettingsWorkflow } from "../../../workflows/settings"
 import type { UpdatePaymentSettingsBody } from "../../validators"
 
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
@@ -15,9 +16,8 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) 
 export async function POST(req: AuthenticatedMedusaRequest<UpdatePaymentSettingsBody>, res: MedusaResponse) {
   const error = validateSettings(req.validatedBody)
   if (error) throw new MedusaError(MedusaError.Types.INVALID_DATA, error)
-  const cod = req.scope.resolve<CodModuleService>(COD_MODULE)
-  await cod.getSettings()
-  const settings = await cod.updatePaymentSettings({ id: SETTINGS_ID, ...req.validatedBody })
+  const { result } = await updatePaymentSettingsWorkflow(req.scope).run({ input: req.validatedBody })
+  const settings = result as unknown as Awaited<ReturnType<CodModuleService["getSettings"]>>
   // The prepaid discount is a Medusa promotion; keep its % in step (0 = off).
   if (req.validatedBody.prepaid_discount_percent !== undefined) {
     await syncPrepaidPromotion(req.scope, settings.prepaid_discount_percent)

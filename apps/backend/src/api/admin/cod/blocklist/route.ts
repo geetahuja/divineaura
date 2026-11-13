@@ -4,6 +4,7 @@ import { parsePincodes } from "../../../../lib/cod"
 import { COD_MODULE } from "../../../../modules/cod"
 import type CodModuleService from "../../../../modules/cod/service"
 import type { AddBlockedPincodesBody } from "../../../validators"
+import { addCodBlockedPincodesWorkflow, removeCodBlockedPincodeWorkflow } from "../../../../workflows/settings"
 
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
   const pincodes = await req.scope
@@ -19,14 +20,11 @@ export async function POST(req: AuthenticatedMedusaRequest<AddBlockedPincodesBod
   const cod = req.scope.resolve<CodModuleService>(COD_MODULE)
   const existing = new Set((await cod.listCodBlockedPincodes({ pincode: valid }, { select: ["pincode"] })).map((p) => p.pincode))
   const fresh = valid.filter((p) => !existing.has(p))
-  if (fresh.length) await cod.createCodBlockedPincodes(fresh.map((pincode) => ({ pincode })))
+  if (fresh.length) await addCodBlockedPincodesWorkflow(req.scope).run({ input: fresh })
   res.json({ added: fresh.length, already_listed: valid.length - fresh.length, invalid })
 }
 
 export async function DELETE(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
-  const pincode = String(req.query.pincode ?? "")
-  const cod = req.scope.resolve<CodModuleService>(COD_MODULE)
-  const rows = await cod.listCodBlockedPincodes({ pincode }, { select: ["id"] })
-  if (rows.length) await cod.deleteCodBlockedPincodes(rows.map((r) => r.id))
-  res.json({ removed: rows.length })
+  const { result } = await removeCodBlockedPincodeWorkflow(req.scope).run({ input: String(req.query.pincode ?? "") })
+  res.json({ removed: result })
 }

@@ -1,10 +1,12 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
+import { updateRegionsWorkflow } from "@medusajs/medusa/core-flows"
 import { stateCode } from "../../../lib/gst-invoice"
 import { INVOICE_MODULE } from "../../../modules/invoice"
 import type InvoiceModuleService from "../../../modules/invoice/service"
 import type { BusinessSettingsBody } from "../../validators"
 import { syncTaxProvider } from "../../../lib/gst-scheme"
+import { updateBusinessSettingsWorkflow } from "../../../workflows/settings"
 
 // Admin → Business details: seller block on invoices + return window.
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
@@ -26,12 +28,14 @@ export async function POST(req: MedusaRequest<BusinessSettingsBody>, res: Medusa
   // GST scheme: switch the India tax region's provider first (composition = no tax lines),
   // so a failure leaves the setting unchanged.
   if (b.gst_scheme !== current.gst_scheme) await syncTaxProvider(req.scope, b.gst_scheme)
-  const s = await svc.updateBusinessSettings({ id: current.id, ...b })
+  const { result } = await updateBusinessSettingsWorkflow(req.scope).run({ input: b })
+  const s = result as unknown as typeof current
   // One return window everywhere: the storefront's returns policy page and
   // product pages read it from region metadata (region-store-policies.ts).
-  const regions = req.scope.resolve(Modules.REGION)
-  for (const r of await regions.listRegions({}, { select: ["id", "metadata"] })) {
-    await regions.updateRegions(r.id, { metadata: { ...(r.metadata ?? {}), return_window_days: b.return_window_days } })
+  for (const r of await req.scope.resolve(Modules.REGION).listRegions({}, { select: ["id", "metadata"] })) {
+    await updateRegionsWorkflow(req.scope).run({
+      input: { selector: { id: r.id }, update: { metadata: { ...(r.metadata ?? {}), return_window_days: b.return_window_days } } },
+    })
   }
   res.json({ settings: s, state_code: stateCode(s.state) })
 }

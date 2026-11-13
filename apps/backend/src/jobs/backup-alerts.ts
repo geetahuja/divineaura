@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { backupMaxAgeHours, backupProblems, readBackupStatus } from "../lib/backups"
 import { MESSAGING_MODULE } from "../modules/messaging"
 import type MessagingModuleService from "../modules/messaging/service"
@@ -10,7 +11,7 @@ export default async function backupAlerts(container: MedusaContainer) {
   if (!configured) return
   const problems = backupProblems(status, new Date(), backupMaxAgeHours())
   if (!problems.length) return
-  const logger = container.resolve("logger")
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const to = process.env.BACKUP_ALERT_EMAIL
   if (!to) return logger.warn(`backup-alerts: ${problems.map((p) => p.problem).join("; ")} — set BACKUP_ALERT_EMAIL to get an email`)
   const link = `${(process.env.MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")}/app/orders`
