@@ -171,6 +171,10 @@ export async function shippingOverview(c: MedusaContainer, orderId: string, cour
   const selected = courierOverride && available.includes(courierOverride as never) ? courierOverride : defaultId
   const courier = courierById(c, selected)
   const weight = await orderWeight(c, o)
+  const ids = (o.items ?? []).map((i) => i.product_id).filter((x): x is string => !!x)
+  const fragile = ids.length
+    ? (await query(c).graph({ entity: "product", fields: ["id", "product_specs.liquid_fragile"], filters: { id: ids } })).data.some((p) => (p as { product_specs?: { liquid_fragile?: boolean | null } }).product_specs?.liquid_fragile)
+    : false
   let options = null as Awaited<ReturnType<NonNullable<typeof courier>["serviceability"]>> | null
   if (!shipment && courier && pickup && isValidPin(pickup.pincode) && o.shipping_address?.postal_code) {
     options = await courier.serviceability({ pickupPin: pickup.pincode, deliveryPin: o.shipping_address.postal_code, weightGrams: weight, cod: isCod(o) })
@@ -189,6 +193,7 @@ export async function shippingOverview(c: MedusaContainer, orderId: string, cour
     manual_defaults: { courier_name: cs.manual_courier_name, tracking_url_template: cs.manual_tracking_url },
     pickup_ready: !!pickup && isValidPin(pickup.pincode),
     weight_g: weight,
+    liquid_fragile: fragile, // Goda Jal etc.: pack upright, leak-proof, marked fragile
     is_cod: isCod(o),
     cod_ready: codReady,
     shipment: shipment ?? null,

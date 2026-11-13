@@ -63,6 +63,9 @@ const FIELDS: Field[] = [
   { key: "certificate_url", label: "Certificate", kind: "file", hint: "Lab certificate (PDF or image) for gemstones." },
   { key: "country_of_origin", label: "Country of origin", kind: "text", placeholder: "India", hint: "Required by law — shown on the product page." },
   { key: "hsn_code", label: "HSN code", kind: "text", placeholder: "4, 6 or 8 digits" },
+  { key: "net_quantity", label: "Net quantity", kind: "text", placeholder: "250 ml", hint: "Packaged goods (Goda Jal): required by Legal Metrology. Shown on the product page." },
+  { key: "packed_on", label: "Month & year of packing", kind: "text", placeholder: "11/2026", hint: "Packaged goods: from the current batch label." },
+  { key: "liquid_fragile", label: "Liquid / fragile", kind: "select", options: YES_NO, hint: "Yes = packers see a 'Liquid – fragile' warning on the order." },
   { key: "not_returnable", label: "Not returnable", kind: "select", options: YES_NO, hint: "Yes for items that can't be returned once opened (e.g. sacred threads, malas). Shown on the product page." },
 ]
 
@@ -89,7 +92,7 @@ const toBody = (form: Record<string, string>) => ({
       if (f.kind === "number" || f.kind === "int") {
         return [f.key, Number(raw)]
       }
-      if (f.key === "chain_included" || f.key === "not_returnable") {
+      if (f.key === "chain_included" || f.key === "not_returnable" || f.key === "liquid_fragile") {
         return [f.key, raw === "true"]
       }
       return [f.key, raw]

@@ -24,6 +24,9 @@ export const SPEC_FIELDS = [
   "country_of_origin",
   "hsn_code",
   "not_returnable",
+  "net_quantity",
+  "packed_on",
+  "liquid_fragile",
 ] as const
 
 export type ProductSpecs = Partial<Record<(typeof SPEC_FIELDS)[number], string | number | boolean | null>>

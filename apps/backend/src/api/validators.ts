@@ -16,6 +16,9 @@ const ProductSpecsFields = z.object({
     weight_g: num,
     chain_included: z.boolean().nullish(),
     not_returnable: z.boolean().nullish(),
+    liquid_fragile: z.boolean().nullish(),
+    net_quantity: z.string().trim().max(40).nullish().transform((v) => v || null),
+    packed_on: z.string().trim().max(40).nullish().transform((v) => v || null),
     colour: text,
     pack_quantity: int,
     care_instructions: text,
@@ -65,6 +68,24 @@ export const CreateSacredPlaceSchema = z.object(SacredPlaceFields)
 export const UpdateSacredPlaceSchema = z.object(SacredPlaceFields).partial()
 export const ReorderSacredPlacesSchema = z.object({ ids: z.array(z.string()).min(1) })
 
+// Journal articles (Admin → Journal).
+const ArticleFields = z.object({
+  title: z.string().trim().min(1).max(200),
+  slug: z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase words joined by hyphens, e.g. amrut-snan-dates"),
+  excerpt: z.string().trim().max(400).nullish().transform((v) => v || null),
+  body: z.string().max(60_000),
+  cover_image_url: z.string().url().nullish().or(z.literal("").transform(() => null)),
+  cover_image_alt: z.string().trim().max(200).nullish().transform((v) => v || null),
+  published: z.boolean().default(false),
+  published_at: z.coerce.date().nullish(),
+  seo_title: z.string().trim().max(70).nullish().transform((v) => v || null),
+  seo_description: z.string().trim().max(170).nullish().transform((v) => v || null),
+})
+export const CreateArticleSchema = ArticleFields
+export const UpdateArticleSchema = ArticleFields.partial()
+export type CreateArticleBody = z.infer<typeof CreateArticleSchema>
+export type UpdateArticleBody = z.infer<typeof UpdateArticleSchema>
+
 // Hero banners. Links are site paths ("/collections/diwali"), never full URLs,
 // so the domain stays out of content (ARCHITECTURE.md §0).
 const sitePath = z.string().trim().regex(/^\/(?!\/)[^\s]*$/, "Use a site path starting with /, e.g. /collections/diwali")
@@ -73,6 +94,7 @@ const HeroBannerFields = z.object({
   title: z.string().trim().min(1).max(120),
   heading: z.string().trim().min(1).max(120),
   subheading: text,
+  subheading_hi: text,
   button_text: z.string().trim().min(1).max(40),
   button_link: sitePath,
   image_desktop_url: z.string().url().nullish(),

@@ -91,6 +91,7 @@ module.exports = defineConfig({
     { resolve: './src/modules/product-specs' },
     { resolve: './src/modules/sacred-places' },
     { resolve: './src/modules/hero-banners' },
+    { resolve: './src/modules/journal' },
     { resolve: '@medusajs/medusa/payment', options: { providers: paymentProviders } },
     { resolve: './src/modules/cod' },
     // Delivery pricing + courier shipments (ARCHITECTURE.md §5.4, §5.9). The

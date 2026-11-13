@@ -46,7 +46,7 @@ Medusa DTC Starter — a Turborepo workspace monorepo containing a Medusa backen
 │   │       ├── links/            # Module links between modules
 │   │       ├── migration-scripts/# Data migrations run by db:migrate (e.g. initial-data-seed.ts)
 │   │       ├── modules/          # Custom modules (service + models + migrations)
-│   │       ├── scripts/          # medusa exec scripts (e.g. seed-demo-products.ts)
+│   │       ├── scripts/          # medusa exec scripts (e.g. seed-demo-catalogue.ts)
 │   │       ├── search/           # Product search index definition
 │   │       ├── subscribers/      # Event subscribers
 │   │       └── workflows/        # Workflows and workflow steps
@@ -128,7 +128,7 @@ cd apps/backend
 <pm> exec medusa db:generate <module-name>   # generate migrations for a custom module
 <pm> exec medusa db:migrate                  # run migrations + migration-scripts (initial data seed)
 <pm> exec medusa user -e admin@test.com -p supersecret
-<pm> exec medusa exec ./src/scripts/seed-demo-products.ts   # optional demo products
+<pm> exec medusa exec ./src/scripts/seed-demo-catalogue.ts   # optional demo products (staging/dev only)
 ```
 
 ## Medusa Package Docs (`node_modules`)
