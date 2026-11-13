@@ -1,9 +1,10 @@
-import type { ContentPage } from "@lib/data/content"
-import { DEFAULT_OG_IMAGE, STORE_NAME } from "@lib/util/site"
+import { type ContentPage, getBrandName } from "@lib/data/content"
+import { DEFAULT_OG_IMAGE } from "@lib/util/site"
 import type { Metadata } from "next"
 
 // Unique title/description + canonical for an admin-edited page.
-export function contentMetadata(page: ContentPage | null, path: string): Metadata {
+export async function contentMetadata(page: ContentPage | null, path: string): Promise<Metadata> {
+  const STORE_NAME = await getBrandName()
   if (!page) return { title: "Page not found", robots: { index: false } }
   const title = page.seo_title || `${page.title} | ${STORE_NAME}`
   const description = page.seo_description || `${page.title} – ${STORE_NAME}`

@@ -134,6 +134,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "strip_label": {
+          "name": "strip_label",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "rank": {
           "name": "rank",
           "type": "integer",

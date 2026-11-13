@@ -6,7 +6,7 @@ import { notFound } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Your cart",
-  description: "Items in your DivineAura cart.",
+  description: "Items in your cart.",
   robots: { index: false, follow: false },
 }
 

@@ -14,7 +14,7 @@ const W = A4.w - 2 * M
 const money = (v: number) => v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const date = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })
 
-/** A4 tax invoice / bill of supply (GST composition) / credit note in DivineAura colours. */
+/** A4 tax invoice / bill of supply (GST composition) / credit note in brand colours. */
 export function renderInvoicePdf(d: InvoiceData): Buffer {
   const pdf = new Pdf()
   const credit = d.kind === "credit_note"

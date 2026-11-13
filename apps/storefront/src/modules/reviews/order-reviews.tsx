@@ -53,7 +53,7 @@ export default function OrderReviews({ orderId, items }: { orderId: string; item
             </div>
             {i.review?.reply && (
               <p className="mt-2 rounded-md border-l-4 border-accent bg-ivory px-3 py-2 text-sm text-ink">
-                <span className="block text-xs font-semibold text-primary">Reply from DivineAura</span>
+                <span className="block text-xs font-semibold text-primary">Reply from the seller</span>
                 {i.review.reply}
               </p>
             )}

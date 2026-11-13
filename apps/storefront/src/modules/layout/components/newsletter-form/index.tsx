@@ -27,7 +27,7 @@ export default function NewsletterForm() {
       </div>
       <label className="flex items-start gap-2 text-xs text-ivory/90">
         <input type="checkbox" name="consent" required className="mt-0.5 h-4 w-4 shrink-0 accent-[#C58A36]" />
-        I agree to receive DivineAura emails about new collections and festival offers. I can unsubscribe anytime.
+        I agree to receive Anant Sanatan emails about new collections and festival offers. I can unsubscribe anytime.
       </label>
       {state && !state.ok && <p role="alert" className="text-xs text-champagne">{state.message}</p>}
     </form>

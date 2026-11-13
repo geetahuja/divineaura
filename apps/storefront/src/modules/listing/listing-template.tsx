@@ -1,6 +1,7 @@
 import { CatalogueProduct, listCategories, listTags } from "@lib/data/catalogue"
 import { hasActiveFilters, parseFilters, runListing } from "@lib/listing"
-import { DEFAULT_OG_IMAGE, getSiteOrigin, STORE_NAME } from "@lib/util/site"
+import { getBrandName } from "@lib/data/content"
+import { DEFAULT_OG_IMAGE, getSiteOrigin } from "@lib/util/site"
 import type { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Breadcrumbs, { Crumb } from "./breadcrumbs"
@@ -16,7 +17,7 @@ export async function listingMetadata(title: string, description: string, path: 
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: STORE_NAME, type: "website", images: [DEFAULT_OG_IMAGE] },
+    openGraph: { title, description, url, siteName: await getBrandName(), type: "website", images: [DEFAULT_OG_IMAGE] },
   }
 }
 

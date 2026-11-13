@@ -12,6 +12,8 @@ const SacredPlace = model.define("sacred_place", {
   // Full tag value, e.g. "deity:Shiva".
   deity_tag: model.text().nullable(),
   collection_id: model.text().nullable(),
+  // Set = shown on the "Sacred Nashik" skyline strip with this short label.
+  strip_label: model.text().nullable(),
   rank: model.number().default(0),
   visible: model.boolean().default(true),
 })

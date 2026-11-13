@@ -8,7 +8,7 @@ type Props = {
 }
 export const metadata: Metadata = {
   title: "Order confirmed",
-  description: "Your DivineAura order is confirmed.",
+  description: "Your order is confirmed.",
   robots: { index: false, follow: false },
 }
 

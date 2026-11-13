@@ -1,7 +1,6 @@
 import { HttpTypes } from "@medusajs/types"
 import { isVariantInStock } from "./inventory"
 import { reviewStructuredData, ReviewsForSeo } from "./review-structured-data"
-import { STORE_NAME } from "./site"
 import {
   buildReturnPolicy,
   buildShippingDetails,
@@ -22,6 +21,7 @@ export const buildProductStructuredData = ({
   countryCode,
   productUrl,
   reviews,
+  brandName,
 }: {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
@@ -29,6 +29,7 @@ export const buildProductStructuredData = ({
   productUrl: string
   /** Approved reviews only (from the public review route). */
   reviews?: ReviewsForSeo | null
+  brandName: string
 }) => {
   const currency = region.currency_code.toUpperCase()
   const images = (product.images ?? [])
@@ -38,7 +39,7 @@ export const buildProductStructuredData = ({
     images.push(product.thumbnail)
   }
   const description = product.description || product.title
-  const brand = { "@type": "Brand", name: STORE_NAME }
+  const brand = { "@type": "Brand", name: brandName }
   const policies = getRegionPolicies(region)
   const optionTitles = new Map(
     (product.options ?? []).map((option) => [option.id, option.title])

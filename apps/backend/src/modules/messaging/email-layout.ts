@@ -33,7 +33,7 @@ export function renderEmail(spec: EmailSpec, vars: Record<string, string>, siteU
 <body style="margin:0;padding:0;background:${C.ivory};font-family:Arial,Helvetica,sans-serif;color:${C.ink}">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.ivory}"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid ${C.champagne};border-radius:12px;overflow:hidden">
-<tr><td style="background:${C.maroon};padding:20px 24px;text-align:center"><a href="${siteUrl}" style="color:#ffffff;text-decoration:none;font-family:Georgia,'Times New Roman',serif;font-size:26px">DivineAura</a></td></tr>
+<tr><td style="background:${C.maroon};padding:20px 24px;text-align:center"><a href="${siteUrl}" style="color:#ffffff;text-decoration:none;font-family:Georgia,'Times New Roman',serif;font-size:26px">${safe.brand}</a></td></tr>
 <tr><td style="height:3px;background:${C.gold};line-height:3px;font-size:0">&nbsp;</td></tr>
 <tr><td style="padding:28px 24px">
 <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.3;color:${C.maroon}">${heading}</h1>

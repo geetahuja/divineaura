@@ -4,7 +4,7 @@ import { DEFAULT_COUNTRY_CODE } from "@lib/util/site"
 import { HttpTypes } from "@medusajs/types"
 import { getRegion } from "./regions"
 
-// DivineAura details (backend product-specs module). The store route only
+// Product details (backend product-specs module). The store route only
 // allows these fields by name (no product_specs.* wildcard).
 export const SPEC_FIELDS = [
   "material",

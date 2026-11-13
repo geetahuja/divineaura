@@ -77,12 +77,22 @@ export async function renderPage(c: MedusaContainer, slug: string, opts: { inclu
   }
 }
 
+/** Brand name from Business details, for message templates ({brand}). */
+export async function brandVars(c: MedusaContainer) {
+  return { brand: (await c.resolve<InvoiceModuleService>(INVOICE_MODULE).getSettings()).brand_name }
+}
+
 /** Public seller block for the footer / Contact (E-Commerce Rules 2020). */
 export async function sellerDetails(c: MedusaContainer) {
   const b = await c.resolve<InvoiceModuleService>(INVOICE_MODULE).getSettings()
   return {
     legal_name: b.legal_name,
     brand: b.brand_name,
+    brand_hi: b.brand_name_hi,
+    tagline_en: b.tagline_en,
+    tagline_hi: b.tagline_hi,
+    social: { instagram: b.social_instagram, facebook: b.social_facebook, youtube: b.social_youtube, pinterest: b.social_pinterest },
+    kumbh: { snan_label: b.next_snan_label, snan_date: b.next_snan_date, dispatch_date: b.goda_jal_dispatch_date, packer: b.goda_jal_packer },
     address: b.address.split(/\r?\n/).filter(Boolean).join(", ") || null,
     gstin: b.gstin || null,
     email: b.email || null,

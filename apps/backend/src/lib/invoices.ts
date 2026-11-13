@@ -10,7 +10,7 @@ import { amountInWords, documentNumber, financialYear, InvoiceLine, InvoiceTotal
 /**
  * GST invoices and credit notes (ARCHITECTURE.md §5 rule 11).
  * - One invoice per order, issued when an online payment is captured or a COD
- *   order is confirmed; numbers DA/26-27/00001, consecutive per financial year.
+ *   order is confirmed; numbers AS/26-27/00001, consecutive per financial year.
  * - The invoice is a frozen snapshot (`data`); the PDF is drawn from it, so
  *   re-downloads never change even if business details are edited later.
  * - Credit notes (CN/26-27/00001) for refunds and cancellations, linked to it.

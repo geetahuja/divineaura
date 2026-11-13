@@ -117,7 +117,7 @@ const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
       }),
     onSuccess: (res) => {
       queryClient.setQueryData(queryKey, res)
-      toast.success("DivineAura details saved")
+      toast.success("Product details & specs saved")
       setOpen(false)
     },
     onError: (e: Error) => toast.error(e.message),
@@ -154,7 +154,7 @@ const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
     <Container className="divide-y p-0">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-x-2">
-          <Heading level="h2">DivineAura details</Heading>
+          <Heading level="h2">Product details & specs</Heading>
           {!isLoading && !data?.specs?.country_of_origin && (
             <Badge size="2xsmall" color="red" title="Required by the Consumer Protection (E-Commerce) Rules 2020">Country of origin missing</Badge>
           )}
@@ -206,7 +206,7 @@ const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
       <Drawer open={open} onOpenChange={setOpen}>
         <Drawer.Content>
           <Drawer.Header>
-            <Drawer.Title>DivineAura details</Drawer.Title>
+            <Drawer.Title>Product details & specs</Drawer.Title>
           </Drawer.Header>
           <Drawer.Body className="flex flex-col gap-y-4 overflow-y-auto">
             <div className="flex flex-col gap-y-1">

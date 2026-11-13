@@ -5,7 +5,7 @@ import { notFound } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Orders",
-  description: "Your DivineAura orders.",
+  description: "Your orders.",
 }
 
 export default async function Orders() {

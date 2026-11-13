@@ -31,7 +31,7 @@ export const shippingPrice = (subtotal: number, policy: { rate: number; freeThre
   policy.freeThreshold !== null && subtotal >= policy.freeThreshold ? 0 : policy.rate
 
 // ── Weight ─────────────────────────────────────────────────────────────────
-// Sum of each item's DivineAura weight (weight_g, per unit) × quantity, using a
+// Sum of each item's product weight (weight_g, per unit) × quantity, using a
 // default for products with no weight yet, plus packaging. Result in grams.
 export function shipmentWeightGrams(
   items: { quantity: number; weight_g?: number | null }[],

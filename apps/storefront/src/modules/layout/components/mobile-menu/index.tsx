@@ -2,11 +2,12 @@
 
 import { Dialog, DialogPanel } from "@headlessui/react"
 import type { NavItem } from "@lib/nav"
+import BrandLogo, { type Brand } from "@modules/layout/components/brand-logo"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ChevronDown, Menu, X } from "lucide-react"
 import { useState } from "react"
 
-export default function MobileMenu({ items }: { items: NavItem[] }) {
+export default function MobileMenu({ items, brand }: { items: NavItem[]; brand: Brand }) {
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
 
@@ -25,7 +26,7 @@ export default function MobileMenu({ items }: { items: NavItem[] }) {
         <div className="fixed inset-0 bg-ink/40" aria-hidden />
         <DialogPanel className="fixed inset-y-0 left-0 w-[85%] max-w-sm overflow-y-auto bg-ivory p-5 shadow-xl">
           <div className="flex items-center justify-between mb-4">
-            <span className="font-serif text-2xl font-semibold text-primary">DivineAura</span>
+            <BrandLogo brand={brand} compact as="div" />
             <button onClick={close} aria-label="Close menu" className="p-2 -mr-2 text-primary">
               <X className="h-6 w-6" />
             </button>

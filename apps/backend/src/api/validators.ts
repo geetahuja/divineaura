@@ -56,6 +56,7 @@ const SacredPlaceFields = {
   image_credit: text,
   deity_tag: z.string().trim().startsWith("deity:").nullish().or(z.literal("").transform(() => null)),
   collection_id: text,
+  strip_label: z.string().trim().max(40).nullish().transform((v) => v || null),
   rank: z.number().int().optional(),
   visible: z.boolean().optional(),
 }
@@ -191,9 +192,27 @@ export const WishlistSchema = z.object({
 export const AdminReturnNoteSchema = z.object({ note: z.string().trim().max(500).nullish() })
 export const AdminReturnRejectSchema = z.object({ note: z.string().trim().min(3, "Tell the customer why").max(500) })
 export const AdminRefundPaidSchema = z.object({ reference: z.string().trim().max(100).nullish() })
+const optionalUrl = z.string().trim().url().max(300).nullish().or(z.literal("").transform(() => null))
+const optionalDate = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use a date like 2027-08-02")
+  .nullish()
+  .or(z.literal("").transform(() => null))
 export const BusinessSettingsSchema = z.object({
   legal_name: z.string().trim().min(2).max(120),
   brand_name: z.string().trim().min(2).max(60),
+  brand_name_hi: z.string().trim().min(1).max(60),
+  tagline_en: z.string().trim().max(120),
+  tagline_hi: z.string().trim().max(120),
+  social_instagram: optionalUrl,
+  social_facebook: optionalUrl,
+  social_youtube: optionalUrl,
+  social_pinterest: optionalUrl,
+  next_snan_label: z.string().trim().max(80).nullish().transform((v) => v || null),
+  next_snan_date: optionalDate,
+  goda_jal_dispatch_date: optionalDate,
+  goda_jal_packer: z.string().trim().max(1000).nullish().transform((v) => v || null),
   address: z.string().trim().max(500),
   state: z.string().trim().min(2).max(60),
   gstin: z

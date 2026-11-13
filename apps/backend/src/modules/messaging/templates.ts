@@ -33,18 +33,18 @@ export const TEMPLATES = {
     category: "otp",
     vars: ["otp", "domain"],
     // Last line = Web OTP format so Android can auto-fill the code.
-    sms: "{otp} is your DivineAura login code. It is valid for 5 minutes. Do not share it with anyone.\n\n@{domain} #{otp}",
+    sms: "{otp} is your Anant Sanatan login code. It is valid for 5 minutes. Do not share it with anyone.\n\n@{domain} #{otp}",
     whatsapp: { name: "login_otp", params: ["otp"] },
     email: {
-      subject: "Your DivineAura login code",
+      subject: "Your {brand} login code",
       heading: "Your login code",
-      lines: ["Use this code to sign in to DivineAura:", "<strong style=\"font-size:28px;letter-spacing:6px\">{otp}</strong>", "It is valid for 5 minutes. If you didn't ask for it, you can ignore this email."],
+      lines: ["Use this code to sign in to {brand}:", "<strong style=\"font-size:28px;letter-spacing:6px\">{otp}</strong>", "It is valid for 5 minutes. If you didn't ask for it, you can ignore this email."],
     },
   },
   order_placed: {
     category: "transactional",
     vars: ["order", "amount", "link"],
-    sms: "DivineAura: Thank you! Your order #{order} of Rs.{amount} is confirmed. We will message you when it ships. Details: {link}",
+    sms: "Anant Sanatan: Thank you! Your order #{order} of Rs.{amount} is confirmed. We will message you when it ships. Details: {link}",
     whatsapp: { name: "order_confirmed", params: ["order", "amount", "link"] },
     email: {
       subject: "Order #{order} confirmed",
@@ -56,13 +56,13 @@ export const TEMPLATES = {
   cod_confirm_request: {
     category: "transactional",
     vars: ["order", "amount", "link", "hours"],
-    sms: "DivineAura: Please confirm your Cash on Delivery order #{order} of Rs.{amount}. Tap {link} within {hours} hours, or it will be cancelled.",
+    sms: "Anant Sanatan: Please confirm your COD order #{order} of Rs.{amount}. Tap {link} within {hours} hours, or it will be cancelled.",
     whatsapp: { name: "cod_confirm_request", params: ["order", "amount", "link", "hours"] },
   },
   cod_confirmed: {
     category: "transactional",
     vars: ["order", "amount", "link"],
-    sms: "DivineAura: Thank you! Your Cash on Delivery order #{order} is confirmed. Please keep Rs.{amount} ready at delivery.",
+    sms: "Anant Sanatan: Thank you! Your Cash on Delivery order #{order} is confirmed. Please keep Rs.{amount} ready at delivery.",
     whatsapp: { name: "cod_confirmed", params: ["order", "amount"] },
     email: {
       subject: "Your Cash on Delivery order #{order} is confirmed",
@@ -74,7 +74,7 @@ export const TEMPLATES = {
   order_shipped: {
     category: "transactional",
     vars: ["order", "courier", "link", "invoice"],
-    sms: "DivineAura: Your order #{order} has shipped via {courier}. Track it here: {link}",
+    sms: "Anant Sanatan: Your order #{order} has shipped via {courier}. Track it here: {link}",
     whatsapp: { name: "order_shipped", params: ["order", "courier", "link"] },
     email: {
       subject: "Order #{order} has shipped",
@@ -86,13 +86,13 @@ export const TEMPLATES = {
   out_for_delivery: {
     category: "transactional",
     vars: ["order", "link"],
-    sms: "DivineAura: Your order #{order} is out for delivery today. Track it here: {link}",
+    sms: "Anant Sanatan: Your order #{order} is out for delivery today. Track it here: {link}",
     whatsapp: { name: "out_for_delivery", params: ["order", "link"] },
   },
   order_delivered: {
     category: "transactional",
     vars: ["order", "link"],
-    sms: "DivineAura: Your order #{order} has been delivered. Thank you for shopping with us! Need help? {link}",
+    sms: "Anant Sanatan: Your order #{order} has been delivered. Thank you for shopping with us! Need help? {link}",
     whatsapp: { name: "order_delivered", params: ["order", "link"] },
     email: {
       subject: "Order #{order} delivered",
@@ -104,13 +104,13 @@ export const TEMPLATES = {
   order_rto: {
     category: "transactional",
     vars: ["order", "link"],
-    sms: "DivineAura: We could not deliver your order #{order} and it is being returned to us. We will contact you shortly. Help: {link}",
+    sms: "Anant Sanatan: We could not deliver your order #{order} and it is being returned to us. We will contact you soon. Help: {link}",
     whatsapp: { name: "order_returned", params: ["order", "link"] },
   },
   order_cancelled: {
     category: "transactional",
     vars: ["order", "reason", "link"],
-    sms: "DivineAura: Order #{order} is cancelled ({reason}). Any amount paid will be refunded in 5-7 working days. {link}",
+    sms: "Anant Sanatan: Order #{order} is cancelled ({reason}). Any amount paid will be refunded in 5-7 working days. {link}",
     whatsapp: { name: "order_cancelled", params: ["order", "reason", "link"] },
     email: {
       subject: "Order #{order} cancelled",
@@ -122,7 +122,7 @@ export const TEMPLATES = {
   refund_processed: {
     category: "transactional",
     vars: ["order", "amount", "link"],
-    sms: "DivineAura: A refund of Rs.{amount} for order #{order} has been processed. It may take 5-7 working days to reflect. Help: {link}",
+    sms: "Anant Sanatan: A refund of Rs.{amount} for order #{order} has been processed. It may take 5-7 working days to reflect. Help: {link}",
     whatsapp: { name: "refund_processed", params: ["order", "amount", "link"] },
     email: {
       subject: "Refund for order #{order}",
@@ -134,7 +134,7 @@ export const TEMPLATES = {
   return_requested: {
     category: "transactional",
     vars: ["order", "link"],
-    sms: "DivineAura: We have received your return request for order #{order}. We will review it within 2 working days. Details: {link}",
+    sms: "Anant Sanatan: We have received your return request for order #{order}. We will review it within 2 working days. Details: {link}",
     whatsapp: { name: "return_requested", params: ["order", "link"] },
     email: {
       subject: "Return request for order #{order} received",
@@ -146,7 +146,7 @@ export const TEMPLATES = {
   return_approved: {
     category: "transactional",
     vars: ["order", "awb", "link"],
-    sms: "DivineAura: Return for order #{order} approved. Courier pickup in 2-4 days, AWB {awb}. Keep the item packed. {link}",
+    sms: "Anant Sanatan: Return for order #{order} approved. Courier pickup in 2-4 days, AWB {awb}. Keep the item packed. {link}",
     whatsapp: { name: "return_approved", params: ["order", "awb", "link"] },
     email: {
       subject: "Return approved for order #{order}",
@@ -158,7 +158,7 @@ export const TEMPLATES = {
   return_rejected: {
     category: "transactional",
     vars: ["order", "reason", "link"],
-    sms: "DivineAura: Sorry, we could not accept the return for order #{order} ({reason}). Reply or contact us for help: {link}",
+    sms: "Anant Sanatan: Sorry, we could not accept the return for order #{order} ({reason}). Contact us for help: {link}",
     whatsapp: { name: "return_rejected", params: ["order", "reason", "link"] },
     email: {
       subject: "About your return for order #{order}",
@@ -170,7 +170,7 @@ export const TEMPLATES = {
   return_received: {
     category: "transactional",
     vars: ["order", "link"],
-    sms: "DivineAura: We have received your returned item(s) for order #{order}. Your refund is being processed. {link}",
+    sms: "Anant Sanatan: We have received your returned item(s) for order #{order}. Your refund is being processed. {link}",
     whatsapp: { name: "return_received", params: ["order", "link"] },
     email: {
       subject: "Returned item(s) received – order #{order}",
@@ -182,7 +182,7 @@ export const TEMPLATES = {
   review_request: {
     category: "transactional",
     vars: ["order", "link"],
-    sms: "DivineAura: We hope you like your order #{order}. Please share a quick review - it helps other devotees: {link}",
+    sms: "Anant Sanatan: We hope you like your order #{order}. Please share a quick review - it helps other devotees: {link}",
     whatsapp: { name: "review_request", params: ["order", "link"] },
     email: {
       subject: "How was your order #{order}?",
@@ -194,7 +194,7 @@ export const TEMPLATES = {
   review_coupon: {
     category: "transactional",
     vars: ["order", "code", "percent"],
-    sms: "DivineAura: Thank you for your review! Here is your {percent}% coupon for your next order: {code} (single use).",
+    sms: "Anant Sanatan: Thank you for your review! Here is your {percent}% coupon for your next order: {code} (single use).",
     whatsapp: { name: "review_coupon", params: ["code", "percent"] },
     email: {
       subject: "Your thank-you coupon",
@@ -244,9 +244,9 @@ export const TEMPLATES = {
     category: "transactional",
     vars: ["link"],
     email: {
-      subject: "Reset your DivineAura admin password",
+      subject: "Reset your {brand} admin password",
       heading: "Reset your password",
-      lines: ["Someone asked to reset the password for your DivineAura admin account.", "The link is valid for a short time. If it wasn't you, ignore this email — your password stays the same."],
+      lines: ["Someone asked to reset the password for your {brand} admin account.", "The link is valid for a short time. If it wasn't you, ignore this email — your password stays the same."],
       cta: { label: "Reset password", url: "{link}" },
     },
   },
@@ -255,7 +255,7 @@ export const TEMPLATES = {
     category: "transactional",
     vars: ["problem", "details", "link"],
     email: {
-      subject: "DivineAura backup problem: {problem}",
+      subject: "{brand} backup problem: {problem}",
       heading: "Backup needs attention",
       lines: ["{problem}.", "{details}", "Check the backup log on the server (LOG_FILE in /etc/divineaura/backup.conf); steps are in deploy/backup/RESTORE.md."],
       cta: { label: "Open admin", url: "{link}" },

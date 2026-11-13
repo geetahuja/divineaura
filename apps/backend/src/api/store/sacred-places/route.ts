@@ -19,6 +19,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         "image_credit",
         "deity_tag",
         "collection_id",
+        "strip_label",
       ],
       order: { rank: "ASC", created_at: "ASC" },
     }

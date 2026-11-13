@@ -10,7 +10,7 @@ import { merchandiseSubtotal, shippingPrice } from "../../lib/shipping"
 type Options = { default_rate?: number; default_free_threshold?: number }
 
 /**
- * DivineAura delivery (ARCHITECTURE.md §5.4): flat fee below the free-shipping
+ * Store delivery (ARCHITECTURE.md §5.4): flat fee below the free-shipping
  * threshold, free at or above it. The threshold is checked against the product
  * subtotal after coupons, EXCLUDING the COD fee and the prepaid discount
  * (computed in the setCalculatedShippingPricingContext hook), so COD vs online

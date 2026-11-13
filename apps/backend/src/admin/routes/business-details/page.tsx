@@ -8,6 +8,17 @@ import { sdk } from "../../lib/sdk"
 type Settings = {
   legal_name: string
   brand_name: string
+  brand_name_hi: string
+  tagline_en: string
+  tagline_hi: string
+  social_instagram: string | null
+  social_facebook: string | null
+  social_youtube: string | null
+  social_pinterest: string | null
+  next_snan_label: string | null
+  next_snan_date: string | null
+  goda_jal_dispatch_date: string | null
+  goda_jal_packer: string | null
   address: string
   state: string
   gstin: string | null
@@ -27,13 +38,16 @@ type Settings = {
 
 const FIELDS: { key: keyof Settings; label: string; hint?: string; textarea?: boolean; type?: string; options?: [string, string][] }[] = [
   { key: "legal_name", label: "Legal name", hint: "Printed as the seller on invoices." },
-  { key: "brand_name", label: "Brand name" },
+  { key: "brand_name", label: "Brand name", hint: "Shown in the site header, footer, page titles, emails and invoices." },
+  { key: "brand_name_hi", label: "Brand name (Hindi)" },
+  { key: "tagline_en", label: "Tagline (English)" },
+  { key: "tagline_hi", label: "Tagline (Hindi)" },
   { key: "address", label: "Registered address", textarea: true, hint: "One line per row, including PIN code." },
   { key: "state", label: "State", hint: "Decides CGST + SGST (same state) or IGST (other states)." },
   { key: "gstin", label: "GSTIN", hint: "15 characters. Leave blank until registered — invoices show a placeholder in development." },
   { key: "email", label: "Support email" },
   { key: "phone", label: "Support phone" },
-  { key: "invoice_prefix", label: "Invoice prefix", hint: "e.g. DA → DA/26-27/00001 (max 16 characters in total)." },
+  { key: "invoice_prefix", label: "Invoice prefix", hint: "e.g. AS → AS/26-27/00001 (max 16 characters in total)." },
   { key: "credit_note_prefix", label: "Credit note prefix", hint: "e.g. CN → CN/26-27/00001" },
   {
     key: "gst_scheme",
@@ -48,6 +62,14 @@ const FIELDS: { key: keyof Settings; label: string; hint?: string; textarea?: bo
   { key: "grievance_phone", label: "Grievance Officer – phone", hint: "Blank = support phone." },
   { key: "grievance_ack_hours", label: "Acknowledge complaints within (hours)", type: "number", hint: "The Rules require 48 hours." },
   { key: "grievance_resolve_days", label: "Resolve complaints within (days)", type: "number", hint: "The Rules require one month." },
+  { key: "social_instagram", label: "Instagram link", hint: "Full URL. Empty = icon hidden in the footer." },
+  { key: "social_facebook", label: "Facebook link" },
+  { key: "social_youtube", label: "YouTube link" },
+  { key: "social_pinterest", label: "Pinterest link" },
+  { key: "next_snan_label", label: "Next Amrut Snan – name", hint: "e.g. \"First Amrut Snan, Nashik\". Shown with a countdown on the homepage Kumbh band. Empty = badge hidden." },
+  { key: "next_snan_date", label: "Next Amrut Snan – date", type: "date" },
+  { key: "goda_jal_dispatch_date", label: "Goda Jal – dispatches after", type: "date", hint: "Pre-orders show \"Dispatches after [date]\". Empty = ships normally." },
+  { key: "goda_jal_packer", label: "Goda Jal – packed by (Legal Metrology)", textarea: true, hint: "Name, full address and licence no. of the licensed packer. Printed on Goda Jal pages as the packer declaration." },
 ]
 
 // Seller details for GST invoices + the return window (ARCHITECTURE.md §5 rule 11, §12).

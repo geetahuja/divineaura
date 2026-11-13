@@ -49,7 +49,6 @@ export default function RazorpayPayButton({ cart, providerId, disabled }: PayBut
         order_id: d.razorpay_order_id,
         amount: d.amount_paise,
         currency: "INR",
-        name: "DivineAura",
         description: "Order payment",
         prefill: { name: [a?.first_name, a?.last_name].filter(Boolean).join(" "), email: cart.email ?? "", contact: a?.phone ?? "" },
         theme: { color: "#762019" },

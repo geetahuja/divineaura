@@ -10,7 +10,12 @@ export type SacredPlace = {
   image_credit: string | null
   deity_tag: string | null
   collection_handle: string | null
+  strip_label: string | null
 }
+
+/** Anchor on /sacred-nashik for a place (#kalaram-mandir). */
+export const placeAnchor = (name: string) =>
+  name.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
 
 // Visible entries in admin order; admin changes show up within 5 minutes.
 export const listSacredPlaces = () =>

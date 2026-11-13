@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { brandVars } from "../lib/content"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { backupMaxAgeHours, backupProblems, readBackupStatus } from "../lib/backups"
 import { MESSAGING_MODULE } from "../modules/messaging"
@@ -17,7 +18,7 @@ export default async function backupAlerts(container: MedusaContainer) {
   const link = `${(process.env.MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")}/app/orders`
   const messaging = container.resolve<MessagingModuleService>(MESSAGING_MODULE)
   for (const p of problems) {
-    await messaging.sendMessage("backup_alert", { email: to }, { problem: p.problem, details: p.details, link }, { dedupeKey: p.key })
+    await messaging.sendMessage("backup_alert", { email: to }, { ...(await brandVars(container)), problem: p.problem, details: p.details, link }, { dedupeKey: p.key })
   }
 }
 

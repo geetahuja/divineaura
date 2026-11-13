@@ -20,7 +20,7 @@ module.exports = {
         padding: "padding-top padding-right padding-bottom padding-left",
       },
       colors: {
-        // DivineAura brand (ARCHITECTURE.md §8). Gold fails AA as text on ivory:
+        // Brand (ARCHITECTURE.md §8). Gold fails AA as text on ivory:
         // use it for icons, borders and accents, not body copy.
         primary: { DEFAULT: "#762019", hover: "#5E1913", pressed: "#4A130F" },
         accent: { DEFAULT: "#C58A36", soft: "#F3E2C7" },
@@ -66,6 +66,7 @@ module.exports = {
       },
       fontFamily: {
         serif: ["var(--font-serif)", "Georgia", "serif"],
+        deva: ["var(--font-deva)", "var(--font-serif)", "serif"],
         sans: [
           "var(--font-sans)",
           "-apple-system",

@@ -4,5 +4,5 @@ import type { CodCancelBody } from "../../../../../validators"
 
 // Cancels a pending COD order (releases its stock).
 export async function POST(req: AuthenticatedMedusaRequest<CodCancelBody>, res: MedusaResponse) {
-  res.json(await cancelCodOrder(req.scope, req.params.id, req.validatedBody.reason || "cancelled by DivineAura"))
+  res.json(await cancelCodOrder(req.scope, req.params.id, req.validatedBody.reason || "cancelled by the seller"))
 }

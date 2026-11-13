@@ -1,8 +1,9 @@
+import { getBrand } from "@lib/data/content"
 import { getBaseURL } from "@lib/util/env"
 import Analytics from "@modules/consent/analytics"
 import ConsentBanner from "@modules/consent/consent-banner"
 import { Metadata } from "next"
-import { Cormorant_Garamond, Mulish } from "next/font/google"
+import { Cormorant_Garamond, Mulish, Noto_Serif_Devanagari } from "next/font/google"
 import "styles/globals.css"
 
 const serif = Cormorant_Garamond({
@@ -12,17 +13,23 @@ const serif = Cormorant_Garamond({
   display: "swap",
 })
 const sans = Mulish({ subsets: ["latin"], variable: "--font-sans", display: "swap" })
+// Hindi taglines only; not preloaded so it never competes with the LCP text.
+const deva = Noto_Serif_Devanagari({ subsets: ["devanagari"], weight: ["500", "600"], variable: "--font-deva", display: "swap", preload: false })
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getBaseURL()),
-  title: { default: "DivineAura – devotional lockets, bracelets & malas", template: "%s | DivineAura" },
-  // Google Search Console: set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION to the meta-tag code.
-  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } } : {}),
+export async function generateMetadata(): Promise<Metadata> {
+  const brand = await getBrand()
+  return {
+    metadataBase: new URL(getBaseURL()),
+    title: { default: `${brand.name} – ${brand.tagline_en}`, template: `%s | ${brand.name}` },
+    applicationName: brand.name,
+    // Google Search Console: set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION to the meta-tag code.
+    ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } } : {}),
+  }
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" data-mode="light" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
+    <html lang="en-IN" data-mode="light" className={`${serif.variable} ${sans.variable} ${deva.variable}`} suppressHydrationWarning>
       <head>
         <link rel="ucp" href="/.well-known/ucp" />
         {/* Hide the consent banner before first paint when a choice is already saved. */}

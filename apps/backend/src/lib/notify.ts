@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { brandVars } from "./content"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { MESSAGING_MODULE } from "../modules/messaging"
 import type MessagingModuleService from "../modules/messaging/service"
@@ -44,6 +45,7 @@ export async function notifyOrder(
     order: String(o.display_id),
     amount: rupees(o.total),
     link: event === "order_cancelled" ? links.shop() : event === "order_delivered" || event === "order_rto" ? links.help() : links.track(),
+    ...(await brandVars(container)),
     ...extra,
   }
   return container

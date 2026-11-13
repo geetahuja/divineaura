@@ -36,7 +36,7 @@ function ReviewCard({ r, onPhoto }: { r: PublicReview; onPhoto: (url: string) =>
       {r.incentivized && <p className="mt-2 text-xs italic text-ink-muted">Received a coupon for reviewing.</p>}
       {r.reply && (
         <div className="mt-3 rounded-md border-l-4 border-accent bg-ivory px-3 py-2">
-          <p className="text-xs font-semibold text-primary">Reply from DivineAura</p>
+          <p className="text-xs font-semibold text-primary">Reply from the seller</p>
           <p className="mt-1 whitespace-pre-line text-sm text-ink">{r.reply}</p>
         </div>
       )}

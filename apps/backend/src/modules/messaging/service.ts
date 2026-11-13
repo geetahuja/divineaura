@@ -48,7 +48,8 @@ export default class MessagingModuleService extends MedusaService({ MessageLog, 
 
   private build(event: string, tpl: TemplateSpec, channel: Channel, to: string, data: Record<string, string>): Outgoing {
     if (channel === "email") {
-      const e = renderEmail(tpl.email!, data, this.siteUrl())
+      // Callers pass {brand} from Business details (lib/content brandVars); the default only guards a missed caller.
+      const e = renderEmail(tpl.email!, { brand: "Anant Sanatan", ...data }, this.siteUrl())
       return { channel, to, ...e }
     }
     const text = render(tpl.sms ?? "", data)
@@ -104,11 +105,11 @@ export default class MessagingModuleService extends MedusaService({ MessageLog, 
    * sms_then_whatsapp switches to WhatsApp for resends). The code is never
    * stored, and outside development it is never printed to the console.
    */
-  async sendOtp(target: { phone?: string; email?: string }, code: string, sendNumber = 0) {
+  async sendOtp(target: { phone?: string; email?: string }, code: string, sendNumber = 0, extra: Record<string, string> = {}) {
     const tpl: TemplateSpec = TEMPLATES.otp_login
     const channel: Channel = target.email ? "email" : otpChannel(parseOtp(process.env.OTP_CHANNEL), sendNumber)
     const recipient = (target.email ?? target.phone)!
-    const data = { otp: code, domain: new URL(this.siteUrl()).hostname }
+    const data = { ...extra, otp: code, domain: new URL(this.siteUrl()).hostname }
     let provider = this.providerFor(channel)
     if (provider.name === "console" && !testToolsAllowed()) {
       this.logger_.warn(`messaging: no ${channel} provider configured — login code NOT delivered (code hidden)`)

@@ -17,7 +17,7 @@ const Review = model
     display_name: model.text(), // "Priya S., Nashik" or "Verified buyer"
     status: model.enum(["pending", "approved", "rejected", "hidden"]).default("pending"),
     reject_reason: model.text().nullable(), // admin only, never public
-    reply: model.text().nullable(), // public DivineAura reply
+    reply: model.text().nullable(), // public seller reply
     replied_at: model.dateTime().nullable(),
     approved_at: model.dateTime().nullable(),
     incentive_code: model.text().nullable(), // coupon given for this review (shown as a note)

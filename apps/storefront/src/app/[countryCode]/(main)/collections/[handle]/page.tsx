@@ -1,5 +1,6 @@
 import { listCatalogue, listCollectionsAll } from "@lib/data/catalogue"
 import ListingTemplate, { listingMetadata, SearchParams } from "@modules/listing/listing-template"
+import { getBrandName } from "@lib/data/content"
 import { notFound } from "next/navigation"
 
 type Props = { params: Promise<{ handle: string }>; searchParams: Promise<SearchParams> }
@@ -17,7 +18,7 @@ export async function generateMetadata(props: Props) {
   const c = await resolve(props)
   return listingMetadata(
     c.title,
-    `${c.title} at DivineAura: devotional lockets, bracelets, malas and gifts for the occasion. Prices inclusive of all taxes.`,
+    `${c.title} at ${await getBrandName()}: devotional lockets, bracelets, malas and gifts for the occasion. Prices inclusive of all taxes.`,
     `/collections/${c.handle}`
   )
 }

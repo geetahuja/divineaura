@@ -30,6 +30,7 @@ type SacredPlace = {
   image_credit: string | null
   deity_tag: string | null
   collection_id: string | null
+  strip_label: string | null
   rank: number
   visible: boolean
 }
@@ -44,6 +45,7 @@ const EMPTY: Form = {
   image_credit: null,
   deity_tag: null,
   collection_id: null,
+  strip_label: null,
   visible: true,
 }
 const KEY = ["sacred-places"]
@@ -75,10 +77,10 @@ const SacredPlacesPage = () => {
   const onError = (e: Error) => toast.error(e.message)
 
   const save = useMutation({
-    mutationFn: ({ id, name, location, description, image_url, image_credit, deity_tag, collection_id, visible }: Form) =>
+    mutationFn: ({ id, name, location, description, image_url, image_credit, deity_tag, collection_id, strip_label, visible }: Form) =>
       sdk.client.fetch(id ? `/admin/sacred-places/${id}` : "/admin/sacred-places", {
         method: "POST",
-        body: { name, location, description, image_url, image_credit, deity_tag, collection_id, visible },
+        body: { name, location, description, image_url, image_credit, deity_tag, collection_id, strip_label, visible },
       }),
     onSuccess: () => {
       refresh()
@@ -240,6 +242,11 @@ const SacredPlacesPage = () => {
               <div className="flex flex-col gap-y-1">
                 <Label size="small" htmlFor="sp-location">Location</Label>
                 <Input id="sp-location" value={form.location} onChange={(e) => set("location", e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-y-1">
+                <Label size="small" htmlFor="sp-strip">Label on the Sacred Nashik skyline</Label>
+                <Input id="sp-strip" placeholder="e.g. Ram Ghat (Ramkund)" maxLength={40} value={form.strip_label ?? ""} onChange={(e) => set("strip_label", e.target.value || null)} />
+                <Text size="xsmall" className="text-ui-fg-muted">Empty = listed under "Other sacred places", not on the skyline.</Text>
               </div>
               <div className="flex flex-col gap-y-1">
                 <Label size="small" htmlFor="sp-description">Short description (2–3 lines)</Label>

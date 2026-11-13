@@ -1,4 +1,5 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
+import { brandVars } from "../lib/content"
 import { MESSAGING_MODULE } from "../modules/messaging"
 import type MessagingModuleService from "../modules/messaging/service"
 
@@ -10,7 +11,7 @@ export default async function passwordReset({ event, container }: SubscriberArgs
   const link = `${admin}/app/reset-password?token=${encodeURIComponent(event.data.token)}&email=${encodeURIComponent(event.data.entity_id)}`
   await container
     .resolve<MessagingModuleService>(MESSAGING_MODULE)
-    .sendMessage("admin_password_reset", { email: event.data.entity_id }, { link }, { dedupe: false })
+    .sendMessage("admin_password_reset", { email: event.data.entity_id }, { ...(await brandVars(container)), link }, { dedupe: false })
 }
 
 export const config: SubscriberConfig = { event: "auth.password_reset" }

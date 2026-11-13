@@ -106,7 +106,7 @@ export async function recordEvent(
           event === "order_shipped"
             ? { courier: shipment?.courier_name ?? "our courier", invoice: invoice ? documentUrl("invoice", invoice.id) : `${(process.env.STOREFRONT_URL ?? "").replace(/\/$/, "")}/account/orders`, ...(shipment?.tracking_url ? { link: shipment.tracking_url } : {}) }
             : event === "order_cancelled"
-              ? { reason: opts.note ?? "cancelled by DivineAura" }
+              ? { reason: opts.note ?? "cancelled by the seller" }
               : {}
         await notifyOrder(c, event as never, orderId, extra)
       }
