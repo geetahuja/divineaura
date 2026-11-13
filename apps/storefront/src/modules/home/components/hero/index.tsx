@@ -33,7 +33,7 @@ const artFor = (link: string) =>
 const PHOTO_GLOW =
   "bg-[radial-gradient(ellipse_at_50%_45%,rgba(255,245,232,0.8),rgba(255,245,232,0.35)_55%,transparent_75%),linear-gradient(to_bottom,transparent_70%,rgba(30,12,4,0.55))] small:bg-[radial-gradient(ellipse_at_54.5%_50%,rgba(255,245,232,0.3),transparent_40%),linear-gradient(to_bottom,transparent_80%,rgba(30,12,4,0.3))]"
 const ART_GLOW =
-  "bg-[radial-gradient(ellipse_at_50%_48%,rgba(255,245,232,0.94),rgba(255,245,232,0.7)_45%,transparent_78%),linear-gradient(to_bottom,transparent_70%,rgba(30,12,4,0.55))] small:bg-[radial-gradient(ellipse_at_54.5%_50%,rgba(255,245,232,0.92),rgba(255,245,232,0.6)_30%,transparent_55%),linear-gradient(to_bottom,transparent_75%,rgba(30,12,4,0.45))]"
+  "bg-[linear-gradient(to_bottom,rgba(255,245,232,0.85),transparent_22%),radial-gradient(ellipse_at_50%_48%,rgba(255,245,232,0.94),rgba(255,245,232,0.7)_45%,transparent_78%),linear-gradient(to_bottom,transparent_70%,rgba(30,12,4,0.55))] small:bg-[linear-gradient(to_bottom,rgba(255,245,232,0.85),transparent_22%),radial-gradient(ellipse_at_54.5%_50%,rgba(255,245,232,0.92),rgba(255,245,232,0.6)_30%,transparent_55%),linear-gradient(to_bottom,transparent_75%,rgba(30,12,4,0.45))]"
 
 /** Line – ornament – line, as in the design (maroon hairlines with a diamond tip). */
 function Ornament({ src, w, className }: { src: string; w: number; className: string }) {
@@ -72,7 +72,7 @@ function Slide({ s, first, brandName }: { s: HeroSlide; first: boolean; brandNam
           <img src={`${art.src}.jpg`} alt={s.image_alt ?? ""} fetchPriority={first ? "high" : "auto"} loading={first ? "eager" : "lazy"} className={`absolute inset-0 -z-10 h-full w-full object-cover ${art.pos}`} />
         </picture>
       )}
-      {/* Ivory glow behind the words (stronger over the busy built-in artwork), dark fade at the bottom for the white caption and button. */}
+      {/* Ivory glow behind the words (stronger over the busy built-in artwork, plus a light top under the header), dark fade at the bottom for the white caption and button. */}
       <div aria-hidden className={`absolute inset-0 -z-10 ${s.image_desktop_url ? PHOTO_GLOW : ART_GLOW}`} />
 
       <div className="flex flex-1 flex-col items-center justify-center px-5 py-8 text-center text-primary small:py-0 small:pl-[9%]">
