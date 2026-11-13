@@ -56,8 +56,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Resized WebP per card/screen size (sharp is installed with Next). Upload file names
+  // are unique (timestamped), so optimized copies can be cached for 30 days.
   images: {
-    unoptimized: true,
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       {
         protocol: backend.protocol.replace(":", ""),

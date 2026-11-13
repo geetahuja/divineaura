@@ -27,18 +27,21 @@ export const DRAFTS: Draft[] = [
   {
     slug: "about",
     title: "Our story",
-    seo_title: "About DivineAura – devotional jewellery made with care",
-    seo_description: "Why DivineAura began, how our lockets, malas, bracelets and sacred threads are made, and what we promise our customers.",
+    seo_title: "Our story – {{brand}}, rooted in Nashik",
+    seo_description: "{{brand}} began on the banks of the Godavari in Nashik. How we make our lockets, bracelets, sacred threads and Goda Jal, and what we promise our customers.",
     body: `${DRAFT}
 
-## Why DivineAura
-DivineAura began with a simple wish: to make devotional pieces we would be proud to wear ourselves — lockets, malas, bracelets and sacred threads that honour the traditions they come from.
+## Rooted in Nashik
+{{brand}} began in Nashik, on the banks of the Godavari — a city of ghats, temples and the Simhastha Kumbh Mela, where Lord Ram is believed to have lived during his exile at Panchavati. Mornings at Ram Ghat, evening aarti on the river and the climb to Brahmagiri above Trimbakeshwar are part of everyday life here.
+
+Our name means *"the eternal, the timeless tradition"*. Our tagline — *Beyond Eternity, Beyond Time* — is a reminder that the traditions behind every locket, mala and thread are far older than any of us.
 
 ## What we make
-- **Lockets** with deity images in brass, silver-tone and enamel finishes.
+- **Lockets** with deity images — Om, Shiva, Hanuman, Sai Baba, Balaji and more.
 - **Spiritual and gemstone bracelets** — every stone is described truthfully as natural, reconstituted or dyed.
-- **Malas and hand ties (kalava, dhaga)** made in the traditional way.
-- **Gift sets** for festivals, pujas and new beginnings.
+- **Sacred hand ties, kalava and malas** made in the traditional way.
+- **Goda Jal (Godavari Water)** for puja at home, packed by a licensed packer.
+- **Puja essentials and gift sets** for festivals, pujas and new beginnings.
 
 ## Our promise
 - **Honest descriptions.** We describe the beliefs and traditions around each piece. We never promise guaranteed health, wealth or life results.
@@ -53,8 +56,8 @@ Questions? [Contact us](/contact) — we reply within one working day.`,
   {
     slug: "contact",
     title: "Contact us",
-    seo_title: "Contact DivineAura",
-    seo_description: "Email, phone and the seller's registered details for DivineAura. Send us a message about an order, a product or anything else.",
+    seo_title: "Contact {{brand}}",
+    seo_description: "Email, phone and the seller's registered details for {{brand}}. Send us a message about an order, a product or anything else.",
     body: `${DRAFT}
 
 We usually reply within one working day (Monday–Saturday, 10 am – 6 pm IST).
@@ -74,8 +77,8 @@ If something has gone wrong, our Grievance Officer **{{grievance_name}}** will h
   {
     slug: "faq",
     title: "Frequently asked questions",
-    seo_title: "FAQ – orders, delivery, COD and returns | DivineAura",
-    seo_description: "Answers about delivery times, Cash on Delivery, paying online, returns, refunds, gemstone authenticity and caring for your DivineAura pieces.",
+    seo_title: "FAQ – orders, delivery, COD and returns | {{brand}}",
+    seo_description: "Answers about delivery times, Cash on Delivery, paying online, returns, refunds, gemstone authenticity and caring for your {{brand}} pieces.",
     body: `${DRAFT}
 
 Can't find your answer? [Contact us](/contact).`,
@@ -96,8 +99,8 @@ Can't find your answer? [Contact us](/contact).`,
   {
     slug: "shipping",
     title: "Shipping policy",
-    seo_title: "Shipping policy – delivery charges and times | DivineAura",
-    seo_description: "Delivery charges, free-shipping threshold, dispatch and delivery times, Cash on Delivery and tracking for DivineAura orders across India.",
+    seo_title: "Shipping policy – delivery charges and times | {{brand}}",
+    seo_description: "Delivery charges, free-shipping threshold, dispatch and delivery times, Cash on Delivery and tracking for {{brand}} orders across India.",
     body: `${DRAFT}
 
 ## Where we deliver
@@ -126,8 +129,8 @@ If a parcel can't be delivered after the courier's attempts, it is returned to u
   {
     slug: "returns-refunds",
     title: "Returns & refunds",
-    seo_title: "Returns & refunds policy | DivineAura",
-    seo_description: "How to return a DivineAura order within the return window, which items can't be returned, and how and when refunds are paid.",
+    seo_title: "Returns & refunds policy | {{brand}}",
+    seo_description: "How to return a {{brand}} order within the return window, which items can't be returned, and how and when refunds are paid.",
     body: `${DRAFT}
 
 ## Return window
@@ -156,8 +159,8 @@ See our [Cancellation policy](/policies/cancellation).`,
   {
     slug: "cancellation",
     title: "Cancellation policy",
-    seo_title: "Cancellation policy | DivineAura",
-    seo_description: "When and how you can cancel a DivineAura order, what happens to your payment, and when we may cancel an order.",
+    seo_title: "Cancellation policy | {{brand}}",
+    seo_description: "When and how you can cancel a {{brand}} order, what happens to your payment, and when we may cancel an order.",
     body: `${DRAFT}
 
 ## Cancelling your order
@@ -173,8 +176,8 @@ You can cancel an order **until it is packed** — go to **Account → Orders �
   {
     slug: "privacy",
     title: "Privacy policy",
-    seo_title: "Privacy policy | DivineAura",
-    seo_description: "What personal data DivineAura collects, why, how long we keep it, who we share it with, cookies and analytics, and your rights under India's DPDP Act.",
+    seo_title: "Privacy policy | {{brand}}",
+    seo_description: "What personal data {{brand}} collects, why, how long we keep it, who we share it with, cookies and analytics, and your rights under India's DPDP Act.",
     body: `${DRAFT}
 
 {{legal_name}} ("{{brand}}", "we") respects your privacy. This policy explains what we collect, why, and your rights under the Digital Personal Data Protection Act, 2023.
@@ -211,8 +214,8 @@ You can ask to **access, correct or delete** your personal data, or withdraw con
   {
     slug: "terms",
     title: "Terms of use",
-    seo_title: "Terms of use | DivineAura",
-    seo_description: "The terms for using the DivineAura website and buying from us: orders, prices, payments, product descriptions, liability and governing law.",
+    seo_title: "Terms of use | {{brand}}",
+    seo_description: "The terms for using the {{brand}} website and buying from us: orders, prices, payments, product descriptions, liability and governing law.",
     body: `${DRAFT}
 
 These terms apply when you use this website or buy from **{{legal_name}}** (brand **{{brand}}**), {{address}}, GSTIN {{gstin}}. By placing an order you agree to them.
@@ -247,8 +250,8 @@ These terms are governed by the laws of India. Courts at **[city – owner to fi
   {
     slug: "grievance",
     title: "Grievance redressal",
-    seo_title: "Grievance redressal | DivineAura",
-    seo_description: "How to raise a complaint with DivineAura's Grievance Officer, and how quickly we acknowledge and resolve it.",
+    seo_title: "Grievance redressal | {{brand}}",
+    seo_description: "How to raise a complaint with {{brand}}'s Grievance Officer, and how quickly we acknowledge and resolve it.",
     body: `${DRAFT}
 
 In line with the Consumer Protection (E-Commerce) Rules, 2020, we have appointed a Grievance Officer.

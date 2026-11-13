@@ -1,8 +1,7 @@
 "use client"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import Search from "@modules/layout/components/search"
-import { Home, Search as SearchIcon, ShoppingBag, Store, User } from "lucide-react"
+import { Home, Package, ShoppingBag, Store, User } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 const item = "flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold"
@@ -25,10 +24,6 @@ export default function MobileBottomBar({ cartCount }: { cartCount: number }) {
         <Store className="h-5 w-5" aria-hidden />
         Shop
       </LocalizedClientLink>
-      <Search className={`${item} ${active("/search")}`}>
-        <SearchIcon className="h-5 w-5" aria-hidden />
-        Search
-      </Search>
       <LocalizedClientLink href="/cart" className={`${item} ${active("/cart")}`}>
         <span className="relative">
           <ShoppingBag className="h-5 w-5" aria-hidden />
@@ -40,7 +35,11 @@ export default function MobileBottomBar({ cartCount }: { cartCount: number }) {
         </span>
         Cart
       </LocalizedClientLink>
-      <LocalizedClientLink href="/account" className={`${item} ${active("/account")}`}>
+      <LocalizedClientLink href="/account/orders" className={`${item} ${active("/account/orders")}`}>
+        <Package className="h-5 w-5" aria-hidden />
+        Orders
+      </LocalizedClientLink>
+      <LocalizedClientLink href="/account" className={`${item} ${pathname.startsWith("/account/orders") ? "text-ink-soft" : active("/account")}`}>
         <User className="h-5 w-5" aria-hidden />
         Account
       </LocalizedClientLink>

@@ -151,7 +151,7 @@ export function providersFromEnv(logger: Logger, env = process.env): Record<Chan
         ? new MetaWhatsApp({ phoneNumberId: env.WHATSAPP_PHONE_NUMBER_ID, token: env.WHATSAPP_ACCESS_TOKEN })
         : consoleP
   const email = env.RESEND_API_KEY
-    ? new ResendEmail({ apiKey: env.RESEND_API_KEY, from: env.EMAIL_FROM ?? "DivineAura <noreply@divinesanatani.com>", replyTo: env.EMAIL_REPLY_TO ?? "support@divinesanatani.com" })
+    ? new ResendEmail({ apiKey: env.RESEND_API_KEY, from: env.EMAIL_FROM ?? "Anant Sanatan <noreply@divinesanatani.com>", replyTo: env.EMAIL_REPLY_TO ?? "support@divinesanatani.com" })
     : consoleP
   return { sms, whatsapp, email }
 }

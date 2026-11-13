@@ -1,11 +1,14 @@
+import { getBrand } from "@lib/data/content"
+import BrandLogo from "@modules/layout/components/brand-logo"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import ChevronDown from "@modules/common/icons/chevron-down"
 
-export default function CheckoutLayout({
+export default async function CheckoutLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const brand = await getBrand()
   return (
     <div className="w-full bg-ivory relative small:min-h-screen">
       <div className="h-16 bg-ivory border-b border-champagne">
@@ -23,13 +26,7 @@ export default function CheckoutLayout({
               Back
             </span>
           </LocalizedClientLink>
-          <LocalizedClientLink
-            href="/"
-            className="font-serif text-2xl font-semibold text-primary"
-            data-testid="store-link"
-          >
-            DivineAura
-          </LocalizedClientLink>
+          <BrandLogo brand={brand} compact />
           <div className="flex-1 basis-0" />
         </nav>
       </div>

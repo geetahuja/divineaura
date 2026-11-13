@@ -4,13 +4,26 @@ import { model } from "@medusajs/framework/utils"
 const BusinessSettings = model.define("business_settings", {
   id: model.id({ prefix: "bset" }).primaryKey(),
   legal_name: model.text().default("Jayshankar Enterprises"),
-  brand_name: model.text().default("DivineAura"),
+  brand_name: model.text().default("Anant Sanatan"),
+  brand_name_hi: model.text().default("अनंत सनातन"),
+  tagline_en: model.text().default("Beyond Eternity, Beyond Time."),
+  tagline_hi: model.text().default("समय से पहले, समय के बाद भी।"),
+  // Footer social links; empty = icon hidden.
+  social_instagram: model.text().nullable(),
+  social_facebook: model.text().nullable(),
+  social_youtube: model.text().nullable(),
+  social_pinterest: model.text().nullable(),
+  // Kumbh / Goda Jal (homepage badge, Goda Jal pages). Legal Metrology "packed by" block.
+  next_snan_label: model.text().nullable(),
+  next_snan_date: model.text().nullable(), // YYYY-MM-DD
+  goda_jal_dispatch_date: model.text().nullable(), // YYYY-MM-DD; pre-orders "Dispatches after …"
+  goda_jal_packer: model.text().nullable(),
   address: model.text().default(""),
   state: model.text().default("Maharashtra"),
   gstin: model.text().nullable(),
   email: model.text().nullable(),
   phone: model.text().nullable(),
-  invoice_prefix: model.text().default("DA"),
+  invoice_prefix: model.text().default("AS"),
   credit_note_prefix: model.text().default("CN"),
   // GST scheme: "regular" (tax invoices, all India) or "composition" (Bill of Supply,
   // no tax collected, delivery only within the seller's state). lib/gst-scheme.ts.

@@ -1,3 +1,4 @@
+import { getBrand } from "@lib/data/content"
 import { getBaseURL } from "@lib/util/env"
 import Analytics from "@modules/consent/analytics"
 import ConsentBanner from "@modules/consent/consent-banner"
@@ -10,14 +11,21 @@ const serif = Cormorant_Garamond({
   weight: ["500", "600", "700"],
   variable: "--font-serif",
   display: "swap",
+  // Not preloaded: on slow 4G the preloads competed with the CSS and the hero image
+  // (mobile LCP). Text paints at once in the metric-matched fallback, then swaps.
+  preload: false,
 })
-const sans = Mulish({ subsets: ["latin"], variable: "--font-sans", display: "swap" })
+const sans = Mulish({ subsets: ["latin"], variable: "--font-sans", display: "swap", preload: false })
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getBaseURL()),
-  title: { default: "DivineAura – devotional lockets, bracelets & malas", template: "%s | DivineAura" },
-  // Google Search Console: set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION to the meta-tag code.
-  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } } : {}),
+export async function generateMetadata(): Promise<Metadata> {
+  const brand = await getBrand()
+  return {
+    metadataBase: new URL(getBaseURL()),
+    title: { default: `${brand.name} – ${brand.tagline_en}`, template: `%s | ${brand.name}` },
+    applicationName: brand.name,
+    // Google Search Console: set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION to the meta-tag code.
+    ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } } : {}),
+  }
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {

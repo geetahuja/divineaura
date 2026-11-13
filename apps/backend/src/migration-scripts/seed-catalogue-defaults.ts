@@ -214,8 +214,8 @@ export default async function seedCatalogueDefaults({ container }: { container: 
           weight: 15,
           options: [{ id: optionId("Chain") }],
           variants: [
-            variant("With chain", "DA-LKT-HAN-001", { Chain: "With chain" }, 599, 899),
-            variant("Without chain", "DA-LKT-HAN-002", { Chain: "Without chain" }, 449, 649),
+            variant("With chain", "AS-LKT-HAN-001", { Chain: "With chain" }, 599, 899),
+            variant("Without chain", "AS-LKT-HAN-002", { Chain: "Without chain" }, 449, 649),
           ],
         },
         {
@@ -229,7 +229,7 @@ export default async function seedCatalogueDefaults({ container }: { container: 
           weight: 25,
           options: [{ id: optionId("Bracelet size") }],
           variants: ["S", "M", "L"].map((size, i) =>
-            variant(size, `DA-BRC-GEN-00${i + 1}`, { "Bracelet size": size }, 699, 999)
+            variant(size, `AS-BRC-GEN-00${i + 1}`, { "Bracelet size": size }, 699, 999)
           ),
         },
         {
@@ -243,7 +243,7 @@ export default async function seedCatalogueDefaults({ container }: { container: 
           weight: 30,
           options: [{ id: optionId("Bracelet size") }],
           variants: ["S", "M", "L"].map((size, i) =>
-            variant(size, `DA-BRC-GEN-00${i + 4}`, { "Bracelet size": size }, 899, 1299)
+            variant(size, `AS-BRC-GEN-00${i + 4}`, { "Bracelet size": size }, 899, 1299)
           ),
         },
         {
@@ -257,9 +257,9 @@ export default async function seedCatalogueDefaults({ container }: { container: 
           weight: 5,
           options: [{ id: optionId("Pack") }],
           variants: [
-            variant("Pack of 1", "DA-HTY-SAI-001", { Pack: "Pack of 1" }, 99, 149),
-            variant("Pack of 3", "DA-HTY-SAI-002", { Pack: "Pack of 3" }, 249, 349),
-            variant("Pack of 5", "DA-HTY-SAI-003", { Pack: "Pack of 5" }, 399, 549),
+            variant("Pack of 1", "AS-HTY-SAI-001", { Pack: "Pack of 1" }, 99, 149),
+            variant("Pack of 3", "AS-HTY-SAI-002", { Pack: "Pack of 3" }, 249, 349),
+            variant("Pack of 5", "AS-HTY-SAI-003", { Pack: "Pack of 5" }, 399, 549),
           ],
         },
       ],
@@ -283,7 +283,7 @@ export default async function seedCatalogueDefaults({ container }: { container: 
     })
   }
 
-  // 8. Sample DivineAura details (truthful placeholders, marked as samples).
+  // 8. Sample product details (truthful placeholders, marked as samples).
   const specs: Record<string, Record<string, unknown>> = {
     "sample-hanuman-brass-locket": {
       material: "Brass, gold-plated (sample)",
@@ -330,7 +330,7 @@ export default async function seedCatalogueDefaults({ container }: { container: 
     input: {
       selector: { id: stockLocation.id },
       update: {
-        name: "DivineAura Warehouse",
+        name: "Anant Sanatan Warehouse",
         address: { address_1: "Address to be updated", city: "To be updated", country_code: "IN" },
       },
     },
@@ -341,5 +341,5 @@ export default async function seedCatalogueDefaults({ container }: { container: 
     await createSacredPlaceWorkflow(container).run({ input: { ...place, rank, visible: true } })
   }
 
-  logger.info("Seeded DivineAura catalogue defaults.")
+  logger.info("Seeded catalogue defaults.")
 }

@@ -1,5 +1,6 @@
 import "server-only"
 import { categoryHref, listCategories, listCollectionsAll, listTags } from "@lib/data/catalogue"
+import { listSacredPlaces, placeAnchor } from "@lib/data/sacred-places"
 
 // Menu built from Medusa data (ARCHITECTURE.md §7), so categories, deity /
 // intention tags and collections added in the admin appear on their own.
@@ -56,6 +57,37 @@ export async function getMainMenu(): Promise<NavItem[]> {
   }
 
   return menu
+}
+
+/**
+ * Header menu (Option A design): Home | Shop ▾ | Goda Jal | Kumbh Special |
+ * Sacred Nashik ▾ | Our Story | Journal | Contact. "Shop" holds the catalogue
+ * menu above as columns; "Sacred Nashik" lists the places on the skyline strip.
+ */
+export async function getHeaderMenu(): Promise<NavItem[]> {
+  const [catalogue, places] = await Promise.all([getMainMenu(), listSacredPlaces()])
+  const loose = catalogue.filter((i) => !i.columns).map(({ label, href }) => ({ label, href }))
+  const shopColumns = [
+    ...catalogue.flatMap((i) => i.columns ?? []),
+    ...(loose.length ? [{ title: "More", links: loose }] : []),
+  ]
+  const nashik = places.filter((p) => p.strip_label)
+  return [
+    { label: "Home", href: "/" },
+    { label: "Shop", href: "/shop", columns: shopColumns.length ? [{ title: "All products", links: [{ label: "Shop all", href: "/shop" }] }, ...shopColumns] : undefined },
+    { label: "Goda Jal", href: "/category/goda-jal" },
+    { label: "Kumbh Special", href: "/kumbh-special" },
+    {
+      label: "Sacred Nashik",
+      href: "/sacred-nashik",
+      columns: nashik.length
+        ? [{ title: "Sacred Nashik", links: [...nashik.map((p) => ({ label: p.strip_label!, href: `/sacred-nashik#${placeAnchor(p.name)}` })), { label: "All sacred places", href: "/sacred-nashik" }] }]
+        : undefined,
+    },
+    { label: "Our Story", href: "/about" },
+    { label: "Journal", href: "/journal" },
+    { label: "Contact", href: "/contact" },
+  ]
 }
 
 export const FOOTER_HELP: NavLink[] = [

@@ -26,6 +26,11 @@ export async function getPage(slug: string): Promise<ContentPage | null> {
 export type Seller = {
   legal_name: string
   brand: string
+  brand_hi: string
+  tagline_en: string
+  tagline_hi: string
+  social: { instagram: string | null; facebook: string | null; youtube: string | null; pinterest: string | null }
+  kumbh: { snan_label: string | null; snan_date: string | null; dispatch_date: string | null; packer: string | null }
   address: string | null
   gstin: string | null
   email: string | null
@@ -38,6 +43,21 @@ export async function getSeller(): Promise<Seller | null> {
     .fetch<{ seller: Seller }>("/store/seller", cached)
     .then((r) => r.seller)
     .catch(() => null)
+}
+
+// Brand name/taglines live in Admin → Business details; this fallback only covers an unreachable API.
+export async function getBrand() {
+  const s = await getSeller()
+  return {
+    name: s?.brand || "Anant Sanatan",
+    name_hi: s?.brand_hi || "अनंत सनातन",
+    tagline_en: s?.tagline_en ?? "Beyond Eternity, Beyond Time.",
+    tagline_hi: s?.tagline_hi ?? "समय से पहले, समय के बाद भी।",
+  }
+}
+
+export async function getBrandName() {
+  return (await getBrand()).name
 }
 
 export type FormState = { ok: boolean; message: string } | null

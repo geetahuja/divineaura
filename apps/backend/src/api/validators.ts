@@ -16,6 +16,9 @@ const ProductSpecsFields = z.object({
     weight_g: num,
     chain_included: z.boolean().nullish(),
     not_returnable: z.boolean().nullish(),
+    liquid_fragile: z.boolean().nullish(),
+    net_quantity: z.string().trim().max(40).nullish().transform((v) => v || null),
+    packed_on: z.string().trim().max(40).nullish().transform((v) => v || null),
     colour: text,
     pack_quantity: int,
     care_instructions: text,
@@ -56,6 +59,7 @@ const SacredPlaceFields = {
   image_credit: text,
   deity_tag: z.string().trim().startsWith("deity:").nullish().or(z.literal("").transform(() => null)),
   collection_id: text,
+  strip_label: z.string().trim().max(40).nullish().transform((v) => v || null),
   rank: z.number().int().optional(),
   visible: z.boolean().optional(),
 }
@@ -63,6 +67,24 @@ const SacredPlaceFields = {
 export const CreateSacredPlaceSchema = z.object(SacredPlaceFields)
 export const UpdateSacredPlaceSchema = z.object(SacredPlaceFields).partial()
 export const ReorderSacredPlacesSchema = z.object({ ids: z.array(z.string()).min(1) })
+
+// Journal articles (Admin → Journal).
+const ArticleFields = z.object({
+  title: z.string().trim().min(1).max(200),
+  slug: z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase words joined by hyphens, e.g. amrut-snan-dates"),
+  excerpt: z.string().trim().max(400).nullish().transform((v) => v || null),
+  body: z.string().max(60_000),
+  cover_image_url: z.string().url().nullish().or(z.literal("").transform(() => null)),
+  cover_image_alt: z.string().trim().max(200).nullish().transform((v) => v || null),
+  published: z.boolean().default(false),
+  published_at: z.coerce.date().nullish(),
+  seo_title: z.string().trim().max(70).nullish().transform((v) => v || null),
+  seo_description: z.string().trim().max(170).nullish().transform((v) => v || null),
+})
+export const CreateArticleSchema = ArticleFields
+export const UpdateArticleSchema = ArticleFields.partial()
+export type CreateArticleBody = z.infer<typeof CreateArticleSchema>
+export type UpdateArticleBody = z.infer<typeof UpdateArticleSchema>
 
 // Hero banners. Links are site paths ("/collections/diwali"), never full URLs,
 // so the domain stays out of content (ARCHITECTURE.md §0).
@@ -72,6 +94,7 @@ const HeroBannerFields = z.object({
   title: z.string().trim().min(1).max(120),
   heading: z.string().trim().min(1).max(120),
   subheading: text,
+  subheading_hi: text,
   button_text: z.string().trim().min(1).max(40),
   button_link: sitePath,
   image_desktop_url: z.string().url().nullish(),
@@ -191,9 +214,27 @@ export const WishlistSchema = z.object({
 export const AdminReturnNoteSchema = z.object({ note: z.string().trim().max(500).nullish() })
 export const AdminReturnRejectSchema = z.object({ note: z.string().trim().min(3, "Tell the customer why").max(500) })
 export const AdminRefundPaidSchema = z.object({ reference: z.string().trim().max(100).nullish() })
+const optionalUrl = z.string().trim().url().max(300).nullish().or(z.literal("").transform(() => null))
+const optionalDate = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use a date like 2027-08-02")
+  .nullish()
+  .or(z.literal("").transform(() => null))
 export const BusinessSettingsSchema = z.object({
   legal_name: z.string().trim().min(2).max(120),
   brand_name: z.string().trim().min(2).max(60),
+  brand_name_hi: z.string().trim().min(1).max(60),
+  tagline_en: z.string().trim().max(120),
+  tagline_hi: z.string().trim().max(120),
+  social_instagram: optionalUrl,
+  social_facebook: optionalUrl,
+  social_youtube: optionalUrl,
+  social_pinterest: optionalUrl,
+  next_snan_label: z.string().trim().max(80).nullish().transform((v) => v || null),
+  next_snan_date: optionalDate,
+  goda_jal_dispatch_date: optionalDate,
+  goda_jal_packer: z.string().trim().max(1000).nullish().transform((v) => v || null),
   address: z.string().trim().max(500),
   state: z.string().trim().min(2).max(60),
   gstin: z

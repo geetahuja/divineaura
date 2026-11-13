@@ -89,7 +89,7 @@ function Detail({ review, onDone }: { review: Review; onDone: () => void }) {
       </div>
 
       <div className="flex flex-col gap-2 border-t pt-4">
-        <Label size="small" htmlFor="rv-reply">Public reply from DivineAura (shown under the review)</Label>
+        <Label size="small" htmlFor="rv-reply">Public reply from the seller (shown under the review)</Label>
         <Textarea id="rv-reply" rows={3} value={reply} onChange={(e) => setReply(e.target.value)} />
         <Button size="small" variant="secondary" isLoading={act.isPending} onClick={() => act.mutate({ action: "reply", body: { reply } })}>
           {reply.trim() ? "Save reply" : "Remove reply"}

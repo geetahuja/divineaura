@@ -3,7 +3,7 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Wishlist",
-  description: "Products you saved at DivineAura.",
+  description: "Products you saved.",
   robots: { index: false },
 }
 

@@ -30,7 +30,7 @@ export function financialYear(d: Date): string {
   return `${String(start % 100).padStart(2, "0")}-${String((start + 1) % 100).padStart(2, "0")}`
 }
 
-/** "DA/26-27/00001" — GST allows at most 16 characters. */
+/** "AS/26-27/00001" — GST allows at most 16 characters. */
 export function documentNumber(prefix: string, fy: string, seq: number): string {
   const n = `${prefix}/${fy}/${String(seq).padStart(5, "0")}`
   if (n.length > 16) throw new MedusaError(MedusaError.Types.INVALID_DATA, `Document number ${n} is longer than 16 characters`)

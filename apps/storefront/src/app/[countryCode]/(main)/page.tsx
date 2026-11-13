@@ -1,33 +1,34 @@
 import { Metadata } from "next"
 
 import Bestsellers from "@modules/home/components/bestsellers"
+import CategoryCards from "@modules/home/components/category-cards"
 import Hero from "@modules/home/components/hero"
-import SacredPlaces from "@modules/home/components/sacred-places"
-import { BrandStory, PhotoReviews } from "@modules/home/components/story"
-import { DeityTiles, IntentionTiles } from "@modules/home/components/tiles"
+import KumbhBand from "@modules/home/components/kumbh-band"
 import TrustStrip from "@modules/home/components/trust-strip"
+import SacredNashikStrip from "@modules/sacred-nashik/skyline"
 import { listRegions } from "@lib/data/regions"
-import { getSeller } from "@lib/data/content"
+import { getBrand, getSeller } from "@lib/data/content"
 import { toJsonLd } from "@lib/util/product-structured-data"
-import { getSiteOrigin, STORE_NAME } from "@lib/util/site"
+import { getSiteOrigin } from "@lib/util/site"
 import { buildRegionsReturnPolicies } from "@lib/util/store-policies"
 
 export const dynamic = "force-static"
 export const revalidate = 60
 
 export async function generateMetadata(): Promise<Metadata> {
-  const origin = await getSiteOrigin()
+  const [origin, brand] = await Promise.all([getSiteOrigin(), getBrand()])
 
   return {
-    title: { absolute: `${STORE_NAME} | Devotional lockets, bracelets & malas` },
+    title: { absolute: `${brand.name} | Devotional lockets, bracelets, Goda Jal & more` },
     description:
-      "Devotional lockets, spiritual and gemstone bracelets, malas and sacred threads. Prices inclusive of all taxes.",
+      "Devotional lockets, gemstone and spiritual bracelets, sacred threads, puja essentials and Goda Jal from Nashik. Prices inclusive of all taxes.",
     alternates: { canonical: origin },
   }
 }
 
 export default async function Home() {
-  const [origin, regions, seller] = await Promise.all([getSiteOrigin(), listRegions(), getSeller()])
+  const [origin, regions, seller, brand] = await Promise.all([getSiteOrigin(), listRegions(), getSeller(), getBrand()])
+  const STORE_NAME = brand.name
   const homeUrl = origin
   const returnPolicies = buildRegionsReturnPolicies(regions)
   const structuredData = [
@@ -67,15 +68,13 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: toJsonLd(structuredData) }}
       />
-      {/* Order: ARCHITECTURE.md §7 + Sacred Places. Footer comes from the layout. */}
+      {/* Option A order (docs/ARCHITECTURE.md §7). Footer comes from the layout. */}
       <Hero />
-      <DeityTiles />
-      <SacredPlaces />
+      <CategoryCards />
+      <KumbhBand />
+      <SacredNashikStrip />
       <Bestsellers />
-      <IntentionTiles />
       <TrustStrip />
-      <PhotoReviews />
-      <BrandStory />
     </>
   )
 }

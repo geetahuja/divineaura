@@ -33,7 +33,7 @@ const OrderCodStatusWidget = ({ data: order }: DetailWidgetProps<AdminOrder>) =>
     mutationFn: (action: "confirm" | "cancel") =>
       sdk.client.fetch(`/admin/cod/orders/${order.id}/${action}`, {
         method: "POST",
-        body: action === "cancel" ? { reason: "cancelled by DivineAura" } : undefined,
+        body: action === "cancel" ? { reason: "cancelled by the seller" } : undefined,
       }),
     onSuccess: () => {
       qc.invalidateQueries()

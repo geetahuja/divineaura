@@ -40,7 +40,7 @@ describe("invoice numbering", () => {
     expect(financialYear(new Date("2099-06-01T00:00:00Z"))).toBe("99-00")
   })
   it("formats within 16 characters and refuses longer", () => {
-    expect(documentNumber("DA", "26-27", 1)).toBe("DA/26-27/00001")
+    expect(documentNumber("AS", "26-27", 1)).toBe("AS/26-27/00001")
     expect(documentNumber("CN", "26-27", 12345).length).toBeLessThanOrEqual(16)
     expect(() => documentNumber("DIVINE", "26-27", 1)).toThrow(/16/)
   })

@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { brandVars } from "./content"
 import { MedusaError } from "@medusajs/framework/utils"
 import { CONTENT_MODULE } from "../modules/content"
 import type ContentModuleService from "../modules/content/service"
@@ -34,8 +35,8 @@ export async function sendContactMessage(
   const { support } = await supportEmail(c)
   if (!support) throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "Support email is not set (Admin → Business details).")
   const contact = [b.email, b.phone].filter(Boolean).join(" · ")
-  await messaging(c).sendMessage("contact_message", { email: support }, { name: b.name, contact, order: b.order_number || "—", topic: TOPICS[b.topic] ?? b.topic, message: b.message }, { dedupe: false })
-  if (b.email) await messaging(c).sendMessage("contact_ack", { email: b.email }, { name: b.name }, { dedupe: false })
+  await messaging(c).sendMessage("contact_message", { email: support }, { ...(await brandVars(c)), name: b.name, contact, order: b.order_number || "—", topic: TOPICS[b.topic] ?? b.topic, message: b.message }, { dedupe: false })
+  if (b.email) await messaging(c).sendMessage("contact_ack", { email: b.email }, { ...(await brandVars(c)), name: b.name }, { dedupe: false })
 }
 
 const KINDS: Record<string, string> = { delete_data: "delete my personal data", access_data: "get a copy of my personal data", correct_data: "correct my personal data" }
@@ -50,7 +51,7 @@ export async function createPrivacyRequest(
   const { grievance, resolveDays } = await supportEmail(c)
   const admin = `${(process.env.MEDUSA_BACKEND_URL || "http://localhost:9000").replace(/\/$/, "")}/app/privacy-requests`
   if (grievance)
-    await messaging(c).sendMessage("privacy_request_admin", { email: grievance }, { kind: KINDS[b.kind], name: b.name, contact: [b.email, b.phone].filter(Boolean).join(" · "), details: b.details || "—", link: admin }, { dedupe: false })
-  if (b.email) await messaging(c).sendMessage("privacy_request_ack", { email: b.email }, { name: b.name, kind: KINDS[b.kind], days: String(resolveDays) }, { dedupe: false })
+    await messaging(c).sendMessage("privacy_request_admin", { email: grievance }, { ...(await brandVars(c)), kind: KINDS[b.kind], name: b.name, contact: [b.email, b.phone].filter(Boolean).join(" · "), details: b.details || "—", link: admin }, { dedupe: false })
+  if (b.email) await messaging(c).sendMessage("privacy_request_ack", { email: b.email }, { ...(await brandVars(c)), name: b.name, kind: KINDS[b.kind], days: String(resolveDays) }, { dedupe: false })
   return r
 }

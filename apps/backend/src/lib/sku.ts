@@ -1,4 +1,4 @@
-// SKU format DA-<TYPE>-<DEITY>-<NNN>, e.g. DA-LKT-HAN-001.
+// SKU format AS-<TYPE>-<DEITY>-<NNN>, e.g. AS-LKT-HAN-001.
 // TYPE: product type metadata.sku_code, else first 3 letters of the type name.
 // DEITY: first 3 letters of the first "deity:<Name>" tag. GEN when missing.
 
@@ -18,7 +18,7 @@ export const skuPrefix = (product: {
   const deity = product.tags
     ?.map((t) => t?.value ?? "")
     .find((v) => v.toLowerCase().startsWith("deity:"))
-  return `DA-${typeCode}-${code3(deity?.slice("deity:".length))}`
+  return `AS-${typeCode}-${code3(deity?.slice("deity:".length))}`
 }
 
 // Next free number after the highest existing SKU with this prefix.

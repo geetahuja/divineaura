@@ -3,7 +3,7 @@ import TrackOrderForm from "./track-order-form"
 
 export const metadata: Metadata = {
   title: "Track your order",
-  description: "Check the delivery status of your DivineAura order with your order number and mobile number.",
+  description: "Check the delivery status of your order with your order number and mobile number.",
   alternates: { canonical: "/track-order" },
 }
 

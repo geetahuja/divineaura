@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { brandVars } from "./content"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { MESSAGING_MODULE } from "../modules/messaging"
 import type MessagingModuleService from "../modules/messaging/service"
@@ -51,7 +52,7 @@ export async function requestOtp(c: MedusaContainer, target: OtpTarget, ip: stri
     if (open.length) await otp(c).updateOtpChallenges(open.map((o) => ({ id: o.id, consumed_at: now })))
     await otp(c).createOtpChallenges({ identifier, code_hash: hashCode(secret(), identifier, code), expires_at: new Date(now.getTime() + OTP_RULES.ttlMs), last_sent_at: now, ip })
   }
-  const sent = await c.resolve<MessagingModuleService>(MESSAGING_MODULE).sendOtp(target as { phone: string }, code, sendNumber)
+  const sent = await c.resolve<MessagingModuleService>(MESSAGING_MODULE).sendOtp(target as { phone: string }, code, sendNumber, await brandVars(c))
   return { ok: true as const, channel: sent.channel, resendAfterSeconds: OTP_RULES.resendAfterMs / 1000, expiresInSeconds: OTP_RULES.ttlMs / 1000 }
 }
 

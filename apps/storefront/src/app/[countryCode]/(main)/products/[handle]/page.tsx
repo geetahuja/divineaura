@@ -1,7 +1,8 @@
 import { getProduct } from "@lib/data/product"
 import { isVariantInStock } from "@lib/util/inventory"
 import { buildProductStructuredData, getPricedVariants, toJsonLd } from "@lib/util/product-structured-data"
-import { DEFAULT_OG_IMAGE, getSiteOrigin, STORE_NAME } from "@lib/util/site"
+import { getBrandName } from "@lib/data/content"
+import { DEFAULT_OG_IMAGE, getSiteOrigin } from "@lib/util/site"
 import ProductTemplate from "@modules/product/template"
 import { getProductReviews } from "@lib/data/reviews"
 import { Metadata } from "next"
@@ -28,6 +29,7 @@ const summary = (text: string) =>
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { product } = await load(props)
   const url = `${await getSiteOrigin()}/products/${product.handle}`
+  const STORE_NAME = await getBrandName()
   const title = `${product.title} | ${STORE_NAME}`
   const description = summary(
     product.description || `${product.title} from ${STORE_NAME}. Prices inclusive of all taxes, delivered across India.`
@@ -71,7 +73,7 @@ export default async function ProductPage(props: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: toJsonLd(
-            buildProductStructuredData({ product, region, countryCode, productUrl: `${origin}/products/${product.handle}`, reviews })
+            buildProductStructuredData({ product, region, countryCode, productUrl: `${origin}/products/${product.handle}`, reviews, brandName: await getBrandName() })
           ),
         }}
       />

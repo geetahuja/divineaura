@@ -13,6 +13,7 @@ type Overview = {
   manual_defaults: { courier_name: string | null; tracking_url_template: string | null }
   pickup_ready: boolean
   weight_g: number
+  liquid_fragile?: boolean
   is_cod: boolean
   cod_ready: boolean
   cancelled: boolean
@@ -79,6 +80,12 @@ const OrderShippingWidget = ({ data: order }: DetailWidgetProps<AdminOrder>) => 
         </div>
       </div>
 
+      {data.liquid_fragile && (
+        <div className="px-6 py-3">
+          <Badge color="orange" size="small">Liquid – fragile</Badge>
+          <Text size="small" className="mt-1 text-ui-fg-subtle">This order has a liquid / breakable item (e.g. Goda Jal). Seal the cap, pack upright with cushioning and mark the box "Fragile – Liquid".</Text>
+        </div>
+      )}
       <div className="px-6 py-4">
         {data.shipment ? (
           <div className="flex flex-col gap-y-2">

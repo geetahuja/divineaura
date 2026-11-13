@@ -33,7 +33,7 @@ if [ "$MODE" = staging ]; then
   fi
   cat >"$SNIP/storefront-server.conf" <<EOF
 # STAGING (site-mode.sh): password + keep search engines out
-auth_basic "DivineAura staging";
+auth_basic "Anant Sanatan staging";
 auth_basic_user_file $HT;
 location = /robots.txt { auth_basic off; default_type text/plain; add_header X-Robots-Tag "noindex, nofollow" always; return 200 "User-agent: *\nDisallow: /\n"; }
 EOF
@@ -47,7 +47,7 @@ sub_filter '</head>' '<style id="da-staging">body::before{content:"STAGING \2013
 EOF
   cat >"$SNIP/api-private.conf" <<EOF
 # STAGING (site-mode.sh): password on the admin UI (on top of the admin login)
-auth_basic "DivineAura staging";
+auth_basic "Anant Sanatan staging";
 auth_basic_user_file $HT;
 EOF
 else

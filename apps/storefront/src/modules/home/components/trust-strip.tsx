@@ -1,37 +1,29 @@
 import { getPublicPaymentSettings } from "@lib/data/payment-options"
-import { getStorePolicies } from "@lib/data/store-policies"
 import { convertToLocale } from "@lib/util/money"
-import { DEFAULT_COUNTRY_CODE } from "@lib/util/site"
-import { Banknote, LockKeyhole, RotateCcw, Truck } from "lucide-react"
+import { Banknote, BadgeCheck, HeartHandshake, ShieldCheck, Truck } from "lucide-react"
 
+// Option A trust strip (+ COD when switched on in Admin → COD & payments).
 export default async function TrustStrip() {
-  const [{ current }, payments] = await Promise.all([getStorePolicies(DEFAULT_COUNTRY_CODE), getPublicPaymentSettings()])
+  const payments = await getPublicPaymentSettings()
   const items = [
-    // Switched on/off in Admin → COD & payments.
-    payments?.cod_enabled && {
-      icon: Banknote,
-      title: "Cash on delivery",
-      sub: `On orders up to ${convertToLocale({ amount: payments.cod_max_order_value, currency_code: "inr" })}`,
-    },
-    current?.freeShippingThreshold != null && {
-      icon: Truck,
-      title: `Free shipping above ${convertToLocale({ amount: current.freeShippingThreshold, currency_code: "inr" })}`,
-      sub: "Delivered across India",
-    },
-    current && { icon: RotateCcw, title: "Easy returns", sub: `Within ${current.returnWindowDays} days of delivery` },
-    { icon: LockKeyhole, title: "Secure payments", sub: "UPI, cards and net banking" },
+    { icon: BadgeCheck, title: "100% Authentic", sub: "Products" },
+    { icon: ShieldCheck, title: "Secure & Easy", sub: "Payments" },
+    { icon: Truck, title: "Fast & Reliable", sub: "Delivery" },
+    payments?.cod_enabled && { icon: Banknote, title: "Cash on Delivery", sub: `Up to ${convertToLocale({ amount: payments.cod_max_order_value, currency_code: "inr" })}` },
+    { icon: HeartHandshake, title: "Devotion in", sub: "Every Order" },
   ].filter((i): i is { icon: typeof Truck; title: string; sub: string } => !!i)
 
   return (
-    <section aria-label="Why shop with us" className="border-y border-champagne bg-ivory-deep">
-      <ul className="content-container grid grid-cols-2 gap-6 py-8 small:flex small:justify-around">
-        {items.map(({ icon: Icon, title, sub }) => (
-          <li key={title} className="flex flex-col items-center gap-2 text-center small:flex-row small:text-left">
-            <Icon aria-hidden className="h-8 w-8 shrink-0 text-accent" strokeWidth={1.5} />
-            <div>
-              <p className="text-sm font-semibold text-ink">{title}</p>
-              <p className="text-xs text-ink-muted">{sub}</p>
-            </div>
+    <section aria-label="Why shop with us" className="[contain-intrinsic-size:auto_200px] [content-visibility:auto] border-y border-champagne bg-[#F7E6CC]">
+      <ul className="content-container grid grid-cols-2 gap-x-4 gap-y-5 py-6 small:flex small:justify-between small:py-7">
+        {items.map(({ icon: Icon, title, sub }, i) => (
+          <li key={title} className={`flex items-center gap-3 small:flex-1 small:justify-center ${i ? "small:border-l small:border-accent/40" : ""}`}>
+            <Icon aria-hidden className="h-9 w-9 shrink-0 text-accent" strokeWidth={1.4} />
+            <p className="font-serif text-base leading-tight text-primary">
+              {title}
+              <br />
+              {sub}
+            </p>
           </li>
         ))}
       </ul>

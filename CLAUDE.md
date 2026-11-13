@@ -1,4 +1,4 @@
-# DivineAura — instructions for Claude Code
+# Anant Sanatan — instructions for Claude Code
 
 Read `docs/ARCHITECTURE.md` before starting any task. It is the source of truth for stack, structure, data model, business rules and build order.
 
@@ -16,7 +16,9 @@ Read `docs/ARCHITECTURE.md` before starting any task. It is the source of truth 
 - Ask me before adding a new paid service or a major dependency.
 
 ## Non-negotiable rules
-- Production domain is **divinesanatani.com** (API at api.divinesanatani.com; brand name stays DivineAura). Never hard-code it: build every absolute URL from env variables (ARCHITECTURE.md §0).
+- Production domain is **divinesanatani.com** (API at api.divinesanatani.com). Never hard-code it: build every absolute URL from env variables (ARCHITECTURE.md §0).
+- Brand is **Anant Sanatan** (अनंत सनातन), "a brand of Jayshankar Enterprises" — renamed from DivineAura on 2026-11-13. Brand name and taglines come from Admin → Business details, never hard-coded (only the DLT-registered SMS texts spell it out). Internal names (repo, folders, server paths, PM2, SSH alias `divineaura`, database) keep the old name.
+- Goda Jal copy: "For religious/puja use only. Not for drinking or internal consumption."; no healing, purity, official or "same as Amrut Snan" claims; not affiliated with NTKMA (enforced for products/Journal by `lib/claims.ts`).
 - Prices, discounts, shipping, COD fee and taxes are calculated on the server only.
 - Online orders are marked paid only from a verified Razorpay webhook; handlers are idempotent.
 - Stock is rechecked when an order is placed.
@@ -26,6 +28,7 @@ Read `docs/ARCHITECTURE.md` before starting any task. It is the source of truth 
 - All customer messages and OTPs go through the messaging layer (ARCHITECTURE.md §19). Never call MSG91 or WhatsApp directly from features. "SMS" in §10 means "the configured channel".
 
 ## Brand
+- Taglines: "Beyond Eternity, Beyond Time." / "समय से पहले, समय के बाद भी।"
 - Colours: maroon `#762019` (primary), gold `#C58A36` (accent), ivory `#FFF5E8` (background), champagne `#E8CDA9` (secondary surface).
 - Serif headings, clean sans-serif body, rounded maroon buttons with white text, simple line icons.
 - Devotional motifs only as subtle accents; never reduce readability of prices or buttons.

@@ -3,8 +3,8 @@ import { Metadata } from "next"
 import LoginTemplate from "@modules/account/templates/login-template"
 
 export const metadata: Metadata = {
-  title: { absolute: "Sign in | DivineAura" },
-  description: "Sign in to your DivineAura account with your mobile number.",
+  title: "Sign in",
+  description: "Sign in to your account with your mobile number.",
 }
 
 // ?next=/checkout returns there after login; only same-site paths are accepted.

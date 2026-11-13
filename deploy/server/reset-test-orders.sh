@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # REQUIRED before going live (deploy/GO-LIVE.md §9): deletes every order made on
 # staging and resets the numbering, so the first real order is #1 and the first
-# real invoice is DA/26-27/00001 (credit notes CN/…/00001, bills of supply BOS/…/00001).
+# real invoice is AS/26-27/00001 (credit notes CN/…/00001, bills of supply BOS/…/00001).
 #   ssh -t divineaura "bash /var/www/divineaura/app/deploy/server/reset-test-orders.sh"
 #
 # Deletes ALL orders, carts, payments, fulfillments, stock reservations, invoices,
@@ -47,7 +47,7 @@ TRUNCATE TABLE
   payment_collection, payment_collection_payment_providers, payment_session, payment, capture, refund,
   fulfillment, fulfillment_address, fulfillment_item, fulfillment_label,
   reservation_item,
-  -- DivineAura modules: documents + numbering, shipping, COD, returns, reviews, messages
+  -- custom modules: documents + numbering, shipping, COD, returns, reviews, messages
   invoice, credit_note, doc_counter,
   shipment, order_event,
   cod_confirmation, return_request,
@@ -57,10 +57,13 @@ RESTART IDENTITY;
 ALTER SEQUENCE order_display_id_seq RESTART WITH 1;
 ALTER SEQUENCE order_claim_display_id_seq RESTART WITH 1;
 ALTER SEQUENCE order_exchange_display_id_seq RESTART WITH 1;
+-- Rebrand (2026-11-13): DA/… test invoices are gone; real numbering uses AS/….
+UPDATE business_settings SET invoice_prefix = 'AS' WHERE invoice_prefix = 'DA';
 COMMIT;
 SQL
 
 echo "Done: $(count)."
 echo "Next order: #1"
-echo "Next invoice: DA/<financial year>/00001 (counters cleared)."
+PREFIX=$(psql "$DB" -tAc "select invoice_prefix from business_settings limit 1")
+echo "Next invoice: ${PREFIX:-AS}/<financial year>/00001 (counters cleared)."
 echo "Check stock levels in Admin → Inventory: shipped test orders reduced them."

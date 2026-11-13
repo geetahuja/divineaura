@@ -63,6 +63,9 @@ const FIELDS: Field[] = [
   { key: "certificate_url", label: "Certificate", kind: "file", hint: "Lab certificate (PDF or image) for gemstones." },
   { key: "country_of_origin", label: "Country of origin", kind: "text", placeholder: "India", hint: "Required by law — shown on the product page." },
   { key: "hsn_code", label: "HSN code", kind: "text", placeholder: "4, 6 or 8 digits" },
+  { key: "net_quantity", label: "Net quantity", kind: "text", placeholder: "250 ml", hint: "Packaged goods (Goda Jal): required by Legal Metrology. Shown on the product page." },
+  { key: "packed_on", label: "Month & year of packing", kind: "text", placeholder: "11/2026", hint: "Packaged goods: from the current batch label." },
+  { key: "liquid_fragile", label: "Liquid / fragile", kind: "select", options: YES_NO, hint: "Yes = packers see a 'Liquid – fragile' warning on the order." },
   { key: "not_returnable", label: "Not returnable", kind: "select", options: YES_NO, hint: "Yes for items that can't be returned once opened (e.g. sacred threads, malas). Shown on the product page." },
 ]
 
@@ -89,7 +92,7 @@ const toBody = (form: Record<string, string>) => ({
       if (f.kind === "number" || f.kind === "int") {
         return [f.key, Number(raw)]
       }
-      if (f.key === "chain_included" || f.key === "not_returnable") {
+      if (f.key === "chain_included" || f.key === "not_returnable" || f.key === "liquid_fragile") {
         return [f.key, raw === "true"]
       }
       return [f.key, raw]
@@ -117,7 +120,7 @@ const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
       }),
     onSuccess: (res) => {
       queryClient.setQueryData(queryKey, res)
-      toast.success("DivineAura details saved")
+      toast.success("Product details & specs saved")
       setOpen(false)
     },
     onError: (e: Error) => toast.error(e.message),
@@ -154,7 +157,7 @@ const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
     <Container className="divide-y p-0">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-x-2">
-          <Heading level="h2">DivineAura details</Heading>
+          <Heading level="h2">Product details & specs</Heading>
           {!isLoading && !data?.specs?.country_of_origin && (
             <Badge size="2xsmall" color="red" title="Required by the Consumer Protection (E-Commerce) Rules 2020">Country of origin missing</Badge>
           )}
@@ -206,7 +209,7 @@ const ProductSpecsWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
       <Drawer open={open} onOpenChange={setOpen}>
         <Drawer.Content>
           <Drawer.Header>
-            <Drawer.Title>DivineAura details</Drawer.Title>
+            <Drawer.Title>Product details & specs</Drawer.Title>
           </Drawer.Header>
           <Drawer.Body className="flex flex-col gap-y-4 overflow-y-auto">
             <div className="flex flex-col gap-y-1">

@@ -165,7 +165,7 @@ describe("GST composition scheme", () => {
     const { lines, totals } = splitTax([{ kind: "goods", description: "Locket", hsn: "7117", quantity: 1, total: 599, tax: 0, rate: 0 }], true, 599)
     const d = {
       kind: "invoice", number: "BOS/26-27/00001", issued_at: "2026-11-12T10:00:00Z", bill_of_supply: true,
-      seller: { legal_name: "X", brand: "DivineAura", name: "X", lines: [], state: "Maharashtra", state_code: "27", gstin: "27ABCDE1234F1Z5" },
+      seller: { legal_name: "X", brand: "Anant Sanatan", name: "X", lines: [], state: "Maharashtra", state_code: "27", gstin: "27ABCDE1234F1Z5" },
       buyer: { name: "A", lines: [], state: "Maharashtra", state_code: "27" },
       order: { number: 1, date: "2026-11-12T10:00:00Z", payment: "Prepaid (online)" },
       place_of_supply: "Maharashtra (27)", intra_state: true, lines, totals, words: "Rupees Five Hundred Ninety Nine Only",

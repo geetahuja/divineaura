@@ -1,6 +1,6 @@
-# DivineAura — Website Architecture (v1)
+# Anant Sanatan — Website Architecture (v1)
 
-> Build spec for the DivineAura e-commerce website. Hand this to Claude Code.
+> Build spec for the Anant Sanatan e-commerce website (renamed from DivineAura on 2026-11-13; internal names such as the repo, server paths and database keep `divineaura`). Hand this to Claude Code.
 > Scope: **website only** (phase 1). Android/iOS apps come later and will reuse the same backend.
 > Where a command, package name or API may have changed, check the current official docs before using it.
 
@@ -8,7 +8,7 @@
 
 ## 0. Domain (fixed)
 
-The production domain is **divinesanatani.com** (the brand name stays **DivineAura**). Everything is built around it:
+The production domain is **divinesanatani.com** (brand: **Anant Sanatan**, अनंत सनातन — "a brand of Jayshankar Enterprises"; name and taglines "Beyond Eternity, Beyond Time." / "समय से पहले, समय के बाद भी।" are edited in Admin → Business details). Everything is built around it:
 
 | Host | Purpose |
 | --- | --- |
@@ -29,13 +29,15 @@ Rules so the domain never has to be changed in code:
 
 ## 1. Product summary
 
-DivineAura is a D2C store in India selling its own devotional products:
+Anant Sanatan is a D2C store in India, rooted in Nashik, selling its own devotional products:
 
 - **God lockets** — Shiva, Hanuman, Sai Baba, Balaji, etc.
 - **Spiritual bracelets** — Seven Chakra, Money Magnet, etc.
 - **Gemstone bracelets** — Pyrite, Tiger Eye, etc.
 - **Hand ties** — Sai Baba dhaga, sacred threads
 - **Malas** — Kanthi mala, japa malas
+- **Puja essentials** — thalis, diyas
+- **Goda Jal (Godavari Water)** — Kumbh Special; religious/puja use only, Legal Metrology declarations on the page, packed by a licensed packer
 - **Gift sets / combos**
 
 Core journey: **discover → product page → cart → checkout (prepaid or COD) → track order.**
@@ -141,7 +143,7 @@ Every product is tagged three ways so the same catalogue can be browsed by **dei
 | certificate_url | string? | gemstones with a lab certificate |
 | country_of_origin | string | all (legal requirement) |
 | hsn_code | string | all (GST invoice) |
-| gst_rate | number | all — *not stored in specs*: a Medusa tax-rate override (Tax Regions → India; default 3 %). Editable in the DivineAura details panel; blank = default |
+| gst_rate | number | all — *not stored in specs*: a Medusa tax-rate override (Tax Regions → India; default 3 %). Editable in the "Product details & specs" panel; blank = default |
 
 Plus standard Medusa fields: title, handle (URL slug), description, images, SKU per variant, price in INR, compare-at price (MRP), inventory quantity.
 
@@ -187,7 +189,10 @@ Plus standard Medusa fields: title, handle (URL slug), description, images, SKU 
 | `/account` | Login / orders / addresses / profile | Dynamic, protected |
 | `/account/orders/[id]` | Order detail + timeline + invoice + return request | Dynamic, protected |
 | `/wishlist` | Wishlist (local for guests, synced for logged-in) | Dynamic |
-| `/about`, `/contact`, `/faq` | Content pages | Static |
+| `/about` ("Our story"), `/contact`, `/faq` | Content pages | Static |
+| `/sacred-nashik` | Sacred Nashik skyline + place cards (Admin → Sacred Places) | ISR |
+| `/kumbh-special` | Kumbh Special / Goda Jal landing (collection `kumbh-special`) | ISR |
+| `/journal`, `/journal/[slug]` | Journal articles (Admin → Journal) | ISR |
 | `/policies/[slug]` | shipping, returns-refunds, cancellation, privacy, terms, grievance | Static |
 | `/sitemap.xml`, `/robots.txt` | SEO | Generated |
 
@@ -200,7 +205,7 @@ Plus standard Medusa fields: title, handle (URL slug), description, images, SKU 
 ## 7. Key UI components
 
 - **Layout:** `Header` (logo, search, account, wishlist, cart count), `MegaMenu` (Shop by Deity / Bracelets / Lockets / Malas & Threads / Gifts / Offers), `MobileBottomBar` (Home · Shop · Search · Cart · Account), `Footer` (contact, policies, social, newsletter), `AnnouncementBar` (offer / free shipping).
-- **Homepage sections (in order):** `HeroBanner` (festival-driven, one CTA) → `DeityTiles` → `Bestsellers` → `IntentionTiles` → `TrustStrip` (COD available · Free shipping above ₹X · Easy returns · Secure payments) → `PhotoReviews` → `BrandStory` → `InstagramStrip`.
+- **Homepage sections (in order, "Option A" design, 2026-11-13):** maroon top bar (free-shipping threshold) → header (Om-lotus logo, wordmark + English/Hindi taglines; Home | Shop ▾ | Goda Jal | Kumbh Special | Sacred Nashik ▾ | Our Story | Journal | Contact) → `Hero` carousel (Admin → Hero banners, all live slides) → `CategoryCards` → `KumbhBand` (Goda Jal + Amrut Snan countdown from Business details) → `SacredNashikStrip` (SVG skyline, labels link to places) → Featured products (tag `bestseller`) → `TrustStrip` → maroon footer. Mobile bottom bar: Home · Shop · Cart · Orders · Account.
 - **Listing:** `ProductGrid`, `ProductCard` (image, name, price, MRP, discount %, rating, wishlist heart, quick add), `FilterSidebar` / `FilterSheet` (mobile), `SortSelect`, `Breadcrumbs`.
 - **Product page:** `ImageGallery` (zoom, swipe, video support), `PriceBlock`, `VariantSelector`, `QuantitySelector`, `AddToCart` + `BuyNow`, `PincodeChecker`, `SpecsTable`, `MantraCard`, `SizeGuide` (bracelets), `ReviewsSection`, `RelatedProducts`, sticky add-to-cart bar on mobile.
 - **Cart & checkout:** `CartDrawer`, `CartLineItem`, `CouponInput`, `OrderSummary`, `AddressForm` (PIN code auto-fills city/state), `PaymentMethodPicker` (UPI / Card / Net banking / COD with fee + prepaid saving shown), `GiftOptions` (wrap + message).
@@ -262,7 +267,7 @@ Failed / abandoned online payment: cart is preserved, customer can retry or swit
 
 - **v1:** guest checkout (no login needed to buy).
 - **v1:** customer accounts use **mobile-number OTP login** via a custom Medusa auth provider + MSG91 SMS. 6-digit OTP, 5-minute expiry, max 3 resends, rate-limited per number and IP; Web OTP API autofill on Android. Email OTP as fallback. Past guest orders are linked by phone number.
-- **Payment OTPs are NOT sent by DivineAura.** UPI uses the customer's UPI PIN in their app; card OTPs are sent by the customer's bank via Razorpay. The site only sends login OTPs and order SMS.
+- **Payment OTPs are NOT sent by Anant Sanatan.** UPI uses the customer's UPI PIN in their app; card OTPs are sent by the customer's bank via Razorpay. The site only sends login OTPs and order SMS.
 - Account area: orders, addresses, wishlist, profile, logout.
 
 ---
@@ -319,7 +324,7 @@ Provide `.env.example` files for both apps.
 | # | Milestone | Done when |
 | --- | --- | --- |
 | 1 | Scaffold monorepo: Medusa backend + Next.js starter storefront, running locally on Windows | Admin opens; storefront lists demo products |
-| 2 | DivineAura theme: tokens, fonts, header, mega menu, mobile bottom bar, footer | Looks on-brand at 375 px and desktop |
+| 2 | Brand theme: tokens, fonts, header, mega menu, mobile bottom bar, footer | Looks on-brand at 375 px and desktop |
 | 3 | Catalogue: categories, deity/intention tags, collections, `product-specs` module + admin widget, CSV import | Real products visible with specs |
 | 4 | Homepage + listing pages (shop, category, deity, intention, collection) with filters/sort | All browse paths work |
 | 5 | Product page: gallery, variants, specs, size guide, mantra card, related products | Product page complete on mobile |

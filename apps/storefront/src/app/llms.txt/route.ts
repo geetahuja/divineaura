@@ -1,3 +1,4 @@
+import { getBrandName } from "@lib/data/content"
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
 import { listRegions } from "@lib/data/regions"
@@ -5,7 +6,6 @@ import { UCP_MCP_PATH, UCP_REST_BASE_PATH } from "@lib/ucp/ucp"
 import {
   getRequestOrigin,
   listCountryCodes,
-  STORE_NAME,
 } from "@lib/util/site"
 
 export async function GET(request: Request) {
@@ -30,6 +30,7 @@ export async function GET(request: Request) {
     ...collections.map((c) => `- [${c.title}](${base}/collections/${c.handle})`),
   ]
 
+  const STORE_NAME = await getBrandName()
   const body = `# ${STORE_NAME}
 
 > Online store. Ships to ${countries.length} countries. Prices in ${currencies.join(", ")}.

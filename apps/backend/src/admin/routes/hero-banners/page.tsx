@@ -24,6 +24,7 @@ type Banner = {
   title: string
   heading: string
   subheading: string | null
+  subheading_hi: string | null
   button_text: string
   button_link: string
   image_desktop_url: string | null
@@ -40,6 +41,7 @@ const EMPTY: Form = {
   title: "",
   heading: "",
   subheading: "",
+  subheading_hi: "",
   button_text: "Shop now",
   button_link: "/shop",
   image_desktop_url: null,
@@ -91,6 +93,7 @@ const HeroBannersPage = () => {
         body: {
           ...body,
           subheading: body.subheading || null,
+          subheading_hi: body.subheading_hi || null,
           image_alt: body.image_alt || null,
           priority: Number(body.priority) || 0,
         },
@@ -137,7 +140,7 @@ const HeroBannersPage = () => {
     </div>
   )
 
-  const textField = (key: "title" | "heading" | "subheading" | "button_text" | "button_link" | "image_alt", label: string, hint?: string) => (
+  const textField = (key: "title" | "heading" | "subheading" | "subheading_hi" | "button_text" | "button_link" | "image_alt", label: string, hint?: string) => (
     <div className="flex flex-col gap-y-1">
       <Label size="small" htmlFor={`hb-${key}`}>{label}</Label>
       <Input id={`hb-${key}`} value={(form?.[key] as string) ?? ""} onChange={(e) => set(key, e.target.value)} />
@@ -151,7 +154,7 @@ const HeroBannersPage = () => {
         <div>
           <Heading level="h1">Hero banners</Heading>
           <Text size="small" className="text-ui-fg-subtle">
-            The homepage shows the highest-priority Live banner. With none live, it shows the default hero.
+            The homepage shows every Live banner as slides, highest priority first. Without an image, a slide uses the built-in artwork. With none live, it shows the default hero.
           </Text>
         </div>
         <Button size="small" onClick={() => setForm({ ...EMPTY })}>Add banner</Button>
@@ -227,11 +230,12 @@ const HeroBannersPage = () => {
             {textField("title", "Internal name", "Only shown here, e.g. \"Diwali 2026\".")}
             {textField("heading", "Heading")}
             {textField("subheading", "Subheading (optional)")}
+            {textField("subheading_hi", "Hindi line (optional)", "Shown under the subheading in Devanagari, e.g. समय से पहले, समय के बाद भी।")}
             <div className="grid grid-cols-2 gap-3">
               {textField("button_text", "Button text")}
               {textField("button_link", "Button link", "Site path, e.g. /collections/diwali")}
             </div>
-            {imageField("image_desktop_url", "Desktop image", "Wide, about 1920 × 640 px.")}
+            {imageField("image_desktop_url", "Desktop image", "Wide, about 2400 × 1000 px, no text in the image (the heading is added on top).")}
             {imageField("image_mobile_url", "Mobile image (optional)", "Tall, about 750 × 900 px. Falls back to the desktop image.")}
             {textField("image_alt", "Image description (for screen readers)")}
             <div className="grid grid-cols-2 gap-3">

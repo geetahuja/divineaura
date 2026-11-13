@@ -3,7 +3,11 @@ import {
   configureStoreSearch,
   defineMiddlewares,
   validateAndTransformBody,
+  type MedusaNextFunction,
+  type MedusaRequest,
+  type MedusaResponse,
 } from "@medusajs/framework/http"
+import { assertNoBannedClaims } from "../lib/claims"
 import {
   AddBlockedPincodesSchema,
   CreateShipmentSchema,
@@ -38,9 +42,11 @@ import {
   CodConfirmSchema,
   PaymentMethodSchema,
   UpdatePaymentSettingsSchema,
+  CreateArticleSchema,
   CreateHeroBannerSchema,
   CreateSacredPlaceSchema,
   SimulateTestPaymentSchema,
+  UpdateArticleSchema,
   UpdateHeroBannerSchema,
   ReorderSacredPlacesSchema,
   UpdateSacredPlaceSchema,
@@ -65,10 +71,30 @@ const SPEC_FIELDS = [
   "country_of_origin",
   "hsn_code",
   "not_returnable",
+  "net_quantity",
+  "packed_on",
+  "liquid_fragile",
 ]
+
+// Product and Journal copy: no result/healing/purity/official claims (lib/claims.ts).
+// ponytail: covers the admin product form and Journal; CSV imports and batch edits aren't checked.
+const claimsCheck =
+  (what: string, fields: string[]) => (req: MedusaRequest, _res: MedusaResponse, next: MedusaNextFunction) => {
+    const b = (req.body ?? {}) as Record<string, unknown>
+    try {
+      assertNoBannedClaims(what, ...fields.map((f) => (typeof b[f] === "string" ? (b[f] as string) : null)))
+      next()
+    } catch (e) {
+      next(e)
+    }
+  }
 
 export default defineMiddlewares({
   routes: [
+    { method: ["POST"], matcher: "/admin/products", middlewares: [claimsCheck("The product text", ["title", "subtitle", "description"])] },
+    { method: ["POST"], matcher: "/admin/products/:id", middlewares: [claimsCheck("The product text", ["title", "subtitle", "description"])] },
+    { method: ["POST"], matcher: "/admin/journal", middlewares: [claimsCheck("The article", ["title", "excerpt", "body"])] },
+    { method: ["POST"], matcher: "/admin/journal/:id", middlewares: [claimsCheck("The article", ["title", "excerpt", "body"])] },
     // The product index declares filterable `status` and `sales_channel_ids`, so
     // the route narrows it to published products in the key's sales channels.
     {
@@ -139,6 +165,8 @@ export default defineMiddlewares({
       matcher: "/store/test-payment/simulate",
       middlewares: [validateAndTransformBody(SimulateTestPaymentSchema)],
     },
+    { method: ["POST"], matcher: "/admin/journal", middlewares: [validateAndTransformBody(CreateArticleSchema)] },
+    { method: ["POST"], matcher: "/admin/journal/:id", middlewares: [validateAndTransformBody(UpdateArticleSchema)] },
     {
       method: ["POST"],
       matcher: "/admin/hero-banners",

@@ -18,6 +18,7 @@ import BuyBox from "./buy-box"
 import ProductDetails from "./details"
 import Gallery from "./gallery"
 import PincodeChecker from "./pincode-checker"
+import GodaJalNotice, { DispatchNote, isGodaJal } from "@modules/goda-jal/notice"
 
 const RELATED_COUNT = 4
 
@@ -54,6 +55,7 @@ export default async function ProductTemplate({ product, reviews }: { product: F
   const trail = primary ? categoryTrail(primary, categories) : []
   const isBracelet =
     trail[0]?.handle === "bracelets" || (product.options ?? []).some((o) => /bracelet size/i.test(o.title ?? ""))
+  const godaJal = isGodaJal(product)
   const media = (product.images ?? []).map((i) => i.url).filter(Boolean)
   if (!media.length && product.thumbnail) media.push(product.thumbnail)
 
@@ -72,6 +74,9 @@ export default async function ProductTemplate({ product, reviews }: { product: F
       <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-8 small:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] small:gap-12">
         <div className="min-w-0 small:sticky small:top-40 small:self-start">
           <Gallery media={media} title={product.title} />
+          {(product.tags ?? []).some((t) => t.value === "demo") && (
+            <p className="mt-2 text-center text-xs text-ink-muted">Representative image – the actual product may look different.</p>
+          )}
         </div>
 
         <div className="flex min-w-0 flex-col gap-6">
@@ -84,6 +89,7 @@ export default async function ProductTemplate({ product, reviews }: { product: F
             </h1>
             {product.subtitle && <p className="mt-1 text-ink-soft">{product.subtitle}</p>}
           </div>
+          {godaJal && <DispatchNote />}
           <BuyBox product={product} showSizeGuide={isBracelet} />
           <TrackEvent event={{ name: "view_item", value: fromPriceSafe, items: [{ item_id: product.id, item_name: product.title, price: fromPriceSafe, quantity: 1 }] }} />
           <HeartButton productId={product.id} title={product.title} variant="page" />
@@ -113,6 +119,7 @@ export default async function ProductTemplate({ product, reviews }: { product: F
           )}
           <PincodeChecker />
           <ProductDetails specs={product.product_specs ?? null} description={product.description} />
+          {godaJal && <GodaJalNotice specs={product.product_specs ?? null} />}
         </div>
       </div>
 

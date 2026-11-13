@@ -46,7 +46,7 @@ export default async function initial_data_seed({
     result: [defaultSalesChannel],
   } = await createSalesChannelsWorkflow(container).run({
     input: {
-      salesChannelsData: [{ name: "DivineAura Web", description: "divinesanatani.com storefront" }],
+      salesChannelsData: [{ name: "Anant Sanatan Web", description: "divinesanatani.com storefront" }],
     },
   });
 
@@ -66,7 +66,7 @@ export default async function initial_data_seed({
     input: {
       stores: [
         {
-          name: "DivineAura",
+          name: "Anant Sanatan",
           supported_currencies: [{ currency_code: CURRENCY, is_default: true, is_tax_inclusive: true }],
           default_sales_channel_id: defaultSalesChannel.id,
         },
@@ -109,7 +109,7 @@ export default async function initial_data_seed({
     input: {
       locations: [
         {
-          name: "DivineAura Warehouse",
+          name: "Anant Sanatan Warehouse",
           address: { city: "", country_code: "IN", address_1: "" },
         },
       ],

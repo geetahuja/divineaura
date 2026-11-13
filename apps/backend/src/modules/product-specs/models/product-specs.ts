@@ -24,6 +24,11 @@ const ProductSpecs = model.define("product_specs", {
   hsn_code: model.text().nullable(),
   // Yes = excluded from returns (e.g. opened sacred threads / malas). Empty = returnable.
   not_returnable: model.boolean().nullable(),
+  // Packaged goods (Goda Jal): Legal Metrology net quantity + month/year of packing.
+  net_quantity: model.text().nullable(),
+  packed_on: model.text().nullable(),
+  // Yes = liquid / breakable: shown to packers and on the product page.
+  liquid_fragile: model.boolean().nullable(),
 })
 
 export default ProductSpecs

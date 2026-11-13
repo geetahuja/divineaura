@@ -1,6 +1,7 @@
 import { categoryHref, categoryTrail, listCatalogue, listCategories } from "@lib/data/catalogue"
 import { categoryClosure } from "@lib/listing"
 import ListingTemplate, { listingMetadata, SearchParams } from "@modules/listing/listing-template"
+import { getBrandName } from "@lib/data/content"
 import { notFound } from "next/navigation"
 
 type Props = { params: Promise<{ slug: string[] }>; searchParams: Promise<SearchParams> }
@@ -23,7 +24,7 @@ export async function generateMetadata(props: Props) {
   return listingMetadata(
     title,
     cat.description ||
-      `Shop ${title.toLowerCase()} at DivineAura. Prices inclusive of all taxes, delivered across India.`,
+      `Shop ${title.toLowerCase()} at ${await getBrandName()}. Prices inclusive of all taxes, delivered across India.`,
     categoryHref(cat, categories)
   )
 }
