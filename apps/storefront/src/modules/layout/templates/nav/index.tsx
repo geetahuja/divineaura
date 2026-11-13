@@ -8,6 +8,7 @@ import { DEFAULT_COUNTRY_CODE } from "@lib/util/site"
 import { getRegionPolicies } from "@lib/util/store-policies"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import BrandLogo from "@modules/layout/components/brand-logo"
+import HeaderShell from "@modules/layout/components/header-shell"
 import CartButton from "@modules/layout/components/cart-button"
 import MegaMenu from "@modules/layout/components/mega-menu"
 import MobileMenu from "@modules/layout/components/mobile-menu"
@@ -36,7 +37,7 @@ export default async function Nav() {
           )}
         </div>
       </div>
-      <header className="border-b border-champagne bg-ivory">
+      <HeaderShell>
         <div className="content-container flex h-16 items-center justify-between gap-2 small:h-24 small:gap-6">
           <div className="flex items-center gap-1 small:gap-6">
             <MobileMenu items={menu} brand={brand} />
@@ -70,7 +71,7 @@ export default async function Nav() {
             </Suspense>
           </div>
         </div>
-      </header>
+      </HeaderShell>
     </div>
   )
 }

@@ -100,6 +100,7 @@ const HeroBannerFields = z.object({
   image_desktop_url: z.string().url().nullish(),
   image_mobile_url: z.string().url().nullish(),
   image_alt: text,
+  caption: text,
   starts_at: dateTime,
   ends_at: dateTime,
   priority: z.number().int().optional(),

@@ -14,6 +14,7 @@ const HeroBanner = model.define("hero_banner", {
   image_desktop_url: model.text().nullable(),
   image_mobile_url: model.text().nullable(),
   image_alt: model.text().nullable(),
+  caption: model.text().nullable(), // small place label on the photo, e.g. "Tapovan, Nashik"
   starts_at: model.dateTime().nullable(),
   ends_at: model.dateTime().nullable(),
   priority: model.number().default(0), // higher wins when schedules overlap

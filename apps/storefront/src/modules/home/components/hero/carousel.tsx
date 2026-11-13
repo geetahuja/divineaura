@@ -48,7 +48,9 @@ export default function HeroCarousel({ count, children }: { count: number; child
     <section
       aria-roledescription="carousel"
       aria-label="Featured"
-      className="relative border-b border-champagne"
+      id="home-hero"
+      // Slides up under the transparent header (h-16 / small:h-24, see HeaderShell).
+      className="relative -mt-16 small:-mt-24"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -72,7 +74,7 @@ export default function HeroCarousel({ count, children }: { count: number; child
               aria-current={i === active}
               className="flex h-6 w-6 items-center justify-center"
             >
-              <span className={`block h-2.5 w-2.5 rounded-full transition-colors ${i === active ? "bg-primary" : "bg-primary/30"}`} />
+              <span className={`block h-2.5 w-2.5 rounded-full shadow transition-colors ${i === active ? "bg-white" : "bg-white/50"}`} />
             </button>
           ))}
         </div>

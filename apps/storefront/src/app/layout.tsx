@@ -9,6 +9,7 @@ import "styles/globals.css"
 const serif = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
+  style: ["normal", "italic"], // italic: homepage hero heading (only downloaded where used)
   variable: "--font-serif",
   display: "swap",
   // Not preloaded: on slow 4G the preloads competed with the CSS and the hero image

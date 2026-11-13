@@ -30,6 +30,7 @@ type Banner = {
   image_desktop_url: string | null
   image_mobile_url: string | null
   image_alt: string | null
+  caption: string | null
   starts_at: string | null
   ends_at: string | null
   priority: number
@@ -47,6 +48,7 @@ const EMPTY: Form = {
   image_desktop_url: null,
   image_mobile_url: null,
   image_alt: "",
+  caption: "",
   starts_at: null,
   ends_at: null,
   priority: 0,
@@ -95,6 +97,7 @@ const HeroBannersPage = () => {
           subheading: body.subheading || null,
           subheading_hi: body.subheading_hi || null,
           image_alt: body.image_alt || null,
+          caption: body.caption || null,
           priority: Number(body.priority) || 0,
         },
       }),
@@ -140,7 +143,7 @@ const HeroBannersPage = () => {
     </div>
   )
 
-  const textField = (key: "title" | "heading" | "subheading" | "subheading_hi" | "button_text" | "button_link" | "image_alt", label: string, hint?: string) => (
+  const textField = (key: "title" | "heading" | "subheading" | "subheading_hi" | "button_text" | "button_link" | "image_alt" | "caption", label: string, hint?: string) => (
     <div className="flex flex-col gap-y-1">
       <Label size="small" htmlFor={`hb-${key}`}>{label}</Label>
       <Input id={`hb-${key}`} value={(form?.[key] as string) ?? ""} onChange={(e) => set(key, e.target.value)} />
@@ -229,7 +232,7 @@ const HeroBannersPage = () => {
           <Drawer.Body className="flex flex-col gap-y-4 overflow-y-auto">
             {textField("title", "Internal name", "Only shown here, e.g. \"Diwali 2026\".")}
             {textField("heading", "Heading")}
-            {textField("subheading", "Subheading (optional)")}
+            {textField("subheading", "Subheading (optional)", "Write {{brand}} for the brand name from Business details.")}
             {textField("subheading_hi", "Hindi line (optional)", "Shown under the subheading in Devanagari, e.g. समय से पहले, समय के बाद भी।")}
             <div className="grid grid-cols-2 gap-3">
               {textField("button_text", "Button text")}
@@ -238,6 +241,7 @@ const HeroBannersPage = () => {
             {imageField("image_desktop_url", "Desktop image", "Wide, about 2400 × 1000 px, no text in the image (the heading is added on top).")}
             {imageField("image_mobile_url", "Mobile image (optional)", "Tall, about 750 × 900 px. Falls back to the desktop image.")}
             {textField("image_alt", "Image description (for screen readers)")}
+            {textField("caption", "Photo caption (optional)", "Small place name with a pin, bottom-left of the photo, e.g. Tapovan, Nashik.")}
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-y-1">
                 <Label size="small" htmlFor="hb-start">Start (optional)</Label>

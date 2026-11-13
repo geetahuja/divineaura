@@ -23,6 +23,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       image_desktop_url: b.image_desktop_url,
       image_mobile_url: b.image_mobile_url,
       image_alt: b.image_alt,
+      caption: b.caption,
     }))
   // hero_banner kept for older storefront builds during a deploy.
   res.json({ hero_banners: live, hero_banner: live[0] ?? null })
