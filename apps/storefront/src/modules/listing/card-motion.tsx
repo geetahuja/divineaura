@@ -51,8 +51,11 @@ export default function CardMotion({
       }
     } else if (motion && photo.current) {
       photo.current.style.transform = deg ? motionTransform(motion, deg) : ""
+      if (deg) moving(true)
     }
   }
+
+  const moving = (on: boolean) => photo.current?.toggleAttribute("data-moving", on)
 
   // Behind a moving photo: its own background colour, so uncovered corners blend in.
   const fillBehind = () => {
@@ -70,13 +73,17 @@ export default function CardMotion({
     apply(0)
     setShown(true)
     fillBehind()
+    moving(true)
     // Sprite: per-keyframe steps() snaps to whole frames; the effect easing slows the turn at the end.
     const anim = sprite
       ? el.animate([{ transform: "translateX(0)", easing: `steps(${s.n})` }, { transform: "translateX(-100%)" }], { duration: 1400, easing: EASE })
       : el.animate(motionKeyframes(motion!), { duration: motion === "turn" ? 1600 : 1800, easing: motion === "turn" ? EASE : "linear" })
     anim.onfinish = anim.oncancel = () => {
       s.playing = false
-      if (!s.hover) setShown(false)
+      if (!s.hover) {
+        setShown(false)
+        moving(false)
+      }
     }
   }
 
@@ -90,11 +97,16 @@ export default function CardMotion({
         if (k) el.animate([{ transform: el.style.transform, easing: `steps(${k})` }, { transform: "translateX(0)" }], { duration: 40 * k, easing: EASE })
       } else {
         const end = motion === "turn" && d > 180 ? 360 : 0 // shortest way back to the front
-        el.animate([{ transform: motionTransform(motion!, d) }, { transform: motionTransform(motion!, end) }], { duration: 250, easing: EASE })
+        el.animate([{ transform: motionTransform(motion!, d) }, { transform: motionTransform(motion!, end) }], { duration: 250, easing: EASE }).onfinish = () =>
+          moving(false)
+        apply(0)
+        setShown(false)
+        return
       }
     }
     apply(0)
     setShown(false)
+    moving(false)
   }
 
   // Touch screens: one spin when the card settles in the middle of the screen.
@@ -183,7 +195,7 @@ export default function CardMotion({
         }
       }}
     >
-      <div ref={photo} className="absolute inset-0">
+      <div ref={photo} className="absolute inset-0" data-turn={!sprite && motion === "turn" ? "" : undefined}>
         {children}
       </div>
       {sprite && load && (

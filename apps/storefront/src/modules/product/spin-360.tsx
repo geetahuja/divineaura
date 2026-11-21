@@ -106,7 +106,7 @@ export default function Spin360({
         />
       )}
       {load && !sprite && photo && motion && (
-        <div ref={layer} className="absolute inset-0 select-none" style={{ transform: deg ? motionTransform(motion, deg) : undefined }}>
+        <div ref={layer} className="absolute inset-0 select-none" data-turn={motion === "turn" ? "" : undefined} data-moving="" style={{ transform: deg ? motionTransform(motion, deg) : undefined }}>
           <Image
             src={photo}
             alt=""

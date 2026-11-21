@@ -282,3 +282,11 @@ html[data-mode="light"] {
 :root.reduce-motion::view-transition-new(*) {
   animation: none !important;
 }
+
+/* A photo turning in place (photo-motion "turn", card-motion.tsx / spin-360.tsx):
+   fade its square edge into the background colour behind it, so a product that
+   touches the photo border isn't cut by a straight line as the corners swing round. */
+[data-turn][data-moving] {
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 84%, transparent);
+  mask-image: radial-gradient(circle closest-side, #000 84%, transparent);
+}
