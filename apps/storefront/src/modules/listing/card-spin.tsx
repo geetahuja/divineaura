@@ -1,5 +1,6 @@
 "use client"
 
+import { reduceMotion } from "@lib/util/motion"
 import { useEffect, useRef, useState } from "react"
 
 /*
@@ -13,7 +14,7 @@ import { useEffect, useRef, useState } from "react"
 const EASE = "cubic-bezier(.22,1,.36,1)"
 
 const motionOk = () =>
-  !matchMedia("(prefers-reduced-motion: reduce)").matches &&
+  !reduceMotion() &&
   !(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
 
 export default function CardSpin({ src, id }: { src: string; id: string }) {

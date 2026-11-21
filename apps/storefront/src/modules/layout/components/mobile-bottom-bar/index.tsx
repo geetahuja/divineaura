@@ -25,7 +25,7 @@ export default function MobileBottomBar({ cartCount }: { cartCount: number }) {
         Shop
       </LocalizedClientLink>
       <LocalizedClientLink href="/cart" className={`${item} ${active("/cart")}`}>
-        <span className="relative">
+        <span className="relative" data-cart-icon>
           <ShoppingBag className="h-5 w-5" aria-hidden />
           {cartCount > 0 && (
             <span className="absolute -right-2.5 -top-1.5 min-w-[18px] rounded-full bg-primary px-1 text-center text-[10px] leading-[18px] text-white">

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react"
 import Image from "next/image"
 import { useRef, useState, ViewTransition } from "react"
 import Spin360 from "./spin-360"
+import { reduceMotion } from "@lib/util/motion"
 
 // Product media uploaded in admin. A file ending in .mp4/.webm/.mov plays as video.
 const isVideo = (url: string) => /\.(mp4|webm|mov)(\?|$)/i.test(url)
@@ -43,7 +44,7 @@ export default function Gallery({ id, media, spin, title }: { id: string; media:
 
   const goTo = (i: number) => {
     const el = track.current
-    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" })
+    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: reduceMotion() ? "auto" : "smooth" })
   }
   const open = (i: number) => {
     setIndex(i)
@@ -63,6 +64,7 @@ export default function Gallery({ id, media, spin, title }: { id: string; media:
         <ViewTransition name={morph} share="morph" default="none">
           <div
             ref={track}
+            data-product-gallery
             tabIndex={0}
             role="region"
             aria-roledescription="carousel"

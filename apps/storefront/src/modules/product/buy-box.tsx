@@ -4,6 +4,7 @@ import { addToCart } from "@lib/data/cart"
 import { track } from "@lib/analytics"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { notifyCartUpdated } from "@lib/util/cart-events"
+import { flyToCart } from "@lib/util/fly-to-cart"
 import { isVariantInStock } from "@lib/util/inventory"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -109,6 +110,7 @@ export default function BuyBox({ product, showSizeGuide }: { product: HttpTypes.
     try {
       await addToCart({ variantId: variant.id, quantity: qty, countryCode })
       notifyCartUpdated()
+      if (mode === "add") flyToCart(document.querySelector<HTMLImageElement>("[data-product-gallery] img"))
       track({ name: "add_to_cart", value: (price ?? 0) * qty, items: [{ item_id: variant.id, item_name: product.title, item_variant: variant.title ?? undefined, price: price ?? 0, quantity: qty }] })
       if (mode === "buy") {
         router.push("/checkout?step=address")
@@ -220,10 +222,10 @@ export default function BuyBox({ product, showSizeGuide }: { product: HttpTypes.
           </div>
         </div>
         <div ref={actionsRef} className="flex gap-3">
-          <button type="submit" disabled={disabled} className="h-12 flex-1 rounded-full border-2 border-primary text-base font-semibold text-primary hover:bg-primary/5 disabled:opacity-50">
+          <button type="submit" disabled={disabled} className="h-12 flex-1 rounded-full border-2 border-primary text-base font-semibold text-primary transition hover:bg-primary/5 active:scale-[0.97] disabled:opacity-50">
             {busy === "add" ? "Adding…" : label}
           </button>
-          <button type="button" disabled={disabled} onClick={() => add("buy")} className="h-12 flex-1 rounded-full bg-primary text-base font-semibold text-white hover:bg-primary-hover disabled:opacity-50">
+          <button type="button" disabled={disabled} onClick={() => add("buy")} className="h-12 flex-1 rounded-full bg-primary text-base font-semibold text-white transition hover:bg-primary-hover active:scale-[0.97] disabled:opacity-50">
             {busy === "buy" ? "Please wait…" : "Buy now"}
           </button>
         </div>
@@ -250,7 +252,7 @@ export default function BuyBox({ product, showSizeGuide }: { product: HttpTypes.
           tabIndex={actionsVisible ? -1 : 0}
           disabled={disabled}
           onClick={() => add("add")}
-          className="h-11 rounded-full bg-primary px-6 text-sm font-semibold text-white disabled:opacity-50"
+          className="h-11 rounded-full bg-primary px-6 text-sm font-semibold text-white transition active:scale-[0.97] disabled:opacity-50"
         >
           {busy === "add" ? "Adding…" : label}
         </button>

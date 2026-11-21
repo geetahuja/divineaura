@@ -1,5 +1,6 @@
 "use client"
 
+import { reduceMotion } from "@lib/util/motion"
 import { useRef, useState } from "react"
 
 /*
@@ -68,7 +69,7 @@ export default function Spin360({ src, active, title }: { src: string; active: b
             const frames = h ? Math.round(w / h) : 0
             if (frames < 2) return
             setN(frames)
-            if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            if (!reduceMotion()) {
               e.currentTarget.animate(
                 [{ transform: "translateX(0)", easing: `steps(${frames})` }, { transform: "translateX(-100%)" }],
                 { duration: 1800, easing: "cubic-bezier(.22,1,.36,1)" }

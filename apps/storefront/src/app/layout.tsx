@@ -35,7 +35,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       <head>
         <link rel="ucp" href="/.well-known/ucp" />
         {/* Hide the consent banner before first paint when a choice is already saved. */}
-        <script dangerouslySetInnerHTML={{ __html: "if(document.cookie.indexOf('da_consent=')>-1)document.documentElement.classList.add('consent-set')" }} />
+        <script dangerouslySetInnerHTML={{ __html: "if(document.cookie.indexOf('da_consent=')>-1)document.documentElement.classList.add('consent-set');try{localStorage.getItem('reduce-motion')&&document.documentElement.classList.add('reduce-motion')}catch(e){}" }} />
       </head>
       <body>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[100] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:font-semibold focus:text-primary">

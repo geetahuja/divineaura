@@ -3,12 +3,13 @@
 import { addToCart } from "@lib/data/cart"
 import { track } from "@lib/analytics"
 import { notifyCartUpdated } from "@lib/util/cart-events"
+import { flyToCart } from "@lib/util/fly-to-cart"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useParams } from "next/navigation"
 import { useState, useTransition } from "react"
 
 const btn =
-  "mt-2 flex h-9 w-full items-center justify-center rounded-full text-sm font-semibold transition-colors disabled:opacity-60"
+  "mt-2 flex h-9 w-full items-center justify-center rounded-full text-sm font-semibold transition active:scale-[0.97] disabled:opacity-60"
 
 // One-variant products go straight to the cart; others need options picked first.
 export default function QuickAdd({
@@ -51,12 +52,14 @@ export default function QuickAdd({
       <button
         type="button"
         disabled={pending}
-        onClick={() =>
+        onClick={(e) => {
+          const photo = e.currentTarget.closest("li")?.querySelector("img")
           start(async () => {
             setError(false)
             try {
               await addToCart({ variantId, quantity: 1, countryCode })
               notifyCartUpdated()
+              flyToCart(photo)
               track({ name: "add_to_cart", value: price ?? 0, items: [{ item_id: variantId, item_name: title, price: price ?? 0, quantity: 1 }] })
               setAdded(true)
               setTimeout(() => setAdded(false), 2000)
@@ -64,7 +67,7 @@ export default function QuickAdd({
               setError(true)
             }
           })
-        }
+        }}
         className={`${btn} bg-primary text-white hover:bg-primary-hover`}
       >
         {pending ? "Adding…" : added ? "Added ✓" : "Add to cart"}

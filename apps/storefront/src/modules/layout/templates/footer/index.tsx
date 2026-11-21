@@ -3,6 +3,7 @@ import { FOOTER_HELP, FOOTER_POLICIES, getMainMenu, NavLink } from "@lib/nav"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import OmDivider from "@modules/common/components/om-divider"
 import CookieSettingsButton from "@modules/consent/cookie-settings-button"
+import ReduceMotionToggle from "@modules/layout/components/reduce-motion-toggle"
 import BrandLogo from "@modules/layout/components/brand-logo"
 import SocialIcons from "@modules/layout/components/social-icons"
 import NewsletterForm from "@modules/layout/components/newsletter-form"
@@ -106,6 +107,7 @@ export default async function Footer() {
           <p className="flex flex-wrap items-center gap-x-4 gap-y-1 small:col-span-2">
             <span>© {new Date().getFullYear()} {seller?.legal_name ?? brand.name}. Prices inclusive of all taxes.</span>
             <CookieSettingsButton />
+            <ReduceMotionToggle />
           </p>
         </div>
       </div>

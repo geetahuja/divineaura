@@ -116,6 +116,7 @@ const CartDropdown = ({
             href="/cart"
             aria-label={`Cart, ${totalItems} items`}
             data-testid="nav-cart-link"
+            data-cart-icon
           >
             <ShoppingBag className="h-5 w-5" aria-hidden />
             {totalItems > 0 && (

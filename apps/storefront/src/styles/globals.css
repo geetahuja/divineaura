@@ -259,3 +259,26 @@ html[data-mode="light"] {
     animation: none !important;
   }
 }
+
+/* Footer "Reduce motion" toggle (reduce-motion-toggle.tsx): same effect as the
+   OS setting for CSS motion; JS motion checks lib/util/motion.ts. */
+.reduce-motion {
+  scroll-behavior: auto !important;
+}
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+.reduce-motion .card-lift,
+.reduce-motion .card-shadow {
+  transform: none !important;
+}
+:root.reduce-motion::view-transition-group(*),
+:root.reduce-motion::view-transition-old(*),
+:root.reduce-motion::view-transition-new(*) {
+  animation: none !important;
+}

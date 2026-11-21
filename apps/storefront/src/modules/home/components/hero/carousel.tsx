@@ -1,5 +1,6 @@
 "use client"
 
+import { reduceMotion } from "@lib/util/motion"
 import { Children, useEffect, useRef, useState } from "react"
 
 /**
@@ -39,7 +40,7 @@ export default function HeroCarousel({ count, children }: { count: number; child
   }, [])
 
   useEffect(() => {
-    if (count < 2 || paused || !loaded || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    if (count < 2 || paused || !loaded || reduceMotion()) return
     const t = setTimeout(() => go((active + 1) % count), 7000)
     return () => clearTimeout(t)
   }, [active, paused, count, loaded])
