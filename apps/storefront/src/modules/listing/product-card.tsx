@@ -4,7 +4,7 @@ import { convertToLocale } from "@lib/util/money"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Image from "next/image"
 import QuickAdd from "./quick-add"
-import CardSpin from "./card-spin"
+import CardMotion from "./card-motion"
 import HeartButton from "@modules/wishlist/heart-button"
 import Stars from "@modules/reviews/stars"
 
@@ -39,18 +39,19 @@ export default function ProductCard({ product, priority, featured }: { product: 
         <ViewTransition name={`product-${product.id}`} share="morph" default="none">
         <div className={`card-lift relative aspect-square overflow-hidden rounded-lg bg-ivory-deep ${featured ? "" : "border border-champagne"}`}>
           {product.thumbnail ? (
-            <Image
-              src={product.thumbnail}
-              alt={product.title}
-              fill
-              priority={priority}
-              sizes="(min-width: 1024px) 25vw, 50vw"
-              className="object-cover"
-            />
+            <CardMotion id={product.id} sprite={product.spin_sprite} motion={product.motion}>
+              <Image
+                src={product.thumbnail}
+                alt={product.title}
+                fill
+                priority={priority}
+                sizes="(min-width: 1024px) 25vw, 50vw"
+                className="object-cover"
+              />
+            </CardMotion>
           ) : (
             <LotusPlaceholder />
           )}
-          {product.spin_sprite && <CardSpin src={product.spin_sprite} id={product.id} />}
           <HeartButton productId={product.id} title={product.title} />
           {isDemo(product) && (
             <span className="absolute bottom-1.5 left-1.5 rounded bg-white/85 px-1.5 py-0.5 text-[10px] text-ink-soft">Representative image</span>

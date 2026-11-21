@@ -1,4 +1,5 @@
 import "server-only"
+import { photoMotion, type Motion } from "@lib/util/photo-motion"
 import { sdk } from "@lib/config"
 import { parseTag, TagKind } from "@lib/slug"
 import { HttpTypes } from "@medusajs/types"
@@ -43,6 +44,8 @@ export type CatalogueProduct = {
   // spin_sprite: URL of one image holding square turntable frames side by side.
   aura: string | null
   spin_sprite: string | null
+  // How the ordinary photo moves on hover when there is no spin_sprite (lib/util/photo-motion.ts).
+  motion: Motion | null
 }
 
 export async function listCategories(): Promise<Category[]> {
@@ -100,6 +103,13 @@ export const categoryTrail = (cat: Category, all: Category[]): Category[] => {
   const parent = cat.parent_id ? all.find((c) => c.id === cat.parent_id) : undefined
   return parent ? [...categoryTrail(parent, all), cat] : [cat]
 }
+// Handles of the given categories and all their parents ("gemstone-bracelets" → also "bracelets").
+export const categoryHandles = (ids: string[], all: Category[]) =>
+  ids.flatMap((id) => {
+    const cat = all.find((c) => c.id === id)
+    return cat ? categoryTrail(cat, all).map((c) => c.handle) : []
+  })
+
 export const categoryHref = (cat: Category, all: Category[]) =>
   `/category/${categoryTrail(cat, all).map((c) => c.handle).join("/")}`
 
@@ -134,7 +144,7 @@ type RawProduct = {
 export const safeHex = (v: unknown) => (typeof v === "string" && /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v) ? v : null)
 export const safeUrl = (v: unknown) => (typeof v === "string" && /^(https?:\/\/|\/(?!\/))\S+$/.test(v) ? v : null)
 
-const toCatalogueProduct = (p: RawProduct): CatalogueProduct => {
+const toCatalogueProduct = (p: RawProduct, categories: Category[]): CatalogueProduct => {
   const variants = (p.variants ?? []).filter((v) => v.calculated_price?.calculated_amount != null)
   const cheapest = [...variants].sort(
     (a, b) => a.calculated_price!.calculated_amount! - b.calculated_price!.calculated_amount!
@@ -161,6 +171,7 @@ const toCatalogueProduct = (p: RawProduct): CatalogueProduct => {
     rating: null,
     aura: safeHex(p.metadata?.aura),
     spin_sprite: safeUrl(p.metadata?.spin_sprite),
+    motion: photoMotion(categoryHandles((p.categories ?? []).map((c) => c.id), categories), p.metadata?.motion),
   }
 }
 
@@ -193,6 +204,6 @@ export async function listCatalogue(): Promise<CatalogueProduct[]> {
       break
     }
   }
-  const ratings = await getRatingSummaries()
-  return all.map((p) => ({ ...toCatalogueProduct(p), rating: ratings[p.id] ?? null }))
+  const [ratings, categories] = await Promise.all([getRatingSummaries(), listCategories()])
+  return all.map((p) => ({ ...toCatalogueProduct(p, categories), rating: ratings[p.id] ?? null }))
 }

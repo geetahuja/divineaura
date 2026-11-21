@@ -1,64 +1,89 @@
 "use client"
 
 import { reduceMotion } from "@lib/util/motion"
+import { edgeColour, motionKeyframes, motionTransform, SWAY_MAX, type Motion } from "@lib/util/photo-motion"
+import Image from "next/image"
 import { useRef, useState } from "react"
 
 /*
- * 360° slide in the product gallery. Same sprite as the card spin
- * (Admin metadata spin_sprite: square frames in one row). Loaded only once the
- * slide is shown, turns once on first view (not under reduced motion), then
- * drag (one card width = one full turn) or ←/→ keys turn it.
+ * Last gallery slide: turn the product by dragging or with ←/→.
+ *  - `sprite` (Admin metadata spin_sprite: square frames in one row) = real 360° photos.
+ *  - otherwise `photo` (the first product photo) turns or sways
+ *    (`motion`, lib/util/photo-motion.ts), so every product gets the slide.
+ * Loaded only once the slide is shown; moves once on first view (not under
+ * reduced motion). Drag: one slide width = one full turn (or the full sway).
  * ponytail: one sprite for card + page caps quality at ~600 px frames
  * (WebP max width 16,383 px ÷ 24 frames); add a separate page sprite if that looks soft.
  */
-export default function Spin360({ src, active, title }: { src: string; active: boolean; title: string }) {
+const EASE = "cubic-bezier(.22,1,.36,1)"
+
+export default function Spin360({
+  sprite,
+  photo,
+  motion,
+  active,
+  title,
+}: {
+  sprite?: string | null
+  photo?: string | null
+  motion: Motion | null
+  active: boolean
+  title: string
+}) {
   const box = useRef<HTMLDivElement>(null)
-  const img = useRef<HTMLImageElement>(null)
-  const drag = useRef({ x0: -1, f0: 0 })
+  const layer = useRef<HTMLDivElement>(null)
+  const drag = useRef({ x0: -1, d0: 0 })
   const [load, setLoad] = useState(false)
-  const [n, setN] = useState(0)
-  const [frame, setFrame] = useState(0)
+  const [n, setN] = useState(0) // sprite frames
+  const [deg, setDeg] = useState(0)
+  const [fill, setFill] = useState<string | null>(null)
   if (active && !load) setLoad(true)
 
-  const turn = (k: number) => setFrame(((k % n) + n) % n)
+  const sway = !sprite && motion === "sway"
+  const step = sprite ? 360 / (n || 24) : sway ? 10 : 15
+  const ready = sprite ? n > 0 : load
+  const turn = (d: number) => {
+    const snapped = sprite ? Math.round(d / step) * step : d
+    setDeg(sway ? Math.max(-SWAY_MAX, Math.min(SWAY_MAX, snapped)) : ((snapped % 360) + 360) % 360)
+  }
+  const frame = n ? Math.round(deg / (360 / n)) % n : 0
 
   return (
     <div
       ref={box}
       role="slider"
       tabIndex={0}
-      aria-label={`${title}, 360° view. Drag or use the arrow keys to turn it.`}
-      aria-valuemin={1}
-      aria-valuemax={n || 1}
-      aria-valuenow={frame + 1}
-      aria-valuetext={n ? `${Math.round((frame / n) * 360)}°` : "loading"}
+      aria-label={`${title}, ${sprite ? "360° view" : "turning view"}. Drag or use the arrow keys to turn it.`}
+      aria-valuemin={sway ? -SWAY_MAX : 0}
+      aria-valuemax={sway ? SWAY_MAX : 359}
+      aria-valuenow={Math.round(deg)}
+      aria-valuetext={ready ? `${Math.round(deg)}°` : "loading"}
       className="absolute inset-0 cursor-grab overflow-hidden bg-ivory-deep active:cursor-grabbing"
-      style={{ touchAction: "pan-y" }}
+      style={{ touchAction: "pan-y", background: fill ?? undefined }}
       onKeyDown={(e) => {
-        if (!n || (e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return
+        if (!ready || (e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return
         e.preventDefault()
         e.stopPropagation() // the gallery uses ←/→ to change slides
-        turn(frame + (e.key === "ArrowRight" ? 1 : -1))
+        turn(deg + (e.key === "ArrowRight" ? step : -step))
       }}
       onPointerDown={(e) => {
-        if (!n) return
-        img.current?.getAnimations().forEach((a) => a.cancel())
+        if (!ready) return
+        e.currentTarget.getAnimations({ subtree: true }).forEach((a) => a.cancel())
         e.currentTarget.setPointerCapture(e.pointerId)
-        drag.current = { x0: e.clientX, f0: frame }
+        drag.current = { x0: e.clientX, d0: deg }
       }}
       onPointerMove={(e) => {
-        const { x0, f0 } = drag.current
-        if (x0 < 0 || !n) return
-        turn(f0 + Math.round(((e.clientX - x0) / box.current!.clientWidth) * n))
+        const { x0, d0 } = drag.current
+        if (x0 < 0 || !ready) return
+        turn(d0 + ((e.clientX - x0) / box.current!.clientWidth) * (sway ? 2 * SWAY_MAX : 360))
       }}
       onPointerUp={() => (drag.current.x0 = -1)}
       onPointerCancel={() => (drag.current.x0 = -1)}
     >
-      {load && (
+      {load && sprite && (
         // eslint-disable-next-line @next/next/no-img-element -- sprite strip, not a photo for next/image
         <img
-          ref={img}
-          src={src}
+          src={sprite}
           alt=""
           draggable={false}
           decoding="async"
@@ -68,21 +93,38 @@ export default function Spin360({ src, active, title }: { src: string; active: b
             const el = e.currentTarget
             // "load" fires before a big sprite is decoded; turning it earlier shows a blank slide.
             await el.decode().catch(() => {})
-            const { naturalWidth: w, naturalHeight: h } = el
-            const frames = h ? Math.round(w / h) : 0
+            const frames = el.naturalHeight ? Math.round(el.naturalWidth / el.naturalHeight) : 0
             if (frames < 2) return
             setN(frames)
             if (!reduceMotion()) {
-              el.animate(
-                [{ transform: "translateX(0)", easing: `steps(${frames})` }, { transform: "translateX(-100%)" }],
-                { duration: 1800, easing: "cubic-bezier(.22,1,.36,1)" }
-              )
+              el.animate([{ transform: "translateX(0)", easing: `steps(${frames})` }, { transform: "translateX(-100%)" }], {
+                duration: 1800,
+                easing: EASE,
+              })
             }
           }}
         />
       )}
+      {load && !sprite && photo && motion && (
+        <div ref={layer} className="absolute inset-0 select-none" style={{ transform: deg ? motionTransform(motion, deg) : undefined }}>
+          <Image
+            src={photo}
+            alt=""
+            fill
+            draggable={false}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className="object-cover"
+            onLoad={(e) => {
+              setFill(edgeColour(e.currentTarget))
+              if (!reduceMotion() && layer.current) {
+                layer.current.animate(motionKeyframes(motion), { duration: 2000, easing: motion === "turn" ? EASE : "linear" })
+              }
+            }}
+          />
+        </div>
+      )}
       <span className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-white/85 px-3 py-1 text-xs font-semibold text-primary">
-        {n ? "↔ Drag to turn" : "Loading 360° view…"}
+        {ready ? "↔ Drag to turn" : "Loading…"}
       </span>
     </div>
   )

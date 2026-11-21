@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react"
 import Image from "next/image"
 import { useRef, useState, ViewTransition } from "react"
 import Spin360 from "./spin-360"
+import type { Motion } from "@lib/util/photo-motion"
 import { reduceMotion } from "@lib/util/motion"
 
 // Product media uploaded in admin. A file ending in .mp4/.webm/.mov plays as video.
@@ -18,10 +19,23 @@ const Lotus = () => (
 )
 
 /*
- * Photos (+ videos), then an optional 360° slide (spin sprite). The frame shares
+ * Photos (+ videos), then a turn slide: real 360° frames (spin sprite) or, without
+ * them, the first photo turning/swaying (motion). The frame shares
  * the view-transition name of the product's card, so a card click morphs into it.
  */
-export default function Gallery({ id, media, spin, title }: { id: string; media: string[]; spin?: string | null; title: string }) {
+export default function Gallery({
+  id,
+  media,
+  spin,
+  motion,
+  title,
+}: {
+  id: string
+  media: string[]
+  spin?: string | null
+  motion?: Motion | null
+  title: string
+}) {
   const track = useRef<HTMLDivElement>(null)
   const lightbox = useRef<HTMLDialogElement>(null)
   const [index, setIndex] = useState(0)
@@ -29,7 +43,9 @@ export default function Gallery({ id, media, spin, title }: { id: string; media:
   // Desktop magnifier: which photo, and where the cursor is (in %).
   const [lens, setLens] = useState<{ i: number; x: number; y: number } | null>(null)
   const morph = `product-${id}`
-  const count = media.length + (spin ? 1 : 0)
+  const firstPhoto = media.find((u) => !isVideo(u)) ?? null
+  const turnSlide = !!spin || (!!motion && !!firstPhoto)
+  const count = media.length + (turnSlide ? 1 : 0)
 
   if (!count) {
     return (
@@ -56,7 +72,7 @@ export default function Gallery({ id, media, spin, title }: { id: string; media:
     setZoomed(false)
     setIndex((i) => (i + d + media.length) % media.length)
   }
-  const label = (i: number) => (i === media.length ? "360° view" : `photo ${i + 1}`)
+  const label = (i: number) => (i === media.length ? (spin ? "360° view" : "turning view") : `photo ${i + 1}`)
 
   return (
     <div className="flex flex-col gap-3 small:flex-row-reverse">
@@ -116,15 +132,15 @@ export default function Gallery({ id, media, spin, title }: { id: string; media:
                 )}
               </div>
             ))}
-            {spin && (
+            {turnSlide && (
               <div className="relative aspect-square w-full shrink-0 snap-center">
-                <Spin360 src={spin} active={index === media.length} title={title} />
+                <Spin360 sprite={spin} photo={firstPhoto} motion={motion ?? null} active={index === media.length} title={title} />
               </div>
             )}
           </div>
         </ViewTransition>
         <p className="sr-only" aria-live="polite">
-          {count > 1 ? `${index === media.length ? "360° view" : `Image ${index + 1}`} of ${count}` : ""}
+          {count > 1 ? `${index === media.length ? (spin ? "360° view" : "Turning view") : `Image ${index + 1}`} of ${count}` : ""}
         </p>
         {count > 1 && (
           <div className="mt-1 flex justify-center small:hidden">
@@ -139,7 +155,7 @@ export default function Gallery({ id, media, spin, title }: { id: string; media:
 
       {count > 1 && (
         <ul className="hidden w-20 shrink-0 flex-col gap-2 small:flex">
-          {[...media, ...(spin ? [spin] : [])].map((url, i) => (
+          {[...media, ...(turnSlide ? [spin ?? firstPhoto!] : [])].map((url, i) => (
             <li key={url + i}>
               <button
                 type="button"
@@ -149,7 +165,7 @@ export default function Gallery({ id, media, spin, title }: { id: string; media:
                 className={`relative block aspect-square w-full overflow-hidden rounded-md border-2 bg-ivory-deep ${i === index ? "border-primary" : "border-transparent hover:border-champagne"}`}
               >
                 {i === media.length ? (
-                  <span className="flex h-full items-center justify-center font-serif text-lg font-semibold text-primary">360°</span>
+                  <span className="flex h-full items-center justify-center font-serif text-lg font-semibold text-primary">{spin ? "360°" : "↻ Turn"}</span>
                 ) : isVideo(url) ? (
                   <span className="flex h-full items-center justify-center text-xs font-semibold text-primary">Video</span>
                 ) : (
