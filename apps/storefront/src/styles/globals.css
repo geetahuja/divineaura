@@ -244,3 +244,18 @@ html[data-mode="light"] {
     opacity: 0.5;
   }
 }
+
+/* Card → product page morph (React <ViewTransition share="morph">, gallery.tsx /
+   product-card.tsx). Browsers without view transitions just navigate.
+   Reduced motion: no morph, no page crossfade. */
+::view-transition-group(.morph) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

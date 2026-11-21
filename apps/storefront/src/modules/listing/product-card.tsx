@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react"
+import { ViewTransition, type CSSProperties } from "react"
 import type { CatalogueProduct } from "@lib/data/catalogue"
 import { convertToLocale } from "@lib/util/money"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -35,6 +35,8 @@ export default function ProductCard({ product, priority, featured }: { product: 
         <div className="card-stage" style={product.aura ? ({ "--aura": product.aura } as CSSProperties) : undefined}>
         <span aria-hidden className="card-glow" />
         <span aria-hidden className="card-shadow" />
+        {/* Same name as the product page gallery: clicking morphs this image into it. */}
+        <ViewTransition name={`product-${product.id}`} share="morph" default="none">
         <div className={`card-lift relative aspect-square overflow-hidden rounded-lg bg-ivory-deep ${featured ? "" : "border border-champagne"}`}>
           {product.thumbnail ? (
             <Image
@@ -59,6 +61,7 @@ export default function ProductCard({ product, priority, featured }: { product: 
             </span>
           )}
         </div>
+        </ViewTransition>
         </div>
         <h3 className={`mt-2 line-clamp-2 leading-snug text-ink group-hover:text-primary ${featured ? "font-serif text-base font-semibold small:text-lg" : "text-sm font-medium"}`}>
           {product.title}

@@ -131,8 +131,8 @@ type RawProduct = {
 }
 
 // Admin-entered values end up in inline styles and <img src>: accept only a hex colour / http(s) or root-relative URL.
-const hex = (v: unknown) => (typeof v === "string" && /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v) ? v : null)
-const url = (v: unknown) => (typeof v === "string" && /^(https?:\/\/|\/(?!\/))\S+$/.test(v) ? v : null)
+export const safeHex = (v: unknown) => (typeof v === "string" && /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v) ? v : null)
+export const safeUrl = (v: unknown) => (typeof v === "string" && /^(https?:\/\/|\/(?!\/))\S+$/.test(v) ? v : null)
 
 const toCatalogueProduct = (p: RawProduct): CatalogueProduct => {
   const variants = (p.variants ?? []).filter((v) => v.calculated_price?.calculated_amount != null)
@@ -159,8 +159,8 @@ const toCatalogueProduct = (p: RawProduct): CatalogueProduct => {
     in_stock: (p.variants ?? []).some(inStock),
     single_variant_id: p.variants?.length === 1 && inStock(p.variants[0]) ? p.variants[0].id : null,
     rating: null,
-    aura: hex(p.metadata?.aura),
-    spin_sprite: url(p.metadata?.spin_sprite),
+    aura: safeHex(p.metadata?.aura),
+    spin_sprite: safeUrl(p.metadata?.spin_sprite),
   }
 }
 

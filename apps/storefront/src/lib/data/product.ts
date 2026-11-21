@@ -40,7 +40,7 @@ export async function getProduct(handle: string) {
   }
   const fields = [
     // Listing relations replaces the default field set, so scalars are named too.
-    "id,title,subtitle,handle,description,thumbnail,collection_id,created_at",
+    "id,title,subtitle,handle,description,thumbnail,collection_id,created_at,metadata",
     "*images",
     "*options",
     "*options.values",

@@ -1,4 +1,4 @@
-import { Category, categoryHref, categoryTrail, listCatalogue, listCategories } from "@lib/data/catalogue"
+import { Category, categoryHref, categoryTrail, listCatalogue, listCategories, safeUrl } from "@lib/data/catalogue"
 import type { FullProduct } from "@lib/data/product"
 import { parseTag } from "@lib/slug"
 import { getSiteOrigin } from "@lib/util/site"
@@ -73,7 +73,7 @@ export default async function ProductTemplate({ product, reviews }: { product: F
       {/* minmax(0,1fr) + min-w-0: the swipe track must not widen the column past 375 px. */}
       <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-8 small:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] small:gap-12">
         <div className="min-w-0 small:sticky small:top-40 small:self-start">
-          <Gallery media={media} title={product.title} />
+          <Gallery id={product.id} media={media} spin={safeUrl(product.metadata?.spin_sprite)} title={product.title} />
           {(product.tags ?? []).some((t) => t.value === "demo") && (
             <p className="mt-2 text-center text-xs text-ink-muted">Representative image – the actual product may look different.</p>
           )}
