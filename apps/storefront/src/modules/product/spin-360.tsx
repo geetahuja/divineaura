@@ -64,13 +64,16 @@ export default function Spin360({ src, active, title }: { src: string; active: b
           decoding="async"
           className="absolute left-0 top-0 h-full w-auto max-w-none select-none"
           style={{ transform: n ? `translateX(${(-frame / n) * 100}%)` : undefined }}
-          onLoad={(e) => {
-            const { naturalWidth: w, naturalHeight: h } = e.currentTarget
+          onLoad={async (e) => {
+            const el = e.currentTarget
+            // "load" fires before a big sprite is decoded; turning it earlier shows a blank slide.
+            await el.decode().catch(() => {})
+            const { naturalWidth: w, naturalHeight: h } = el
             const frames = h ? Math.round(w / h) : 0
             if (frames < 2) return
             setN(frames)
             if (!reduceMotion()) {
-              e.currentTarget.animate(
+              el.animate(
                 [{ transform: "translateX(0)", easing: `steps(${frames})` }, { transform: "translateX(-100%)" }],
                 { duration: 1800, easing: "cubic-bezier(.22,1,.36,1)" }
               )

@@ -151,8 +151,11 @@ export default function CardSpin({ src, id }: { src: string; id: string }) {
           draggable={false}
           decoding="async"
           className={`absolute left-0 top-0 h-full w-auto max-w-none bg-ivory-deep transition-opacity duration-200 ${shown ? "opacity-100" : "opacity-0"}`}
-          onLoad={(e) => {
-            const { naturalWidth: w, naturalHeight: h } = e.currentTarget
+          onLoad={async (e) => {
+            const el = e.currentTarget
+            // "load" fires before a big sprite is decoded; showing it earlier flashes an empty card.
+            await el.decode().catch(() => {})
+            const { naturalWidth: w, naturalHeight: h } = el
             S.current.n = h ? Math.round(w / h) : 0
             if (S.current.n < 2) S.current.n = 0 // not a sprite: keep the still photo
             else if (S.current.pending) play()
