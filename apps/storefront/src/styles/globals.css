@@ -166,3 +166,81 @@ html[data-mode="light"] {
 :root {
   --font-deva: "Noto Serif Devanagari", "Tiro Devanagari Hindi", "Kohinoor Devanagari", "Devanagari Sangam MN", "Noto Sans Devanagari", "Nirmala UI", "Mangal";
 }
+
+/* "Products on a table" (product-card.tsx, card-spin.tsx). The grid sits on a
+   warm surface tilted away from the viewer; cards stay upright. Hover/focus:
+   image lifts, contact shadow shrinks, aura glow (--aura, per product from
+   Admin metadata, default gold) fades in. Only transform + opacity animate. */
+.table-stage {
+  position: relative;
+  isolation: isolate;
+  perspective: 1200px;
+}
+.table-stage::before {
+  content: "";
+  position: absolute;
+  inset: -0.75rem -0.75rem -1.5rem;
+  z-index: -1;
+  border-radius: 1.25rem;
+  background: linear-gradient(to bottom, #fff5e8, rgb(232 205 169 / 0.45));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7);
+  transform: rotateX(10deg);
+  transform-origin: 50% 100%;
+}
+.card-stage {
+  --aura: #c58a36;
+  position: relative;
+  isolation: isolate;
+}
+.card-glow {
+  position: absolute;
+  inset: 0 0 auto;
+  aspect-ratio: 1;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--aura) 55%, transparent);
+  filter: blur(22px);
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+.card-shadow {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -10px;
+  height: 16px;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgb(74 19 15 / 0.22), transparent);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease;
+  pointer-events: none;
+}
+.card-lift {
+  z-index: 1;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.group:focus-visible .card-glow {
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .card-glow {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .group:focus-visible .card-lift {
+    transform: translateY(-8px) scale(1.04);
+  }
+  .group:focus-visible .card-shadow {
+    transform: scaleX(0.8);
+    opacity: 0.5;
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .group:hover .card-lift {
+    transform: translateY(-8px) scale(1.04);
+  }
+  .group:hover .card-shadow {
+    transform: scaleX(0.8);
+    opacity: 0.5;
+  }
+}

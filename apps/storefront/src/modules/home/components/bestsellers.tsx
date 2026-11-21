@@ -27,7 +27,7 @@ export default async function Bestsellers() {
         <span aria-hidden className="text-xl">❁</span>
         <span aria-hidden className="hidden h-px w-24 bg-current xsmall:block" />
       </div>
-      <ul className="mt-6 grid grid-cols-2 gap-3 small:grid-cols-4 small:gap-6">
+      <ul className="table-stage mt-6 grid grid-cols-2 gap-3 small:grid-cols-4 small:gap-6">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} featured />
         ))}

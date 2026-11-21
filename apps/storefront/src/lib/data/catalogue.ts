@@ -39,6 +39,10 @@ export type CatalogueProduct = {
   single_variant_id: string | null
   // Approved reviews only; null when the product has none (cards then show no stars).
   rating: { average: number; count: number } | null
+  // Card effects, from Admin → product → Metadata. aura: "#8E6CCF" (hover glow colour).
+  // spin_sprite: URL of one image holding square turntable frames side by side.
+  aura: string | null
+  spin_sprite: string | null
 }
 
 export async function listCategories(): Promise<Category[]> {
@@ -123,7 +127,12 @@ type RawProduct = {
   tags?: { value: string }[] | null
   variants?: RawVariant[] | null
   product_specs?: { material?: string | null; stone_type?: string | null } | null
+  metadata?: Record<string, unknown> | null
 }
+
+// Admin-entered values end up in inline styles and <img src>: accept only a hex colour / http(s) or root-relative URL.
+const hex = (v: unknown) => (typeof v === "string" && /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v) ? v : null)
+const url = (v: unknown) => (typeof v === "string" && /^(https?:\/\/|\/(?!\/))\S+$/.test(v) ? v : null)
 
 const toCatalogueProduct = (p: RawProduct): CatalogueProduct => {
   const variants = (p.variants ?? []).filter((v) => v.calculated_price?.calculated_amount != null)
@@ -150,6 +159,8 @@ const toCatalogueProduct = (p: RawProduct): CatalogueProduct => {
     in_stock: (p.variants ?? []).some(inStock),
     single_variant_id: p.variants?.length === 1 && inStock(p.variants[0]) ? p.variants[0].id : null,
     rating: null,
+    aura: hex(p.metadata?.aura),
+    spin_sprite: url(p.metadata?.spin_sprite),
   }
 }
 
@@ -162,7 +173,7 @@ export async function listCatalogue(): Promise<CatalogueProduct[]> {
     return []
   }
   const fields = [
-    "id,title,handle,thumbnail,created_at,collection_id",
+    "id,title,handle,thumbnail,created_at,collection_id,metadata",
     "*categories",
     "tags.value",
     "*variants",

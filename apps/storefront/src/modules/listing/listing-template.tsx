@@ -72,7 +72,7 @@ export default async function ListingTemplate({
           {result.products.length ? (
             <>
               <h2 className="sr-only">Products</h2>
-              <ul className="grid grid-cols-2 gap-x-4 gap-y-8 xsmall:grid-cols-3 medium:grid-cols-4">
+              <ul className="table-stage grid grid-cols-2 gap-x-4 gap-y-8 xsmall:grid-cols-3 medium:grid-cols-4">
                 {result.products.map((p, i) => (
                   <ProductCard key={p.id} product={p} priority={i < 4} />
                 ))}

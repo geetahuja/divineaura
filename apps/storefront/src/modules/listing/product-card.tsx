@@ -1,8 +1,10 @@
+import type { CSSProperties } from "react"
 import type { CatalogueProduct } from "@lib/data/catalogue"
 import { convertToLocale } from "@lib/util/money"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Image from "next/image"
 import QuickAdd from "./quick-add"
+import CardSpin from "./card-spin"
 import HeartButton from "@modules/wishlist/heart-button"
 import Stars from "@modules/reviews/stars"
 
@@ -29,7 +31,11 @@ export default function ProductCard({ product, priority, featured }: { product: 
   return (
     <li className={`flex flex-col ${featured ? "rounded-xl border border-champagne bg-white p-3 text-center shadow-sm small:p-4" : ""}`}>
       <LocalizedClientLink href={`/products/${product.handle}`} className="group flex flex-1 flex-col">
-        <div className={`relative aspect-square overflow-hidden rounded-lg bg-ivory-deep ${featured ? "" : "border border-champagne"}`}>
+        {/* Card on the "table": glow + contact shadow behind, image lifts on hover/focus (globals.css). */}
+        <div className="card-stage" style={product.aura ? ({ "--aura": product.aura } as CSSProperties) : undefined}>
+        <span aria-hidden className="card-glow" />
+        <span aria-hidden className="card-shadow" />
+        <div className={`card-lift relative aspect-square overflow-hidden rounded-lg bg-ivory-deep ${featured ? "" : "border border-champagne"}`}>
           {product.thumbnail ? (
             <Image
               src={product.thumbnail}
@@ -37,11 +43,12 @@ export default function ProductCard({ product, priority, featured }: { product: 
               fill
               priority={priority}
               sizes="(min-width: 1024px) 25vw, 50vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              className="object-cover"
             />
           ) : (
             <LotusPlaceholder />
           )}
+          {product.spin_sprite && <CardSpin src={product.spin_sprite} id={product.id} />}
           <HeartButton productId={product.id} title={product.title} />
           {isDemo(product) && (
             <span className="absolute bottom-1.5 left-1.5 rounded bg-white/85 px-1.5 py-0.5 text-[10px] text-ink-soft">Representative image</span>
@@ -51,6 +58,7 @@ export default function ProductCard({ product, priority, featured }: { product: 
               Out of stock
             </span>
           )}
+        </div>
         </div>
         <h3 className={`mt-2 line-clamp-2 leading-snug text-ink group-hover:text-primary ${featured ? "font-serif text-base font-semibold small:text-lg" : "text-sm font-medium"}`}>
           {product.title}
